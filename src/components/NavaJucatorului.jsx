@@ -14,19 +14,15 @@ const STORAGE_KEY_TUNING_NAVA = "darkorbit-nava-manual-axes-bank-v2";
 const PAROLA_TUNING = "ovidiuDark.1998";
 
 const TUNING_INITIAL = {
-  // Tuning / play mode
   lockMovementWhileTuning: 0,
 
-  // Miscare
   speed: 2,
   rotationSpeed: 2,
   stopDistance: 0.65,
 
-  // Pozitie globala
   shipWorldY: 3.2,
   parentScale: 1.28,
 
-  // Sprite total
   spriteOffsetX: 0,
   spriteOffsetY: 0,
   spriteOffsetZ: 0,
@@ -34,7 +30,6 @@ const TUNING_INITIAL = {
   spriteScaleX: 1,
   spriteScaleY: 1,
 
-  // Inclinare / banking nava
   bankEnabled: 1,
   bankManualDeg: -49.5361,
   bankAutoStrength: 4.5,
@@ -47,7 +42,6 @@ const TUNING_INITIAL = {
   bankPitchDeg: 0,
   bankRollDeg: 0,
 
-  // Nava
   shipOffsetX: -0.151,
   shipOffsetY: 0.359,
   shipOffsetZ: 0,
@@ -55,8 +49,6 @@ const TUNING_INITIAL = {
   shipScaleX: 7.2659,
   shipScaleY: 9.5873,
 
-
-  // Motor stanga
   leftFlameX: -0.1823,
   leftFlameY: -5.0977,
   leftFlameZ: 0.08,
@@ -64,7 +56,6 @@ const TUNING_INITIAL = {
   leftFlameScaleX: 1.3,
   leftFlameScaleY: 3.6,
 
-  // Motor dreapta
   rightFlameX: 0.472,
   rightFlameY: -5.041,
   rightFlameZ: 0.08,
@@ -72,14 +63,12 @@ const TUNING_INITIAL = {
   rightFlameScaleX: 1.3,
   rightFlameScaleY: 3.6,
 
-  // Flacari
   flameIdle: 0,
   flameMovingBase: 0.75,
   flamePulseAmp: 0.25,
   flamePulseSpeed: 24,
   flameFadeSpeed: 3.2,
 
-  // Indicator / sageata
   indicatorX: 0,
   indicatorY: 4.2,
   indicatorZ: 0.14,
@@ -88,14 +77,12 @@ const TUNING_INITIAL = {
   indicatorScaleY: 1,
   indicatorOpacity: 0.92,
 
-  // Lumina
   lightX: 0,
   lightY: 0,
   lightZ: 0.6,
   lightIntensity: 5.4,
   lightDistance: 14,
 
-  // Camera
   cameraOffsetX: 0,
   cameraOffsetY: 68,
   cameraOffsetZ: 54,
@@ -108,7 +95,6 @@ const TUNING_INITIAL = {
   cameraLerpPosition: 0.08,
   cameraLerpZoom: 0.06,
 
-  // Axe manuale
   gizmoSize: 4.5,
 };
 
@@ -285,7 +271,6 @@ function salveazaTuning(tuning) {
 
     window.localStorage.setItem(STORAGE_KEY_TUNING_NAVA, JSON.stringify(tuning));
   } catch {
-    // ignoram erorile de localStorage
   }
 }
 
@@ -1166,7 +1151,6 @@ function NavaExacta({
         rotation={[0, 0, degToRad(tuning.spriteRotationDeg)]}
         scale={[tuning.spriteScaleX, tuning.spriteScaleY, 1]}
       >
-        {/* Handle invizibil pentru pivot/inclinare. Selecteaza "Inclinare nava". */}
         <group
           ref={bankHandle}
           position={[
@@ -1190,7 +1174,6 @@ function NavaExacta({
           </mesh>
         </group>
 
-        {/* Doar nava + motoarele se inclina. */}
         <group
           ref={bankGroup}
           position={[
@@ -1282,7 +1265,6 @@ function NavaExacta({
           </group>
         </group>
 
-        {/* Sageata ramane indicator curat, nu se inclina. */}
         <IndicatorDirectie tuning={tuning} indicatorMesh={indicatorMesh} />
 
         <pointLight
@@ -1331,7 +1313,6 @@ function BaraStareNavaJucator({ playerRef, viata, scut }) {
 
   return (
     <group ref={grup} renderOrder={950}>
-      {/* Scut */}
       <mesh position={[0, Y_SCUT, -0.002]} renderOrder={950}>
         <planeGeometry args={[LATIME + 0.1, INALTIME_FUNDAL + 0.1]} />
         <meshBasicMaterial
@@ -1363,7 +1344,6 @@ function BaraStareNavaJucator({ playerRef, viata, scut }) {
         />
       </mesh>
 
-      {/* HP */}
       <mesh position={[0, Y_HP, -0.002]} renderOrder={953}>
         <planeGeometry args={[LATIME + 0.1, INALTIME_FUNDAL + 0.1]} />
         <meshBasicMaterial
@@ -1664,10 +1644,6 @@ export default function NavaJucatorului({
     pozitie.z = THREE.MathUtils.clamp(pozitie.z, -limitaHarta, limitaHarta);
     pozitie.y = tuning.shipWorldY;
 
-    /*
-      Inclinare automata stanga/dreapta.
-      Se bazeaza pe cat de rapid se schimba directia navei.
-    */
     const unghiPentruBank = nava.current.userData.unghiVizual || 0;
     const deltaBank = diferentaUnghiulara(
       unghiAnteriorBank.current,
@@ -1800,12 +1776,6 @@ export default function NavaJucatorului({
 
     stare.camera.lookAt(cameraTarget);
 
-    /*
-      Plan DarkOrbit:
-      - vizualul copiaza camera => sprite 2D in planul ecranului
-      - apoi se roteste dupa directia de mers
-      - spriteCore ramane reglabil separat
-    */
     if (vizual.current) {
       const unghiVizual = nava.current.userData.unghiVizual || 0;
 

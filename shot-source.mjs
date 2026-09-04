@@ -25,7 +25,6 @@ async function main() {
   await new Promise((r) => setTimeout(r, 1200));
 
   const fs = await import("fs");
-  // top-left quadrant where nose/antenna should be (around px 200-700, 0-400)
   const shot = await send(ws, "Page.captureScreenshot", {
     format: "png",
     clip: { x: 150, y: 0, width: 650, height: 500, scale: 1.5 },
