@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head><style>body{margin:0;background:#222}</style></head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const img = new Image();
+img.onload = () => {
+  const scale = 1.4;
+  const c = document.getElementById('c');
+  c.width = img.naturalWidth * scale;
+  c.height = img.naturalHeight * scale;
+  const ctx = c.getContext('2d');
+  ctx.scale(scale, scale);
+  ctx.drawImage(img, 0, 0);
+  ctx.strokeStyle = 'rgba(255,0,0,0.5)';
+  ctx.fillStyle = 'yellow';
+  ctx.font = '20px sans-serif';
+  ctx.lineWidth = 1/scale;
+  for (let x = 0; x < img.naturalWidth; x += 100) {
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,img.naturalHeight); ctx.stroke();
+    ctx.fillText(x, x+4, 24);
+  }
+  for (let y = 0; y < img.naturalHeight; y += 100) {
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(img.naturalWidth,y); ctx.stroke();
+    ctx.fillText(y, 4, y+24);
+  }
+  ctx.fillStyle = 'lime';
+  ctx.beginPath();
+  ctx.arc(img.naturalWidth/2, img.naturalHeight/2, 8/scale, 0, Math.PI*2);
+  ctx.fill();
+};
+img.src = '/assets/nava-jucator.jpg';
+</script>
+</body>
+</html>
