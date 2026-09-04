@@ -11,6 +11,7 @@ import folosesteTastatura from "../hooks/useTastatura.jsx";
 import { densitateGazLaPunct } from "../utils/fundalSpatial.js";
 
 const STORAGE_KEY_TUNING_NAVA = "darkorbit-nava-manual-axes-bank-v2";
+const PAROLA_TUNING = "ovidiuDark.1998";
 
 const TUNING_INITIAL = {
   // Tuning / play mode
@@ -396,6 +397,7 @@ function TuningDomMenu({
 }) {
   const panelRef = useRef(null);
   const propsRef = useRef(null);
+  const deblocatRef = useRef(false);
   const [collapsed, setCollapsed] = useState(true);
 
   propsRef.current = {
@@ -450,6 +452,21 @@ function TuningDomMenu({
       const p = propsRef.current;
 
       if (action === "toggleCollapsed") {
+        const seDeschide = p.collapsed;
+
+        if (seDeschide && !deblocatRef.current) {
+          const parola = window.prompt("Introdu parola pentru a deschide tuning-ul:");
+
+          if (parola !== PAROLA_TUNING) {
+            if (parola !== null) {
+              window.alert("Parola incorecta.");
+            }
+            return;
+          }
+
+          deblocatRef.current = true;
+        }
+
         const next = !p.collapsed;
         p.setCollapsed(next);
         p.setActive(!next);
