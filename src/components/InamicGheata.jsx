@@ -123,7 +123,7 @@ export default function InamicGheata({
   onAtac,
   onPozitie,
 }) {
-  const texturaAlien = useLoader(THREE.TextureLoader, "/assets/inamic-gheata-mask.png");
+  const texturaAlien = useLoader(THREE.TextureLoader, `${import.meta.env.BASE_URL}assets/inamic-gheata-mask.png`);
   texturaAlien.colorSpace = THREE.SRGBColorSpace;
   texturaAlien.anisotropy = 16;
 

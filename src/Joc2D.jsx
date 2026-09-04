@@ -350,9 +350,9 @@ export default function Aplicatie() {
 
     async function startGame() {
       const [mapImage, shipRaw, enemyRaw] = await Promise.all([
-        loadImage("/assets/harta-spatiala.jpg"),
-        loadImage("/assets/nava-jucator.jpg"),
-        loadImage("/assets/inamic-gheata.jpg"),
+        loadImage(`${import.meta.env.BASE_URL}assets/harta-spatiala.jpg`),
+        loadImage(`${import.meta.env.BASE_URL}assets/nava-jucator.jpg`),
+        loadImage(`${import.meta.env.BASE_URL}assets/inamic-gheata.jpg`),
       ]);
 
       if (stopped) return;

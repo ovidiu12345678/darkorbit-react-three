@@ -1104,7 +1104,7 @@ function NavaExacta({
 }) {
   const texturaNava = useLoader(
     THREE.TextureLoader,
-    "/assets/GoliathDarkOrbit.png"
+    `${import.meta.env.BASE_URL}assets/GoliathDarkOrbit.png`
   );
 
   useEffect(() => {

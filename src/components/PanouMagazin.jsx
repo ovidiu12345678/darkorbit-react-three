@@ -29,14 +29,14 @@ const TABURI = [
 ];
 
 const ARTICOLE_MUNITIE = [
-  { id: "x1", titlu: "X1", descriere: "Munitie laser de baza", cantitate: 10000, cost: 1000, moneda: "credite", culoare: "#59e6ff", imagine: "/assets/Munitie x1 (1).png" },
-  { id: "x2", titlu: "X2", descriere: "Munitie laser imbunatatita", cantitate: 4000, cost: 60000, moneda: "credite", culoare: "#8cff6b", imagine: "/assets/Munitie X2.png" },
-  { id: "x3", titlu: "X3", descriere: "Munitie laser grea", cantitate: 1600, cost: 340000, moneda: "credite", culoare: "#ffd35a", imagine: "/assets/Munitie X3.png" },
-  { id: "x4", titlu: "X4", descriere: "Munitie laser de elita", cantitate: 15000, cost: 35000, moneda: "uridium", culoare: "#ff4add", imagine: "/assets/munitie x4.png" },
-  { id: "sab", titlu: "SAB", descriere: "Munitie de drenaj scut", cantitate: 50000, cost: 6000, moneda: "uridium", culoare: "#82b7ff", imagine: "/assets/munitie Sab.png" },
-  { id: "rsb", titlu: "RSB", descriere: "Munitie speciala", culoare: "#ff6a3d", indisponibil: true, imagine: "/assets/munitie rsb.png" },
-  { id: "rachete-scut", titlu: "RACHETE DAUNE SCUT", descriere: "Rachete specializate pe daune scut — damage 4.000", cantitate: 430, cost: 1500000, moneda: "credite", culoare: "#b06aff", imagine: "/assets/munitie rackete daune scut.png" },
-  { id: "rachete-hp", titlu: "RACHETE DAUNE HP", descriere: "Rachete specializate pe daune HP — damage 2.500", cantitate: 1300, cost: 600, moneda: "credite", culoare: "#ff5a3d", imagine: "/assets/munitie rachete daune hp.png" },
+  { id: "x1", titlu: "X1", descriere: "Munitie laser de baza", cantitate: 10000, cost: 1000, moneda: "credite", culoare: "#59e6ff", imagine: `${import.meta.env.BASE_URL}assets/Munitie x1 (1).png` },
+  { id: "x2", titlu: "X2", descriere: "Munitie laser imbunatatita", cantitate: 4000, cost: 60000, moneda: "credite", culoare: "#8cff6b", imagine: `${import.meta.env.BASE_URL}assets/Munitie X2.png` },
+  { id: "x3", titlu: "X3", descriere: "Munitie laser grea", cantitate: 1600, cost: 340000, moneda: "credite", culoare: "#ffd35a", imagine: `${import.meta.env.BASE_URL}assets/Munitie X3.png` },
+  { id: "x4", titlu: "X4", descriere: "Munitie laser de elita", cantitate: 15000, cost: 35000, moneda: "uridium", culoare: "#ff4add", imagine: `${import.meta.env.BASE_URL}assets/munitie x4.png` },
+  { id: "sab", titlu: "SAB", descriere: "Munitie de drenaj scut", cantitate: 50000, cost: 6000, moneda: "uridium", culoare: "#82b7ff", imagine: `${import.meta.env.BASE_URL}assets/munitie Sab.png` },
+  { id: "rsb", titlu: "RSB", descriere: "Munitie speciala", culoare: "#ff6a3d", indisponibil: true, imagine: `${import.meta.env.BASE_URL}assets/munitie rsb.png` },
+  { id: "rachete-scut", titlu: "RACHETE DAUNE SCUT", descriere: "Rachete specializate pe daune scut — damage 4.000", cantitate: 430, cost: 1500000, moneda: "credite", culoare: "#b06aff", imagine: `${import.meta.env.BASE_URL}assets/munitie rackete daune scut.png` },
+  { id: "rachete-hp", titlu: "RACHETE DAUNE HP", descriere: "Rachete specializate pe daune HP — damage 2.500", cantitate: 1300, cost: 600, moneda: "credite", culoare: "#ff5a3d", imagine: `${import.meta.env.BASE_URL}assets/munitie rachete daune hp.png` },
 ];
 
 function IconaCos() {
@@ -378,7 +378,7 @@ const ECHIPAMENTE_EXTRA = [
     descriere: "Adauga 6 sloturi in plus in sectiunea Abilitati Extra",
     cost: 40000,
     moneda: "uridium",
-    imagine: "/assets/cip-mareste slot extra +6.png",
+    imagine: `${import.meta.env.BASE_URL}assets/cip-mareste slot extra +6.png`,
   },
   {
     id: "cip-slot-10",
@@ -386,7 +386,7 @@ const ECHIPAMENTE_EXTRA = [
     descriere: "Adauga 10 sloturi in plus in sectiunea Abilitati Extra",
     cost: 75000,
     moneda: "uridium",
-    imagine: "/assets/cip-mareste slot extra +10.png",
+    imagine: `${import.meta.env.BASE_URL}assets/cip-mareste slot extra +10.png`,
   },
   {
     id: "cip-rachete-auto",
@@ -394,7 +394,7 @@ const ECHIPAMENTE_EXTRA = [
     descriere: "Lanseaza rachete automat in lupta",
     cost: 25000,
     moneda: "uridium",
-    imagine: "/assets/extra-cip auto lansare rachete.png",
+    imagine: `${import.meta.env.BASE_URL}assets/extra-cip auto lansare rachete.png`,
   },
   {
     id: "cip-munitie-auto",
@@ -402,7 +402,7 @@ const ECHIPAMENTE_EXTRA = [
     descriere: "Cumpara automat orice tip de munitie in functie de setarile tale",
     cost: 25000,
     moneda: "uridium",
-    imagine: "/assets/cip-auto cumparare munitie.png",
+    imagine: `${import.meta.env.BASE_URL}assets/cip-auto cumparare munitie.png`,
   },
 ];
 

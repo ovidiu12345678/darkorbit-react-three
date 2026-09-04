@@ -144,7 +144,7 @@ const OFFSET_VERTICAL_STATIE = 0.18;
 
 function StatieSector({ pozitie, playerRef }) {
   const sprite = useRef();
-  const texturaStatie = useLoader(THREE.TextureLoader, "/assets/Statie_MMO_rgba.png");
+  const texturaStatie = useLoader(THREE.TextureLoader, `${import.meta.env.BASE_URL}assets/Statie_MMO_rgba.png`);
   texturaStatie.colorSpace = THREE.SRGBColorSpace;
   texturaStatie.generateMipmaps = false;
   texturaStatie.minFilter = THREE.LinearFilter;
@@ -196,7 +196,7 @@ const OFFSET_VERTICAL_HANGAR = 0.18;
 
 function HangarSector({ pozitie, playerRef }) {
   const sprite = useRef();
-  const texturaHangar = useLoader(THREE.TextureLoader, "/assets/Hangar.png");
+  const texturaHangar = useLoader(THREE.TextureLoader, `${import.meta.env.BASE_URL}assets/Hangar.png`);
   texturaHangar.colorSpace = THREE.SRGBColorSpace;
   texturaHangar.generateMipmaps = false;
   texturaHangar.minFilter = THREE.LinearFilter;
@@ -272,7 +272,7 @@ export default function HartaSpatiala({
   const fundalLatime = inaltimeHarta * 2.67 * 1.7768;
   const fundalInaltime = inaltimeHarta * 2.67;
 
-  const texturaHarta = useLoader(THREE.TextureLoader, "/assets/harta-spatiala-fundal-hi.jpg");
+  const texturaHarta = useLoader(THREE.TextureLoader, `${import.meta.env.BASE_URL}assets/harta-spatiala-fundal-hi.jpg`);
 
   useEffect(() => {
     texturaHarta.colorSpace = THREE.SRGBColorSpace;

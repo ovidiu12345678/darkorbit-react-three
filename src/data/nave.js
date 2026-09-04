@@ -7,7 +7,7 @@ export const NAVE = [
     moneda: null,
     scutMax: 0,
     culoare: "#7dffef",
-    imagine: "/assets/GoliathDarkOrbit.png",
+    imagine: `${import.meta.env.BASE_URL}assets/GoliathDarkOrbit.png`,
   },
   {
     id: "venator-x",

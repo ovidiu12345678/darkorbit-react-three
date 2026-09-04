@@ -28,12 +28,12 @@ const PLATFORME_HANGAR = [
 const RAZA_DOCARE_PLATFORMA = 11;
 
 const AMMO_TYPES = [
-  { id: "x1", label: "x1", color: "#59e6ff", multiplicator: 1,  shieldDamage: 4,  descriere: "Munitie laser de baza",       imagine: "/assets/Munitie x1 (1).png" },
-  { id: "x2", label: "x2", color: "#8cff6b", multiplicator: 2,  shieldDamage: 8,  descriere: "Munitie laser imbunatatita",   imagine: "/assets/Munitie X2.png" },
-  { id: "x3", label: "x3", color: "#ffd35a", multiplicator: 3,  shieldDamage: 12, descriere: "Munitie laser grea",           imagine: "/assets/Munitie X3.png" },
-  { id: "x4", label: "x4", color: "#ff4add", multiplicator: 4,  shieldDamage: 16, descriere: "Munitie laser de elita",       imagine: "/assets/munitie x4.png" },
-  { id: "sab", label: "SAB", color: "#82b7ff", multiplicator: 1, shieldDamage: 18, drainShield: true, descriere: "Munitie de drenaj scut", imagine: "/assets/munitie Sab.png" },
-  { id: "rsb", label: "RSB", color: "#ff6a3d", multiplicator: 4,  shieldDamage: 16, descriere: "Munitie speciala",            imagine: "/assets/munitie rsb.png" },
+  { id: "x1", label: "x1", color: "#59e6ff", multiplicator: 1,  shieldDamage: 4,  descriere: "Munitie laser de baza",       imagine: `${import.meta.env.BASE_URL}assets/Munitie x1 (1).png` },
+  { id: "x2", label: "x2", color: "#8cff6b", multiplicator: 2,  shieldDamage: 8,  descriere: "Munitie laser imbunatatita",   imagine: `${import.meta.env.BASE_URL}assets/Munitie X2.png` },
+  { id: "x3", label: "x3", color: "#ffd35a", multiplicator: 3,  shieldDamage: 12, descriere: "Munitie laser grea",           imagine: `${import.meta.env.BASE_URL}assets/Munitie X3.png` },
+  { id: "x4", label: "x4", color: "#ff4add", multiplicator: 4,  shieldDamage: 16, descriere: "Munitie laser de elita",       imagine: `${import.meta.env.BASE_URL}assets/munitie x4.png` },
+  { id: "sab", label: "SAB", color: "#82b7ff", multiplicator: 1, shieldDamage: 18, drainShield: true, descriere: "Munitie de drenaj scut", imagine: `${import.meta.env.BASE_URL}assets/munitie Sab.png` },
+  { id: "rsb", label: "RSB", color: "#ff6a3d", multiplicator: 4,  shieldDamage: 16, descriere: "Munitie speciala",            imagine: `${import.meta.env.BASE_URL}assets/munitie rsb.png` },
 ];
 
 function formateazaNumarMunitie(numar) {
