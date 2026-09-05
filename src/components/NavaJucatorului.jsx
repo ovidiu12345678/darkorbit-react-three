@@ -402,6 +402,7 @@ function TuningDomMenu({
   useEffect(() => {
     const panel = document.createElement("div");
     panelRef.current = panel;
+    panel.className = "tuning-nava-panel";
 
     Object.assign(panel.style, {
       position: "fixed",

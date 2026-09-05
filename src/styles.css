@@ -2336,3 +2336,169 @@ canvas {
     overflow-y: auto;
   }
 }
+
+@media (max-width: 720px) {
+  .buton-nava-status,
+  .buton-resurse-status,
+  .buton-magazin-status,
+  .buton-hangar-status,
+  .buton-fullscreen {
+    position: fixed !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+    width: 46px !important;
+    height: 46px !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    touch-action: manipulation;
+  }
+
+  .buton-resurse-status {
+    left: calc(50% - 131px) !important;
+  }
+
+  .buton-nava-status {
+    left: calc(50% - 77px) !important;
+  }
+
+  .buton-hangar-status {
+    left: calc(50% - 23px) !important;
+  }
+
+  .buton-magazin-status {
+    left: calc(50% + 31px) !important;
+  }
+
+  .buton-fullscreen {
+    left: calc(50% + 85px) !important;
+  }
+
+  .panou-resurse,
+  .panou-magazin,
+  .panou-nava-elegant,
+  .panou-hangar {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+    width: 100vw !important;
+    height: auto !important;
+    max-height: 78vh !important;
+    border-radius: 14px 14px 0 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .panou-resurse-redimensionare,
+  .panou-magazin-redimensionare,
+  .panou-nava-redimensionare,
+  .panou-hangar-redimensionare {
+    display: none !important;
+  }
+
+  .bara-munitie {
+    bottom: 66px !important;
+    max-width: calc(100vw - 16px);
+    overflow-x: auto;
+    gap: 5px;
+    padding: 6px 8px;
+  }
+
+  .buton-munitie {
+    flex: none;
+    width: 44px;
+    height: 52px;
+  }
+
+  .panou-magazin-corp {
+    flex-direction: column;
+  }
+
+  .magazin-sidebar {
+    flex: none;
+    flex-direction: row;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 8px;
+    padding: 0 0 8px;
+  }
+
+  .magazin-tab {
+    flex: none;
+    min-width: 76px;
+  }
+
+  .magazin-continut {
+    min-height: 0;
+  }
+
+  .harta-mini {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .buton-nava-status,
+  .buton-resurse-status,
+  .buton-magazin-status,
+  .buton-hangar-status,
+  .buton-fullscreen {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  .buton-resurse-status {
+    left: calc(50% - 121px) !important;
+  }
+
+  .buton-nava-status {
+    left: calc(50% - 71px) !important;
+  }
+
+  .buton-hangar-status {
+    left: calc(50% - 21px) !important;
+  }
+
+  .buton-magazin-status {
+    left: calc(50% + 29px) !important;
+  }
+
+  .buton-fullscreen {
+    left: calc(50% + 79px) !important;
+  }
+
+  .buton-munitie {
+    width: 40px;
+    height: 48px;
+  }
+}
+
+@media (max-width: 720px) {
+  .tuning-nava-panel {
+    left: 6px !important;
+    top: 6px !important;
+    width: auto !important;
+    max-width: 132px !important;
+    padding: 5px 6px !important;
+    font-size: 9px !important;
+    line-height: 1.3 !important;
+    opacity: 0.55;
+    transition: opacity 150ms ease;
+  }
+
+  .tuning-nava-panel:active,
+  .tuning-nava-panel:focus-within {
+    opacity: 1;
+  }
+
+  .tuning-nava-panel button {
+    font-size: 9px !important;
+    padding: 2px 5px !important;
+  }
+}
