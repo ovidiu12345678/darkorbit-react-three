@@ -932,8 +932,8 @@ const fragmentShaderCorpCeresc = `
     float minim = min(mostra.r, min(mostra.g, mostra.b));
     float saturatie = maxim - minim;
     float luminozitate = (mostra.r + mostra.g + mostra.b) / 3.0;
-    float fundalNeutru = 1.0 - smoothstep(0.025, 0.12, saturatie);
-    float fundalDeschis = smoothstep(0.04, 0.16, luminozitate);
+    float fundalNeutru = 1.0 - smoothstep(0.035, 0.2, saturatie);
+    float fundalDeschis = smoothstep(0.005, 0.08, luminozitate);
     float mascaFundal = 1.0 - fundalNeutru * fundalDeschis;
     vec2 margine = abs(vUv - 0.5) * 2.0;
     float distantaMargine = max(margine.x, margine.y);
@@ -949,26 +949,26 @@ const fragmentShaderCorpCeresc = `
 `;
 
 const CORPURI_STANDARD = [
-  { centru: [0.13, 0.23], decupaj: [0.25, 0.42], marime: [14, 13] },
-  { centru: [0.84, 0.21], decupaj: [0.2, 0.36], marime: [14, 13] },
-  { centru: [0.17, 0.71], decupaj: [0.34, 0.32], marime: [17, 10] },
-  { centru: [0.87, 0.73], decupaj: [0.26, 0.32], marime: [15, 13] },
-  { centru: [0.47, 0.72], decupaj: [0.17, 0.15], marime: [9, 5] },
-  { centru: [0.9, 0.51], decupaj: [0.1, 0.15], marime: [7, 6] },
-  { centru: [0.955, 0.29], decupaj: [0.07, 0.11], marime: [5, 4] },
+  { centru: [0.144, 0.218], decupaj: [0.25, 0.42], marime: [14, 13] },
+  { centru: [0.848, 0.21], decupaj: [0.2, 0.36], marime: [14, 13] },
+  { centru: [0.171, 0.696], decupaj: [0.34, 0.32], marime: [17, 10] },
+  { centru: [0.866, 0.785], decupaj: [0.26, 0.32], marime: [15, 13] },
+  { centru: [0.477, 0.723], decupaj: [0.17, 0.15], marime: [9, 5] },
+  { centru: [0.9, 0.507], decupaj: [0.1, 0.15], marime: [7, 6] },
+  { centru: [0.963, 0.304], decupaj: [0.07, 0.11], marime: [5, 4] },
 ];
 
 const CORPURI_AETHER = [
-  { centru: [0.15, 0.18], decupaj: [0.27, 0.36], marime: [15, 15] },
-  { centru: [0.51, 0.11], decupaj: [0.2, 0.2], marime: [10, 6] },
-  { centru: [0.75, 0.18], decupaj: [0.28, 0.32], marime: [13, 11] },
-  { centru: [0.9, 0.48], decupaj: [0.2, 0.34], marime: [15, 14] },
-  { centru: [0.075, 0.58], decupaj: [0.18, 0.27], marime: [9, 10] },
-  { centru: [0.32, 0.4], decupaj: [0.11, 0.15], marime: [8, 7] },
-  { centru: [0.34, 0.76], decupaj: [0.18, 0.28], marime: [10, 10] },
-  { centru: [0.77, 0.77], decupaj: [0.25, 0.36], marime: [13, 14] },
-  { centru: [0.79, 0.44], decupaj: [0.1, 0.14], marime: [8, 6] },
-  { centru: [0.955, 0.07], decupaj: [0.11, 0.14], marime: [6, 5] },
+  { centru: [0.152, 0.176], decupaj: [0.27, 0.36], marime: [15, 15] },
+  { centru: [0.517, 0.109], decupaj: [0.2, 0.2], marime: [10, 6] },
+  { centru: [0.787, 0.185], decupaj: [0.28, 0.32], marime: [13, 11] },
+  { centru: [0.906, 0.515], decupaj: [0.2, 0.34], marime: [15, 14] },
+  { centru: [0.072, 0.593], decupaj: [0.18, 0.27], marime: [9, 10] },
+  { centru: [0.34, 0.42], decupaj: [0.11, 0.15], marime: [8, 7] },
+  { centru: [0.341, 0.789], decupaj: [0.18, 0.28], marime: [10, 10] },
+  { centru: [0.763, 0.795], decupaj: [0.25, 0.36], marime: [13, 14] },
+  { centru: [0.785, 0.454], decupaj: [0.1, 0.14], marime: [8, 6] },
+  { centru: [0.955, 0.077], decupaj: [0.11, 0.14], marime: [6, 5] },
 ];
 
 function CorpCerescDinHarta({ textura, definitie, limitaHarta }) {
