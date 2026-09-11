@@ -539,7 +539,7 @@ function FundalDistant({ textura, latime, inaltime }) {
 
 const FUNDAL_TILE_LATIME = 280;
 const FUNDAL_TILE_INALTIME = 158;
-const FUNDAL_AETHER_TILE_LATIME = 520;
+const FUNDAL_AETHER_TILE_LATIME = 84;
 
 const POZITIE_STATIE_INITIALA = [-550.4, 0.38, -16.1];
 const POZITIE_HANGAR_INITIALA = [505, 0.38, -137];
