@@ -692,50 +692,71 @@ const fragmentShaderFundal = `
   }
 `;
 
-function FundalDistant({ textura, latime, inaltime }) {
-  const texturaSecundara = useMemo(() => textura.clone(), [textura]);
+function FundalDistant({ textura, limitaDeplasare }) {
+  const fundalRef = useRef();
+  const texturaPanorama = useMemo(() => textura.clone(), [textura]);
+  const directiePrivire = useMemo(() => new THREE.Vector3(), []);
+  const centruVizibil = useMemo(() => new THREE.Vector3(), []);
 
   useEffect(() => {
-    texturaSecundara.colorSpace = THREE.SRGBColorSpace;
-    texturaSecundara.anisotropy = 8;
-    texturaSecundara.wrapS = THREE.MirroredRepeatWrapping;
-    texturaSecundara.wrapT = THREE.MirroredRepeatWrapping;
-    texturaSecundara.repeat.set(5.35, 5.35);
-    texturaSecundara.offset.set(0.31, 0.17);
-    texturaSecundara.center.set(0.5, 0.5);
-    texturaSecundara.rotation = 0.37;
-    texturaSecundara.generateMipmaps = true;
-    texturaSecundara.minFilter = THREE.LinearMipmapLinearFilter;
-    texturaSecundara.magFilter = THREE.LinearFilter;
-    texturaSecundara.needsUpdate = true;
+    texturaPanorama.colorSpace = THREE.SRGBColorSpace;
+    texturaPanorama.anisotropy = 16;
+    texturaPanorama.wrapS = THREE.ClampToEdgeWrapping;
+    texturaPanorama.wrapT = THREE.ClampToEdgeWrapping;
+    texturaPanorama.repeat.set(0.68, 0.68);
+    texturaPanorama.offset.set(0.16, 0.16);
+    texturaPanorama.generateMipmaps = true;
+    texturaPanorama.minFilter = THREE.LinearMipmapLinearFilter;
+    texturaPanorama.magFilter = THREE.LinearFilter;
+    texturaPanorama.needsUpdate = true;
 
-    return () => texturaSecundara.dispose();
-  }, [texturaSecundara]);
+    return () => texturaPanorama.dispose();
+  }, [texturaPanorama]);
+
+  useFrame(({ camera }) => {
+    if (!fundalRef.current) return;
+
+    camera.getWorldDirection(directiePrivire);
+    const distantaPanaLaFundal =
+      (-2.4 - camera.position.y) / Math.min(-0.001, directiePrivire.y);
+    centruVizibil
+      .copy(camera.position)
+      .addScaledVector(directiePrivire, distantaPanaLaFundal);
+
+    fundalRef.current.position.x = centruVizibil.x;
+    fundalRef.current.position.z = centruVizibil.z;
+
+    const progresX = THREE.MathUtils.clamp(
+      (centruVizibil.x + limitaDeplasare) / (limitaDeplasare * 2),
+      0,
+      1
+    );
+    const progresZ = THREE.MathUtils.clamp(
+      (centruVizibil.z + limitaDeplasare) / (limitaDeplasare * 2),
+      0,
+      1
+    );
+    const spatiuPanorama = 1 - texturaPanorama.repeat.x;
+
+    texturaPanorama.offset.x = progresX * spatiuPanorama;
+    texturaPanorama.offset.y = (1 - progresZ) * spatiuPanorama;
+  });
 
   return (
-    <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.4, 0]}>
-        <planeGeometry args={[latime, inaltime]} />
-        <meshBasicMaterial
-          map={textura}
-          toneMapped={false}
-          fog={false}
-          depthWrite={false}
-        />
-      </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.34, 0]}>
-        <planeGeometry args={[latime, inaltime]} />
-        <meshBasicMaterial
-          map={texturaSecundara}
-          transparent
-          opacity={0.2}
-          blending={THREE.AdditiveBlending}
-          toneMapped={false}
-          fog={false}
-          depthWrite={false}
-        />
-      </mesh>
-    </group>
+    <mesh
+      ref={fundalRef}
+      rotation={[-Math.PI / 2, 0, 0]}
+      position={[0, -2.4, 0]}
+      frustumCulled={false}
+    >
+      <planeGeometry args={[120, 80]} />
+      <meshBasicMaterial
+        map={texturaPanorama}
+        toneMapped={false}
+        fog={false}
+        depthWrite={false}
+      />
+    </mesh>
   );
 }
 
@@ -759,9 +780,6 @@ export default function HartaSpatiala({
   const inaltimeHarta = marimeHarta;
   const factorScalare = marimeHarta / 210;
 
-  const fundalInaltime = marimeHarta + 360;
-  const fundalLatime = fundalInaltime * (16 / 9);
-
   const texturaHarta = useLoader(
     THREE.TextureLoader,
     `${import.meta.env.BASE_URL}${imagineFundal}`
@@ -770,9 +788,9 @@ export default function HartaSpatiala({
   useEffect(() => {
     texturaHarta.colorSpace = THREE.SRGBColorSpace;
     texturaHarta.anisotropy = 8;
-    texturaHarta.wrapS = THREE.MirroredRepeatWrapping;
-    texturaHarta.wrapT = THREE.MirroredRepeatWrapping;
-    texturaHarta.repeat.set(8, 8);
+    texturaHarta.wrapS = THREE.ClampToEdgeWrapping;
+    texturaHarta.wrapT = THREE.ClampToEdgeWrapping;
+    texturaHarta.repeat.set(1, 1);
     texturaHarta.offset.set(0, 0);
     texturaHarta.generateMipmaps = true;
     texturaHarta.minFilter = THREE.LinearMipmapLinearFilter;
@@ -815,8 +833,7 @@ export default function HartaSpatiala({
     <group>
       <FundalDistant
         textura={texturaHarta}
-        latime={fundalLatime}
-        inaltime={fundalInaltime}
+        limitaDeplasare={marimeHarta / 2}
       />
 
       <mesh

@@ -23,10 +23,10 @@ import {
 import { NAVE, NAVE_BY_ID } from "./data/nave.js";
 
 const MARIME_HARTA = 1260;
-const FUNDAL_HARTA_STANDARD = "assets/fundal-standard-nebula-v1.png";
-const FUNDAL_HARTA_AETHER = "assets/fundal-aether-nebula-v1.png";
-const FUNDAL_MINI_STANDARD = "assets/fundal-standard-nebula-v1.png";
-const FUNDAL_MINI_AETHER = "assets/fundal-aether-nebula-v1.png";
+const FUNDAL_HARTA_STANDARD = "assets/harta-standard-v2.png";
+const FUNDAL_HARTA_AETHER = "assets/harta-nebuloasa-aether-v2.png";
+const FUNDAL_MINI_STANDARD = FUNDAL_HARTA_STANDARD;
+const FUNDAL_MINI_AETHER = FUNDAL_HARTA_AETHER;
 
 const LIMITA_HARTA = MARIME_HARTA / 2 - 4.5;
 const FACTOR_SCALARE_HARTA = MARIME_HARTA / 210;
