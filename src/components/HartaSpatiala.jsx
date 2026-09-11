@@ -704,8 +704,8 @@ function FundalDistant({ textura }) {
   useEffect(() => {
     texturaPanorama.colorSpace = THREE.SRGBColorSpace;
     texturaPanorama.anisotropy = 16;
-    texturaPanorama.wrapS = THREE.RepeatWrapping;
-    texturaPanorama.wrapT = THREE.RepeatWrapping;
+    texturaPanorama.wrapS = THREE.MirroredRepeatWrapping;
+    texturaPanorama.wrapT = THREE.MirroredRepeatWrapping;
     texturaPanorama.repeat.set(1, 1);
     texturaPanorama.offset.set(0.44, 0.04);
     texturaPanorama.generateMipmaps = true;
@@ -731,11 +731,11 @@ function FundalDistant({ textura }) {
 
     texturaPanorama.offset.x = THREE.MathUtils.euclideanModulo(
       0.44 + centruVizibil.x / LATIME_FUNDAL_VIZIBIL,
-      1
+      2
     );
     texturaPanorama.offset.y = THREE.MathUtils.euclideanModulo(
       0.04 - centruVizibil.z / INALTIME_FUNDAL_VIZIBIL,
-      1
+      2
     );
   });
 
@@ -928,12 +928,22 @@ const fragmentShaderCorpCeresc = `
   void main() {
     vec2 uvSursa = uCentru + (vUv - 0.5) * uDecupaj;
     vec4 mostra = texture2D(uTextura, uvSursa);
+    float maxim = max(mostra.r, max(mostra.g, mostra.b));
+    float minim = min(mostra.r, min(mostra.g, mostra.b));
+    float saturatie = maxim - minim;
+    float luminozitate = (mostra.r + mostra.g + mostra.b) / 3.0;
+    float fundalNeutru = 1.0 - smoothstep(0.018, 0.085, saturatie);
+    float fundalDeschis = smoothstep(0.4, 0.58, luminozitate);
+    float mascaFundal = 1.0 - fundalNeutru * fundalDeschis;
     vec2 margine = abs(vUv - 0.5) * 2.0;
     float distantaMargine = max(margine.x, margine.y);
     float mascaDreptunghi = 1.0 - smoothstep(0.68, 1.0, distantaMargine);
     float mascaRotunda = 1.0 - smoothstep(0.72, 1.0, length((vUv - 0.5) * 2.0));
     float masca = max(mascaRotunda, mascaDreptunghi * 0.42);
-    gl_FragColor = vec4(mostra.rgb, mostra.a * masca);
+    float alphaFinal = mostra.a * masca * mascaFundal;
+    if (alphaFinal < 0.025) discard;
+    vec3 culoareClara = mostra.rgb * 1.12 + pow(maxim, 4.0) * 0.035;
+    gl_FragColor = vec4(culoareClara, alphaFinal);
     #include <colorspace_fragment>
   }
 `;
@@ -1018,7 +1028,7 @@ const POZITIE_HANGAR_INITIALA = [505, 0.38, -137];
 export default function HartaSpatiala({
   marimeHarta,
   imagineFundal = "assets/harta-standard-v2.png",
-  imagineCorpuri = "assets/harta-standard-v3.png",
+  imagineCorpuri = "assets/corpuri-standard-transparente.png",
   onAlegeTinta,
   tintaJucator,
   onStareClic,
