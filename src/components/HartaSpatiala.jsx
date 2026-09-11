@@ -760,6 +760,62 @@ function FundalDistant({ textura, limitaDeplasare }) {
   );
 }
 
+function CampSteleDeplasare({ marimeHarta, temaAether }) {
+  const geometrieStele = useMemo(() => {
+    const numarStele = 18000;
+    const pozitii = new Float32Array(numarStele * 3);
+    const culori = new Float32Array(numarStele * 3);
+    const intindere = marimeHarta + 260;
+    let samanta = temaAether ? 918273 : 471103;
+
+    const aleator = () => {
+      samanta = (samanta * 1664525 + 1013904223) >>> 0;
+      return samanta / 4294967296;
+    };
+
+    const culoareRece = new THREE.Color(temaAether ? "#bc8cff" : "#8edfff");
+    const culoareCalda = new THREE.Color(temaAether ? "#ff9cec" : "#ffd2a0");
+    const culoareStea = new THREE.Color();
+
+    for (let index = 0; index < numarStele; index += 1) {
+      const offset = index * 3;
+      pozitii[offset] = (aleator() - 0.5) * intindere;
+      pozitii[offset + 1] = -1.72 + aleator() * 0.08;
+      pozitii[offset + 2] = (aleator() - 0.5) * intindere;
+
+      culoareStea
+        .copy(culoareRece)
+        .lerp(culoareCalda, aleator())
+        .multiplyScalar(0.58 + aleator() * 0.42);
+      culori[offset] = culoareStea.r;
+      culori[offset + 1] = culoareStea.g;
+      culori[offset + 2] = culoareStea.b;
+    }
+
+    const geometrie = new THREE.BufferGeometry();
+    geometrie.setAttribute("position", new THREE.BufferAttribute(pozitii, 3));
+    geometrie.setAttribute("color", new THREE.BufferAttribute(culori, 3));
+    geometrie.computeBoundingSphere();
+    return geometrie;
+  }, [marimeHarta, temaAether]);
+
+  useEffect(() => () => geometrieStele.dispose(), [geometrieStele]);
+
+  return (
+    <points geometry={geometrieStele} frustumCulled={false}>
+      <pointsMaterial
+        size={0.105}
+        vertexColors
+        transparent
+        opacity={0.82}
+        sizeAttenuation
+        depthWrite={false}
+        toneMapped={false}
+      />
+    </points>
+  );
+}
+
 const POZITIE_STATIE_INITIALA = [-550.4, 0.38, -16.1];
 const POZITIE_HANGAR_INITIALA = [505, 0.38, -137];
 
@@ -835,6 +891,8 @@ export default function HartaSpatiala({
         textura={texturaHarta}
         limitaDeplasare={marimeHarta / 2}
       />
+
+      <CampSteleDeplasare marimeHarta={marimeHarta} temaAether={doarPortal} />
 
       <mesh
         geometry={geometrie}
