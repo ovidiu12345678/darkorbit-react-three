@@ -593,6 +593,7 @@ export default function HartaSpatiala({
   pozitieStatie = POZITIE_STATIE_INITIALA,
   pozitieHangar = POZITIE_HANGAR_INITIALA,
   pozitiePortalAether,
+  doarPortal = false,
   onTransportAether,
 }) {
   const latimeHarta = marimeHarta * (16 / 9);
@@ -678,26 +679,30 @@ export default function HartaSpatiala({
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
 
-      <PoartaSalt pozitie={[marimeHarta * 0.34, 0.76, marimeHarta * 0.34]} culoare="#32f7ff" />
-      <PoartaSalt pozitie={[-marimeHarta * 0.36, 0.76, -marimeHarta * 0.3]} culoare="#ff4add" />
+      {!doarPortal && (
+        <>
+          <PoartaSalt pozitie={[marimeHarta * 0.34, 0.76, marimeHarta * 0.34]} culoare="#32f7ff" />
+          <PoartaSalt pozitie={[-marimeHarta * 0.36, 0.76, -marimeHarta * 0.3]} culoare="#ff4add" />
+
+          <StatieSector pozitie={pozitieStatie} playerRef={playerRef} />
+
+          <HangarSector pozitie={pozitieHangar} playerRef={playerRef} />
+
+          <NodExtractie pozitie={[18 * factorScalare, 0, 16 * factorScalare]} culoare="#7dffef" />
+          <NodExtractie pozitie={[-22 * factorScalare, 0, -12 * factorScalare]} culoare="#ffd35a" />
+          <NodExtractie pozitie={[6 * factorScalare, 0, -36 * factorScalare]} culoare="#8cff6b" />
+
+          <CutieBonus pozitie={[12 * factorScalare, 0, -6 * factorScalare]} culoare="#ffd35a" />
+          <CutieBonus pozitie={[-17 * factorScalare, 0, 24 * factorScalare]} culoare="#36f5ff" />
+          <CutieBonus pozitie={[30 * factorScalare, 0, 4 * factorScalare]} culoare="#ff4add" />
+          <CutieBonus pozitie={[-35 * factorScalare, 0, -26 * factorScalare]} culoare="#8cff6b" />
+          <CutieBonus pozitie={[3 * factorScalare, 0, 29 * factorScalare]} culoare="#ffd35a" />
+        </>
+      )}
 
       {pozitiePortalAether && (
         <PortalAether pozitie={pozitiePortalAether} onTransport={onTransportAether} />
       )}
-
-      <StatieSector pozitie={pozitieStatie} playerRef={playerRef} />
-
-      <HangarSector pozitie={pozitieHangar} playerRef={playerRef} />
-
-      <NodExtractie pozitie={[18 * factorScalare, 0, 16 * factorScalare]} culoare="#7dffef" />
-      <NodExtractie pozitie={[-22 * factorScalare, 0, -12 * factorScalare]} culoare="#ffd35a" />
-      <NodExtractie pozitie={[6 * factorScalare, 0, -36 * factorScalare]} culoare="#8cff6b" />
-
-      <CutieBonus pozitie={[12 * factorScalare, 0, -6 * factorScalare]} culoare="#ffd35a" />
-      <CutieBonus pozitie={[-17 * factorScalare, 0, 24 * factorScalare]} culoare="#36f5ff" />
-      <CutieBonus pozitie={[30 * factorScalare, 0, 4 * factorScalare]} culoare="#ff4add" />
-      <CutieBonus pozitie={[-35 * factorScalare, 0, -26 * factorScalare]} culoare="#8cff6b" />
-      <CutieBonus pozitie={[3 * factorScalare, 0, 29 * factorScalare]} culoare="#ffd35a" />
 
       <TintaIndicator tinta={tintaJucator} />
     </group>

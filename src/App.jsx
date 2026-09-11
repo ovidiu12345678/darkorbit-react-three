@@ -35,6 +35,11 @@ const MARJA_SIGURANTA_PORTAL = 12;
 const COORDONATA_PORTAL_AETHER =
   LIMITA_HARTA - LATIME_ZONA_RADIATIE - RAZA_PORTAL_AETHER - MARJA_SIGURANTA_PORTAL;
 const POZITIE_PORTAL_AETHER = [COORDONATA_PORTAL_AETHER, 0, COORDONATA_PORTAL_AETHER];
+const POZITIE_REVENIRE_STANDARD = [
+  COORDONATA_PORTAL_AETHER - 34,
+  3.2,
+  COORDONATA_PORTAL_AETHER - 34,
+];
 
 const POZITIE_STATIE = [-550.4, 0.38, -16.1];
 const POZITIE_HANGAR = [-360.4, 0.38, 113.9];
@@ -191,13 +196,17 @@ export default function App() {
     setImpulsScut((valoare) => valoare + 1);
   }, []);
 
-  const transportaPeHartaAether = useCallback(() => {
-    setHartaActiva("aether");
+  const transportaPrinPortal = useCallback(() => {
+    const intraInAether = hartaActiva !== "aether";
+
+    setHartaActiva(intraInAether ? "aether" : "standard");
     setTintaJucator(null);
     setTintaLive(false);
-    setAmenintare("sector Aether");
+    setTintaSelectata(null);
+    setAtaca(false);
+    setAmenintare(intraInAether ? "sector Aether" : "sector liber");
     setSemnalTeleportare((valoare) => valoare + 1);
-  }, []);
+  }, [hartaActiva]);
 
   const cumparaMunitie = useCallback(
     (id, cantitate, cost, moneda) => {
@@ -482,10 +491,11 @@ export default function App() {
             pozitieStatie={POZITIE_STATIE}
             pozitieHangar={POZITIE_HANGAR}
             pozitiePortalAether={POZITIE_PORTAL_AETHER}
-            onTransportAether={transportaPeHartaAether}
+            doarPortal={hartaActiva === "aether"}
+            onTransportAether={transportaPrinPortal}
           />
 
-          {inamici.map((inamic) => (
+          {hartaActiva !== "aether" && inamici.map((inamic) => (
             <InamicGheata
               key={`${inamic.id}-${inamic.nonce}`}
               id={inamic.id}
@@ -522,32 +532,36 @@ export default function App() {
             multiplicatorViteza={vitezaNava * (1 + bonusVitezaProcent / 100)}
             viata={viata}
             scut={scut}
-            pozitieTeleportare={POZITIE_INTRARE_AETHER}
+            pozitieTeleportare={
+              hartaActiva === "aether" ? POZITIE_INTRARE_AETHER : POZITIE_REVENIRE_STANDARD
+            }
             semnalTeleportare={semnalTeleportare}
           />
 
-          <GestionarLupta
-            playerRef={playerRef}
-            pozitiiInamici={pozitiiInamici}
-            inamici={inamici}
-            seteazaInamici={setInamici}
-            tintaSelectata={tintaSelectata}
-            seteazaTintaSelectata={setTintaSelectata}
-            ataca={ataca}
-            seteazaAtaca={setAtaca}
-            munitie={AMMO_BY_ID[selectedAmmo]}
-            cantitateMunitie={munitie[selectedAmmo] || 0}
-            onConsumaMunitie={() => consumaMunitie(selectedAmmo)}
-            damageLasere={damageLasere}
-            scutMax={scutMaxNava}
-            seteazaScutJucator={setScut}
-            declanseazaImpulsScut={declanseazaImpulsScut}
-            ultimaLovituraRef={ultimaLovituraRef}
-            onStatus={setAmenintare}
-            onDistrugeInamic={acordaRecompensaInamic}
-            daunePrimiteJucator={daunePrimiteJucator}
-            setDaunePrimiteJucator={setDaunePrimiteJucator}
-          />
+          {hartaActiva !== "aether" && (
+            <GestionarLupta
+              playerRef={playerRef}
+              pozitiiInamici={pozitiiInamici}
+              inamici={inamici}
+              seteazaInamici={setInamici}
+              tintaSelectata={tintaSelectata}
+              seteazaTintaSelectata={setTintaSelectata}
+              ataca={ataca}
+              seteazaAtaca={setAtaca}
+              munitie={AMMO_BY_ID[selectedAmmo]}
+              cantitateMunitie={munitie[selectedAmmo] || 0}
+              onConsumaMunitie={() => consumaMunitie(selectedAmmo)}
+              damageLasere={damageLasere}
+              scutMax={scutMaxNava}
+              seteazaScutJucator={setScut}
+              declanseazaImpulsScut={declanseazaImpulsScut}
+              ultimaLovituraRef={ultimaLovituraRef}
+              onStatus={setAmenintare}
+              onDistrugeInamic={acordaRecompensaInamic}
+              daunePrimiteJucator={daunePrimiteJucator}
+              setDaunePrimiteJucator={setDaunePrimiteJucator}
+            />
+          )}
         </Suspense>
       </Canvas>
 
@@ -591,11 +605,15 @@ export default function App() {
         marimeHarta={MARIME_HARTA}
         pozitieJucator={pozitieJucator}
         tintaJucator={tintaJucator}
-        inamici={inamici}
+        inamici={hartaActiva === "aether" ? [] : inamici}
         onAlegeTinta={alegeTinta}
-        pozitieStatie={POZITIE_STATIE}
-        pozitieHangar={POZITIE_HANGAR}
-        pozitieAndocareHangar={[PLATFORME_HANGAR[2].x, 0, PLATFORME_HANGAR[2].z]}
+        pozitieStatie={hartaActiva === "aether" ? null : POZITIE_STATIE}
+        pozitieHangar={hartaActiva === "aether" ? null : POZITIE_HANGAR}
+        pozitieAndocareHangar={
+          hartaActiva === "aether"
+            ? null
+            : [PLATFORME_HANGAR[2].x, 0, PLATFORME_HANGAR[2].z]
+        }
         pozitiePortal={POZITIE_PORTAL_AETHER}
         imagineFundal={hartaActiva === "aether" ? FUNDAL_HARTA_AETHER : FUNDAL_HARTA_STANDARD}
       />
