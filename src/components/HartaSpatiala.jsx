@@ -939,26 +939,26 @@ const fragmentShaderCorpCeresc = `
 `;
 
 const CORPURI_STANDARD = [
-  { centru: [0.13, 0.23], decupaj: [0.25, 0.42], marime: [42, 38] },
-  { centru: [0.84, 0.21], decupaj: [0.24, 0.38], marime: [43, 39] },
-  { centru: [0.17, 0.71], decupaj: [0.34, 0.32], marime: [48, 28] },
-  { centru: [0.87, 0.73], decupaj: [0.27, 0.39], marime: [43, 38] },
-  { centru: [0.47, 0.72], decupaj: [0.17, 0.15], marime: [24, 13] },
-  { centru: [0.9, 0.51], decupaj: [0.12, 0.17], marime: [17, 15] },
-  { centru: [0.955, 0.29], decupaj: [0.08, 0.13], marime: [13, 11] },
+  { centru: [0.13, 0.23], decupaj: [0.25, 0.42], marime: [14, 13] },
+  { centru: [0.84, 0.21], decupaj: [0.2, 0.36], marime: [14, 13] },
+  { centru: [0.17, 0.71], decupaj: [0.34, 0.32], marime: [17, 10] },
+  { centru: [0.87, 0.73], decupaj: [0.26, 0.32], marime: [15, 13] },
+  { centru: [0.47, 0.72], decupaj: [0.17, 0.15], marime: [9, 5] },
+  { centru: [0.9, 0.51], decupaj: [0.1, 0.15], marime: [7, 6] },
+  { centru: [0.955, 0.29], decupaj: [0.07, 0.11], marime: [5, 4] },
 ];
 
 const CORPURI_AETHER = [
-  { centru: [0.15, 0.18], decupaj: [0.3, 0.42], marime: [43, 42] },
-  { centru: [0.51, 0.11], decupaj: [0.2, 0.2], marime: [29, 17] },
-  { centru: [0.75, 0.18], decupaj: [0.28, 0.32], marime: [37, 32] },
-  { centru: [0.9, 0.48], decupaj: [0.25, 0.36], marime: [43, 39] },
-  { centru: [0.075, 0.58], decupaj: [0.18, 0.27], marime: [25, 29] },
-  { centru: [0.32, 0.4], decupaj: [0.14, 0.19], marime: [21, 19] },
-  { centru: [0.34, 0.76], decupaj: [0.18, 0.28], marime: [27, 29] },
-  { centru: [0.77, 0.77], decupaj: [0.25, 0.36], marime: [37, 39] },
-  { centru: [0.79, 0.44], decupaj: [0.15, 0.17], marime: [21, 17] },
-  { centru: [0.955, 0.07], decupaj: [0.11, 0.14], marime: [17, 14] },
+  { centru: [0.15, 0.18], decupaj: [0.27, 0.36], marime: [15, 15] },
+  { centru: [0.51, 0.11], decupaj: [0.2, 0.2], marime: [10, 6] },
+  { centru: [0.75, 0.18], decupaj: [0.28, 0.32], marime: [13, 11] },
+  { centru: [0.9, 0.48], decupaj: [0.2, 0.34], marime: [15, 14] },
+  { centru: [0.075, 0.58], decupaj: [0.18, 0.27], marime: [9, 10] },
+  { centru: [0.32, 0.4], decupaj: [0.11, 0.15], marime: [8, 7] },
+  { centru: [0.34, 0.76], decupaj: [0.18, 0.28], marime: [10, 10] },
+  { centru: [0.77, 0.77], decupaj: [0.25, 0.36], marime: [13, 14] },
+  { centru: [0.79, 0.44], decupaj: [0.1, 0.14], marime: [8, 6] },
+  { centru: [0.955, 0.07], decupaj: [0.11, 0.14], marime: [6, 5] },
 ];
 
 function CorpCerescDinHarta({ textura, definitie, limitaHarta }) {
