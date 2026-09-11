@@ -1,4 +1,4 @@
-import { useFrame, useLoader, useThree } from "@react-three/fiber";
+import { useFrame, useLoader } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 
@@ -537,64 +537,9 @@ function FundalDistant({ textura, latime, inaltime }) {
   );
 }
 
-function FundalFixPeEcran({ textura, activ, marimeHarta }) {
-  const { scene, size } = useThree();
-  const incadrareRef = useRef({ spatiuX: 0, spatiuY: 0 });
-
-  useFrame(({ camera }) => {
-    if (!activ) return;
-
-    const limita = Math.max(1, marimeHarta / 2);
-    const progresX = THREE.MathUtils.clamp(camera.position.x / limita, -1, 1);
-    const progresZ = THREE.MathUtils.clamp(camera.position.z / limita, -1, 1);
-    const { spatiuX, spatiuY } = incadrareRef.current;
-    const tintaX = spatiuX * 0.5 + progresX * spatiuX * 0.48;
-    const tintaY = spatiuY * 0.5 - progresZ * spatiuY * 0.48;
-
-    textura.offset.x = THREE.MathUtils.lerp(textura.offset.x, tintaX, 0.08);
-    textura.offset.y = THREE.MathUtils.lerp(textura.offset.y, tintaY, 0.08);
-  });
-
-  useEffect(() => {
-    if (!activ) return undefined;
-
-    const fundalAnterior = scene.background;
-    const latimeImagine = textura.image?.naturalWidth || textura.image?.width || 1;
-    const inaltimeImagine = textura.image?.naturalHeight || textura.image?.height || 1;
-    const raportImagine = latimeImagine / inaltimeImagine;
-    const raportEcran = Math.max(1, size.width) / Math.max(1, size.height);
-
-    textura.wrapS = THREE.ClampToEdgeWrapping;
-    textura.wrapT = THREE.ClampToEdgeWrapping;
-    textura.generateMipmaps = false;
-    textura.minFilter = THREE.LinearFilter;
-    textura.magFilter = THREE.LinearFilter;
-
-    let repetareX = raportImagine > raportEcran ? raportEcran / raportImagine : 1;
-    let repetareY = raportImagine > raportEcran ? 1 : raportImagine / raportEcran;
-    const zoomFundal = 0.86;
-    repetareX *= zoomFundal;
-    repetareY *= zoomFundal;
-
-    const spatiuX = 1 - repetareX;
-    const spatiuY = 1 - repetareY;
-    incadrareRef.current = { spatiuX, spatiuY };
-    textura.repeat.set(repetareX, repetareY);
-    textura.offset.set(spatiuX / 2, spatiuY / 2);
-
-    textura.needsUpdate = true;
-    scene.background = textura;
-
-    return () => {
-      if (scene.background === textura) scene.background = fundalAnterior;
-    };
-  }, [activ, scene, size.height, size.width, textura]);
-
-  return null;
-}
-
 const FUNDAL_TILE_LATIME = 280;
 const FUNDAL_TILE_INALTIME = 158;
+const FUNDAL_AETHER_TILE_LATIME = 520;
 
 const POZITIE_STATIE_INITIALA = [-550.4, 0.38, -16.1];
 const POZITIE_HANGAR_INITIALA = [505, 0.38, -137];
@@ -626,12 +571,25 @@ export default function HartaSpatiala({
     texturaHarta.colorSpace = THREE.SRGBColorSpace;
     texturaHarta.anisotropy = 16;
 
-    if (!fundalImagineCompleta) {
+    texturaHarta.generateMipmaps = true;
+    texturaHarta.minFilter = THREE.LinearMipmapLinearFilter;
+    texturaHarta.magFilter = THREE.LinearFilter;
+
+    if (fundalImagineCompleta) {
+      const latimeImagine = texturaHarta.image?.naturalWidth || texturaHarta.image?.width || 1;
+      const inaltimeImagine = texturaHarta.image?.naturalHeight || texturaHarta.image?.height || 1;
+      const inaltimeTileAether = FUNDAL_AETHER_TILE_LATIME * (inaltimeImagine / latimeImagine);
+
+      texturaHarta.wrapS = THREE.MirroredRepeatWrapping;
+      texturaHarta.wrapT = THREE.MirroredRepeatWrapping;
+      texturaHarta.repeat.set(
+        fundalLatime / FUNDAL_AETHER_TILE_LATIME,
+        fundalInaltime / inaltimeTileAether
+      );
+      texturaHarta.offset.set(0.5, 0.5);
+    } else {
       texturaHarta.wrapS = THREE.RepeatWrapping;
       texturaHarta.wrapT = THREE.RepeatWrapping;
-      texturaHarta.generateMipmaps = true;
-      texturaHarta.minFilter = THREE.LinearMipmapLinearFilter;
-      texturaHarta.magFilter = THREE.LinearFilter;
       texturaHarta.repeat.set(fundalLatime / FUNDAL_TILE_LATIME, fundalInaltime / FUNDAL_TILE_INALTIME);
       texturaHarta.offset.set(0.32, 0.4);
     }
@@ -677,15 +635,7 @@ export default function HartaSpatiala({
 
   return (
     <group>
-      <FundalFixPeEcran
-        textura={texturaHarta}
-        activ={fundalImagineCompleta}
-        marimeHarta={marimeHarta}
-      />
-
-      {!fundalImagineCompleta && (
-        <FundalDistant textura={texturaHarta} latime={fundalLatime} inaltime={fundalInaltime} />
-      )}
+      <FundalDistant textura={texturaHarta} latime={fundalLatime} inaltime={fundalInaltime} />
 
       <mesh
         geometry={geometrie}
