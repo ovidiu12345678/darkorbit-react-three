@@ -49,19 +49,19 @@ const TUNING_INITIAL = {
   shipScaleX: 7.2659,
   shipScaleY: 9.5873,
 
-  leftFlameX: -0.1823,
-  leftFlameY: -5.0977,
-  leftFlameZ: 0.08,
-  leftFlameRotationDeg: 0,
-  leftFlameScaleX: 1.3,
-  leftFlameScaleY: 3.6,
+  leftFlameX: -0.506,
+  leftFlameY: -0.2483,
+  leftFlameZ: 0.01,
+  leftFlameRotationDeg: -64,
+  leftFlameScaleX: 0.1789,
+  leftFlameScaleY: 0.3755,
 
-  rightFlameX: 0.472,
-  rightFlameY: -5.041,
-  rightFlameZ: 0.08,
-  rightFlameRotationDeg: 0,
-  rightFlameScaleX: 1.3,
-  rightFlameScaleY: 3.6,
+  rightFlameX: 0.4308,
+  rightFlameY: -0.2482,
+  rightFlameZ: 0.01,
+  rightFlameRotationDeg: 60,
+  rightFlameScaleX: 0.1789,
+  rightFlameScaleY: 0.3755,
 
   flameIdle: 0,
   flameMovingBase: 0.75,
@@ -272,6 +272,18 @@ function incarcaTuningInitial() {
       cameraTargetOffsetX: 0,
       cameraTargetOffsetY: 0,
       cameraTargetOffsetZ: 0,
+      leftFlameX: TUNING_INITIAL.leftFlameX,
+      leftFlameY: TUNING_INITIAL.leftFlameY,
+      leftFlameZ: TUNING_INITIAL.leftFlameZ,
+      leftFlameRotationDeg: TUNING_INITIAL.leftFlameRotationDeg,
+      leftFlameScaleX: TUNING_INITIAL.leftFlameScaleX,
+      leftFlameScaleY: TUNING_INITIAL.leftFlameScaleY,
+      rightFlameX: TUNING_INITIAL.rightFlameX,
+      rightFlameY: TUNING_INITIAL.rightFlameY,
+      rightFlameZ: TUNING_INITIAL.rightFlameZ,
+      rightFlameRotationDeg: TUNING_INITIAL.rightFlameRotationDeg,
+      rightFlameScaleX: TUNING_INITIAL.rightFlameScaleX,
+      rightFlameScaleY: TUNING_INITIAL.rightFlameScaleY,
     };
   } catch {
     return TUNING_INITIAL;
@@ -1225,56 +1237,56 @@ function NavaExacta({
                 side={THREE.DoubleSide}
                 toneMapped={false}
               />
-            </mesh>
 
-            <mesh
-              ref={leftFlameMesh}
-              position={[
-                tuning.leftFlameX,
-                tuning.leftFlameY,
-                tuning.leftFlameZ,
-              ]}
-              rotation={[0, 0, degToRad(tuning.leftFlameRotationDeg)]}
-              scale={[tuning.leftFlameScaleX, tuning.leftFlameScaleY, 1]}
-              renderOrder={11}
-            >
-              <planeGeometry args={[1, 1]} />
-              <shaderMaterial
-                uniforms={uniformeFlacaraStanga}
-                vertexShader={vertexShaderSimplu}
-                fragmentShader={fragmentShaderFlacara}
-                transparent
-                depthWrite={false}
-                depthTest={false}
-                side={THREE.DoubleSide}
-                blending={THREE.AdditiveBlending}
-                toneMapped={false}
-              />
-            </mesh>
+              <mesh
+                ref={leftFlameMesh}
+                position={[
+                  tuning.leftFlameX,
+                  tuning.leftFlameY,
+                  tuning.leftFlameZ,
+                ]}
+                rotation={[0, 0, degToRad(tuning.leftFlameRotationDeg)]}
+                scale={[tuning.leftFlameScaleX, tuning.leftFlameScaleY, 1]}
+                renderOrder={11}
+              >
+                <planeGeometry args={[1, 1]} />
+                <shaderMaterial
+                  uniforms={uniformeFlacaraStanga}
+                  vertexShader={vertexShaderSimplu}
+                  fragmentShader={fragmentShaderFlacara}
+                  transparent
+                  depthWrite={false}
+                  depthTest={false}
+                  side={THREE.DoubleSide}
+                  blending={THREE.AdditiveBlending}
+                  toneMapped={false}
+                />
+              </mesh>
 
-            <mesh
-              ref={rightFlameMesh}
-              position={[
-                tuning.rightFlameX,
-                tuning.rightFlameY,
-                tuning.rightFlameZ,
-              ]}
-              rotation={[0, 0, degToRad(tuning.rightFlameRotationDeg)]}
-              scale={[tuning.rightFlameScaleX, tuning.rightFlameScaleY, 1]}
-              renderOrder={11}
-            >
-              <planeGeometry args={[1, 1]} />
-              <shaderMaterial
-                uniforms={uniformeFlacaraDreapta}
-                vertexShader={vertexShaderSimplu}
-                fragmentShader={fragmentShaderFlacara}
-                transparent
-                depthWrite={false}
-                depthTest={false}
-                side={THREE.DoubleSide}
-                blending={THREE.AdditiveBlending}
-                toneMapped={false}
-              />
+              <mesh
+                ref={rightFlameMesh}
+                position={[
+                  tuning.rightFlameX,
+                  tuning.rightFlameY,
+                  tuning.rightFlameZ,
+                ]}
+                rotation={[0, 0, degToRad(tuning.rightFlameRotationDeg)]}
+                scale={[tuning.rightFlameScaleX, tuning.rightFlameScaleY, 1]}
+                renderOrder={11}
+              >
+                <planeGeometry args={[1, 1]} />
+                <shaderMaterial
+                  uniforms={uniformeFlacaraDreapta}
+                  vertexShader={vertexShaderSimplu}
+                  fragmentShader={fragmentShaderFlacara}
+                  transparent
+                  depthWrite={false}
+                  depthTest={false}
+                  side={THREE.DoubleSide}
+                  blending={THREE.AdditiveBlending}
+                  toneMapped={false}
+                />
+              </mesh>
             </mesh>
           </group>
         </group>
