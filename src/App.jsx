@@ -24,7 +24,7 @@ import { NAVE, NAVE_BY_ID } from "./data/nave.js";
 
 const MARIME_HARTA = 1260;
 const FUNDAL_HARTA_STANDARD = "assets/harta-spatiala-fundal-hi.jpg";
-const FUNDAL_HARTA_AETHER = "assets/harta-nebuloasa-aether.jpg";
+const FUNDAL_HARTA_AETHER = "assets/harta-nebuloasa-aether-v2.png";
 
 const LIMITA_HARTA = MARIME_HARTA / 2 - 4.5;
 const FACTOR_SCALARE_HARTA = MARIME_HARTA / 210;
