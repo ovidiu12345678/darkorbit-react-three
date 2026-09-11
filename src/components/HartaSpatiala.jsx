@@ -244,7 +244,7 @@ function PortalAether({ pozitie, onTransport }) {
   };
 
   return (
-    <group position={pozitie} scale={0.3}>
+    <group position={pozitie} scale={0.09}>
       <mesh ref={portal} position={[0, 9.4, 0]} renderOrder={3}>
         <planeGeometry args={[1, 1]} />
         <meshBasicMaterial
@@ -923,6 +923,7 @@ const fragmentShaderCorpCeresc = `
   uniform sampler2D uTextura;
   uniform vec2 uCentru;
   uniform vec2 uDecupaj;
+  uniform float uPragSaturatie;
   varying vec2 vUv;
 
   void main() {
@@ -932,7 +933,7 @@ const fragmentShaderCorpCeresc = `
     float minim = min(mostra.r, min(mostra.g, mostra.b));
     float saturatie = maxim - minim;
     float luminozitate = (mostra.r + mostra.g + mostra.b) / 3.0;
-    float fundalNeutru = 1.0 - smoothstep(0.035, 0.2, saturatie);
+    float fundalNeutru = 1.0 - smoothstep(0.035, uPragSaturatie, saturatie);
     float fundalDeschis = smoothstep(0.005, 0.08, luminozitate);
     float mascaFundal = 1.0 - fundalNeutru * fundalDeschis;
     vec2 margine = abs(vUv - 0.5) * 2.0;
@@ -941,34 +942,94 @@ const fragmentShaderCorpCeresc = `
     float mascaRotunda = 1.0 - smoothstep(0.72, 1.0, length((vUv - 0.5) * 2.0));
     float masca = max(mascaRotunda, mascaDreptunghi * 0.42);
     float alphaFinal = mostra.a * masca * mascaFundal;
-    if (alphaFinal < 0.025) discard;
-    vec3 culoareClara = mostra.rgb * 1.12 + pow(maxim, 4.0) * 0.035;
+    if (alphaFinal < 0.015) discard;
+    vec3 culoareClara = mostra.rgb * 1.45 + pow(maxim, 2.2) * 0.12;
     gl_FragColor = vec4(culoareClara, alphaFinal);
     #include <colorspace_fragment>
   }
 `;
 
 const CORPURI_STANDARD = [
-  { centru: [0.144, 0.218], decupaj: [0.25, 0.42], marime: [14, 13] },
-  { centru: [0.848, 0.21], decupaj: [0.2, 0.36], marime: [14, 13] },
-  { centru: [0.171, 0.696], decupaj: [0.34, 0.32], marime: [17, 10] },
-  { centru: [0.866, 0.785], decupaj: [0.26, 0.32], marime: [15, 13] },
-  { centru: [0.477, 0.723], decupaj: [0.17, 0.15], marime: [9, 5] },
-  { centru: [0.9, 0.507], decupaj: [0.1, 0.15], marime: [7, 6] },
-  { centru: [0.963, 0.304], decupaj: [0.07, 0.11], marime: [5, 4] },
+  { centru: [0.144, 0.218], decupaj: [0.25, 0.42], marime: [28, 26] },
+  { centru: [0.848, 0.21], decupaj: [0.2, 0.36], marime: [27, 25] },
+  { centru: [0.171, 0.696], decupaj: [0.34, 0.32], marime: [34, 20] },
+  { centru: [0.866, 0.785], decupaj: [0.26, 0.32], marime: [31, 27] },
+  { centru: [0.9, 0.507], decupaj: [0.1, 0.15], marime: [21, 18], pragSaturatie: 0.45 },
+  { centru: [0.963, 0.304], decupaj: [0.07, 0.11], marime: [18, 13] },
 ];
 
+const fragmentShaderCometa = `
+  varying vec2 vUv;
+
+  float zgomot(vec2 punct) {
+    return fract(sin(dot(punct, vec2(127.1, 311.7))) * 43758.5453);
+  }
+
+  void main() {
+    vec2 p = (vUv - 0.5) * 2.0;
+    vec2 cap = vec2(-0.5, -0.05);
+    float distantaCap = length((p - cap) * vec2(1.0, 1.35));
+    float nucleu = 1.0 - smoothstep(0.08, 0.26, distantaCap);
+    float aura = 1.0 - smoothstep(0.12, 0.48, distantaCap);
+
+    float progresCoada = clamp((p.x + 0.42) / 1.35, 0.0, 1.0);
+    float axaCoada = p.y + 0.05 - progresCoada * 0.42;
+    float latimeCoada = mix(0.25, 0.025, progresCoada);
+    float coada = (1.0 - smoothstep(latimeCoada * 0.35, latimeCoada, abs(axaCoada)))
+      * smoothstep(-0.5, -0.25, p.x)
+      * (1.0 - smoothstep(0.72, 0.98, p.x));
+
+    float scantei = step(0.972, zgomot(floor(vUv * vec2(48.0, 24.0))))
+      * smoothstep(-0.35, 0.8, p.x)
+      * (1.0 - smoothstep(0.12, 0.42, abs(axaCoada)));
+
+    float alpha = max(aura * 0.76, max(nucleu, coada * 0.88));
+    alpha = max(alpha, scantei * 0.72);
+    if (alpha < 0.018) discard;
+
+    vec3 cyan = vec3(0.08, 0.72, 1.0);
+    vec3 alb = vec3(0.84, 0.98, 1.0);
+    vec3 culoare = mix(cyan, alb, clamp(nucleu + coada * 0.48 + scantei, 0.0, 1.0));
+    gl_FragColor = vec4(culoare, alpha);
+    #include <colorspace_fragment>
+  }
+`;
+
+function CometaEnergetica({ limitaHarta }) {
+  const centru = [0.477, 0.723];
+  const x = (centru[0] * 2 - 1) * limitaHarta;
+  const z = (centru[1] * 2 - 1) * limitaHarta;
+
+  return (
+    <mesh
+      position={[x, -1.8, z]}
+      rotation={[-Math.PI / 2, 0, -0.34]}
+      renderOrder={4}
+    >
+      <planeGeometry args={[34, 18]} />
+      <shaderMaterial
+        vertexShader={vertexShaderCorpCeresc}
+        fragmentShader={fragmentShaderCometa}
+        transparent
+        depthWrite={false}
+        toneMapped={false}
+        blending={THREE.AdditiveBlending}
+      />
+    </mesh>
+  );
+}
+
 const CORPURI_AETHER = [
-  { centru: [0.152, 0.176], decupaj: [0.27, 0.36], marime: [15, 15] },
-  { centru: [0.517, 0.109], decupaj: [0.2, 0.2], marime: [10, 6] },
-  { centru: [0.787, 0.185], decupaj: [0.28, 0.32], marime: [13, 11] },
-  { centru: [0.906, 0.515], decupaj: [0.2, 0.34], marime: [15, 14] },
-  { centru: [0.072, 0.593], decupaj: [0.18, 0.27], marime: [9, 10] },
-  { centru: [0.34, 0.42], decupaj: [0.11, 0.15], marime: [8, 7] },
-  { centru: [0.341, 0.789], decupaj: [0.18, 0.28], marime: [10, 10] },
-  { centru: [0.763, 0.795], decupaj: [0.25, 0.36], marime: [13, 14] },
-  { centru: [0.785, 0.454], decupaj: [0.1, 0.14], marime: [8, 6] },
-  { centru: [0.955, 0.077], decupaj: [0.11, 0.14], marime: [6, 5] },
+  { centru: [0.152, 0.176], decupaj: [0.27, 0.36], marime: [30, 30] },
+  { centru: [0.517, 0.109], decupaj: [0.2, 0.2], marime: [30, 18] },
+  { centru: [0.787, 0.185], decupaj: [0.28, 0.32], marime: [30, 25] },
+  { centru: [0.906, 0.515], decupaj: [0.2, 0.34], marime: [30, 28] },
+  { centru: [0.072, 0.593], decupaj: [0.18, 0.27], marime: [24, 27] },
+  { centru: [0.34, 0.42], decupaj: [0.11, 0.15], marime: [20, 17] },
+  { centru: [0.341, 0.789], decupaj: [0.18, 0.28], marime: [24, 24] },
+  { centru: [0.763, 0.795], decupaj: [0.25, 0.36], marime: [26, 28] },
+  { centru: [0.785, 0.454], decupaj: [0.1, 0.14], marime: [20, 15], pragSaturatie: 0.28 },
+  { centru: [0.955, 0.077], decupaj: [0.11, 0.14], marime: [24, 15] },
 ];
 
 function CorpCerescDinHarta({ textura, definitie, limitaHarta }) {
@@ -979,6 +1040,7 @@ function CorpCerescDinHarta({ textura, definitie, limitaHarta }) {
         value: new THREE.Vector2(definitie.centru[0], 1 - definitie.centru[1]),
       },
       uDecupaj: { value: new THREE.Vector2(...definitie.decupaj) },
+      uPragSaturatie: { value: definitie.pragSaturatie ?? 0.2 },
     }),
     [textura, definitie]
   );
@@ -1018,6 +1080,7 @@ function CorpuriCerestiUnice({ textura, marimeHarta, temaAether }) {
           limitaHarta={limitaHarta}
         />
       ))}
+      {!temaAether && <CometaEnergetica limitaHarta={limitaHarta} />}
     </group>
   );
 }
