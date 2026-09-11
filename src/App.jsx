@@ -493,6 +493,7 @@ export default function App() {
           <HartaSpatiala
             marimeHarta={MARIME_HARTA}
             imagineFundal={hartaActiva === "aether" ? FUNDAL_JOC_AETHER : FUNDAL_JOC_STANDARD}
+            imagineCorpuri={hartaActiva === "aether" ? FUNDAL_HARTA_AETHER : FUNDAL_HARTA_STANDARD}
             onAlegeTinta={alegeTinta}
             tintaJucator={tintaJucator}
             onStareClic={setTintaLive}

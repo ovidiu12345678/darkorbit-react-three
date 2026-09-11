@@ -910,12 +910,115 @@ function DecorSpatialUnic({ marimeHarta, temaAether }) {
   );
 }
 
+const vertexShaderCorpCeresc = `
+  varying vec2 vUv;
+
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const fragmentShaderCorpCeresc = `
+  uniform sampler2D uTextura;
+  uniform vec2 uCentru;
+  uniform vec2 uDecupaj;
+  varying vec2 vUv;
+
+  void main() {
+    vec2 uvSursa = uCentru + (vUv - 0.5) * uDecupaj;
+    vec4 mostra = texture2D(uTextura, uvSursa);
+    vec2 margine = abs(vUv - 0.5) * 2.0;
+    float distantaMargine = max(margine.x, margine.y);
+    float mascaDreptunghi = 1.0 - smoothstep(0.68, 1.0, distantaMargine);
+    float mascaRotunda = 1.0 - smoothstep(0.72, 1.0, length((vUv - 0.5) * 2.0));
+    float masca = max(mascaRotunda, mascaDreptunghi * 0.42);
+    gl_FragColor = vec4(mostra.rgb, mostra.a * masca);
+    #include <colorspace_fragment>
+  }
+`;
+
+const CORPURI_STANDARD = [
+  { centru: [0.13, 0.23], decupaj: [0.25, 0.42], marime: [42, 38] },
+  { centru: [0.84, 0.21], decupaj: [0.24, 0.38], marime: [43, 39] },
+  { centru: [0.17, 0.71], decupaj: [0.34, 0.32], marime: [48, 28] },
+  { centru: [0.87, 0.73], decupaj: [0.27, 0.39], marime: [43, 38] },
+  { centru: [0.47, 0.72], decupaj: [0.17, 0.15], marime: [24, 13] },
+  { centru: [0.9, 0.51], decupaj: [0.12, 0.17], marime: [17, 15] },
+  { centru: [0.955, 0.29], decupaj: [0.08, 0.13], marime: [13, 11] },
+];
+
+const CORPURI_AETHER = [
+  { centru: [0.15, 0.18], decupaj: [0.3, 0.42], marime: [43, 42] },
+  { centru: [0.51, 0.11], decupaj: [0.2, 0.2], marime: [29, 17] },
+  { centru: [0.75, 0.18], decupaj: [0.28, 0.32], marime: [37, 32] },
+  { centru: [0.9, 0.48], decupaj: [0.25, 0.36], marime: [43, 39] },
+  { centru: [0.075, 0.58], decupaj: [0.18, 0.27], marime: [25, 29] },
+  { centru: [0.32, 0.4], decupaj: [0.14, 0.19], marime: [21, 19] },
+  { centru: [0.34, 0.76], decupaj: [0.18, 0.28], marime: [27, 29] },
+  { centru: [0.77, 0.77], decupaj: [0.25, 0.36], marime: [37, 39] },
+  { centru: [0.79, 0.44], decupaj: [0.15, 0.17], marime: [21, 17] },
+  { centru: [0.955, 0.07], decupaj: [0.11, 0.14], marime: [17, 14] },
+];
+
+function CorpCerescDinHarta({ textura, definitie, limitaHarta }) {
+  const uniforme = useMemo(
+    () => ({
+      uTextura: { value: textura },
+      uCentru: {
+        value: new THREE.Vector2(definitie.centru[0], 1 - definitie.centru[1]),
+      },
+      uDecupaj: { value: new THREE.Vector2(...definitie.decupaj) },
+    }),
+    [textura, definitie]
+  );
+  const x = (definitie.centru[0] * 2 - 1) * limitaHarta;
+  const z = (definitie.centru[1] * 2 - 1) * limitaHarta;
+
+  return (
+    <mesh
+      position={[x, -1.82, z]}
+      rotation={[-Math.PI / 2, 0, 0]}
+      renderOrder={3}
+    >
+      <planeGeometry args={definitie.marime} />
+      <shaderMaterial
+        uniforms={uniforme}
+        vertexShader={vertexShaderCorpCeresc}
+        fragmentShader={fragmentShaderCorpCeresc}
+        transparent
+        depthWrite={false}
+        toneMapped={false}
+      />
+    </mesh>
+  );
+}
+
+function CorpuriCerestiUnice({ textura, marimeHarta, temaAether }) {
+  const limitaHarta = marimeHarta / 2 - 4.5;
+  const corpuri = temaAether ? CORPURI_AETHER : CORPURI_STANDARD;
+
+  return (
+    <group>
+      {corpuri.map((definitie, index) => (
+        <CorpCerescDinHarta
+          key={`${temaAether ? "aether" : "standard"}-${index}`}
+          textura={textura}
+          definitie={definitie}
+          limitaHarta={limitaHarta}
+        />
+      ))}
+    </group>
+  );
+}
+
 const POZITIE_STATIE_INITIALA = [-550.4, 0.38, -16.1];
 const POZITIE_HANGAR_INITIALA = [505, 0.38, -137];
 
 export default function HartaSpatiala({
   marimeHarta,
   imagineFundal = "assets/harta-standard-v2.png",
+  imagineCorpuri = "assets/harta-standard-v3.png",
   onAlegeTinta,
   tintaJucator,
   onStareClic,
@@ -930,9 +1033,12 @@ export default function HartaSpatiala({
   const inaltimeHarta = marimeHarta;
   const factorScalare = marimeHarta / 210;
 
-  const texturaHarta = useLoader(
+  const [texturaHarta, texturaCorpuri] = useLoader(
     THREE.TextureLoader,
-    `${import.meta.env.BASE_URL}${imagineFundal}`
+    [
+      `${import.meta.env.BASE_URL}${imagineFundal}`,
+      `${import.meta.env.BASE_URL}${imagineCorpuri}`,
+    ]
   );
 
   useEffect(() => {
@@ -947,6 +1053,16 @@ export default function HartaSpatiala({
     texturaHarta.magFilter = THREE.LinearFilter;
     texturaHarta.needsUpdate = true;
   }, [texturaHarta]);
+
+  useEffect(() => {
+    texturaCorpuri.colorSpace = THREE.SRGBColorSpace;
+    texturaCorpuri.anisotropy = 16;
+    texturaCorpuri.wrapS = THREE.ClampToEdgeWrapping;
+    texturaCorpuri.wrapT = THREE.ClampToEdgeWrapping;
+    texturaCorpuri.minFilter = THREE.LinearMipmapLinearFilter;
+    texturaCorpuri.magFilter = THREE.LinearFilter;
+    texturaCorpuri.needsUpdate = true;
+  }, [texturaCorpuri]);
 
   const geometrie = useMemo(
     () => new THREE.PlaneGeometry(latimeHarta, inaltimeHarta),
@@ -983,6 +1099,11 @@ export default function HartaSpatiala({
     <group>
       <FundalDistant textura={texturaHarta} />
       <DecorSpatialUnic marimeHarta={marimeHarta} temaAether={doarPortal} />
+      <CorpuriCerestiUnice
+        textura={texturaCorpuri}
+        marimeHarta={marimeHarta}
+        temaAether={doarPortal}
+      />
 
       <mesh
         geometry={geometrie}
