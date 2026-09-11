@@ -539,15 +539,12 @@ const vertexShaderFundal = `
 
 const fragmentShaderFundal = `
   uniform sampler2D uTextura0;
-  uniform sampler2D uTextura1;
-  uniform sampler2D uTextura2;
   uniform vec2 uScara;
+  uniform float uTemaAether;
   varying vec2 vUv;
 
   float hash21(vec2 p) {
-    p = fract(p * vec2(123.34, 456.21));
-    p += dot(p, p + 45.32);
-    return fract(p.x * p.y);
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
   }
 
   float zgomot(vec2 p) {
@@ -563,55 +560,146 @@ const fragmentShaderFundal = `
 
   float nebulozitate(vec2 p) {
     float valoare = 0.0;
-    float amplitudine = 0.55;
-    for (int i = 0; i < 4; i++) {
+    float amplitudine = 0.52;
+    mat2 rotatie = mat2(0.80, -0.60, 0.60, 0.80);
+    for (int i = 0; i < 5; i++) {
       valoare += zgomot(p) * amplitudine;
-      p = p * 2.03 + vec2(7.13, 3.71);
+      p = rotatie * p * 2.03 + vec2(11.7, 7.3);
       amplitudine *= 0.5;
     }
     return valoare;
   }
 
+  vec3 adaugaPlaneta(
+    vec3 fundal,
+    vec2 uv,
+    vec2 centru,
+    float raza,
+    vec3 culoare,
+    float samanta
+  ) {
+    vec2 punct = uv - centru;
+    float distanta = length(punct);
+    float mascaCorp = 1.0 - smoothstep(raza * 0.93, raza, distanta);
+    float suprafata = nebulozitate(punct * (230.0 + samanta * 17.0) + samanta);
+    float lumina = smoothstep(-raza, raza, -punct.x + punct.y * 0.55);
+    vec3 corp = culoare * (0.32 + lumina * 0.95) * (0.72 + suprafata * 0.42);
+    float margine = 1.0 - smoothstep(raza * 0.72, raza, distanta);
+    corp += culoare * margine * 0.16;
+    return mix(fundal, corp, mascaCorp);
+  }
+
+  vec3 adaugaInel(
+    vec3 fundal,
+    vec2 uv,
+    vec2 centru,
+    float raza,
+    vec3 culoare
+  ) {
+    vec2 punct = uv - centru;
+    float elipsa = length(vec2(punct.x, punct.y * 3.1));
+    float inel = 1.0 - smoothstep(raza * 0.055, raza * 0.11, abs(elipsa - raza));
+    inel *= 1.0 - smoothstep(raza * 0.96, raza * 1.02, abs(punct.x));
+    return mix(fundal, culoare * 1.45, inel * 0.72);
+  }
+
   void main() {
     vec2 coordonate = vUv * uScara;
-    vec3 culoare0 = texture2D(uTextura0, coordonate).rgb;
-    vec3 culoare1 = texture2D(
-      uTextura1,
-      coordonate * vec2(0.973, 1.027) + vec2(0.371, 0.193)
-    ).rgb;
-    vec3 culoare2 = texture2D(
-      uTextura2,
-      coordonate * vec2(1.031, 0.961) + vec2(0.117, 0.463)
-    ).rgb;
+    vec2 coordonateLume = (vUv - 0.5) * uScara * 2.8;
+    float campRece = nebulozitate(coordonateLume * 0.38 + vec2(2.7, 8.1));
+    float campCald = nebulozitate(coordonateLume * 0.51 + vec2(13.4, 3.6));
+    float campGol = nebulozitate(coordonateLume * 0.22 + vec2(31.2, 17.8));
+    float filamente = smoothstep(0.10, 0.45, abs(campRece - campCald));
 
-    float masca = nebulozitate(coordonate * 0.19);
-    float amestec1 = smoothstep(0.34, 0.57, masca);
-    float amestec2 = smoothstep(0.64, 0.82, masca);
-    vec3 culoare = mix(culoare0, culoare1, amestec1);
-    culoare = mix(culoare, culoare2, amestec2);
+    vec3 culoareIntunecata = mix(
+      vec3(0.002, 0.009, 0.018),
+      vec3(0.008, 0.002, 0.025),
+      uTemaAether
+    );
+    vec3 culoareRece = mix(
+      vec3(0.015, 0.48, 0.73),
+      vec3(0.27, 0.035, 0.74),
+      uTemaAether
+    );
+    vec3 culoareCalda = mix(
+      vec3(0.93, 0.18, 0.018),
+      vec3(0.84, 0.045, 0.63),
+      uTemaAether
+    );
+
+    vec3 culoareProcedurala = culoareIntunecata;
+    float ceataRece = smoothstep(0.34, 0.80, campRece) * (0.42 + campGol * 0.34);
+    culoareProcedurala = mix(culoareProcedurala, culoareRece, ceataRece * 0.68);
+    culoareProcedurala += culoareCalda
+      * smoothstep(0.57, 0.86, campCald)
+      * (0.19 + filamente * 0.38);
+    float detaliuFin = nebulozitate(coordonateLume * 1.85 + vec2(21.7, 4.9));
+    culoareProcedurala += mix(culoareRece, culoareCalda, campCald)
+      * smoothstep(0.67, 0.90, detaliuFin)
+      * 0.13;
+
+    mat2 rotatieTextura = mat2(0.9063, -0.4226, 0.4226, 0.9063);
+    vec2 deformare = vec2(
+      nebulozitate(coordonate * 0.17 + vec2(4.1, 8.8)),
+      nebulozitate(coordonate * 0.19 + vec2(18.7, 2.5))
+    ) * 1.85;
+    vec3 texturaPrincipala = texture2D(
+      uTextura0,
+      coordonate * 0.72 + deformare
+    ).rgb;
+    vec3 texturaSecundara = texture2D(
+      uTextura0,
+      rotatieTextura * coordonate * 0.41 - deformare * 0.58 + vec2(8.37, 3.14)
+    ).rgb;
+    vec3 culoare = mix(texturaPrincipala, texturaSecundara, 0.37);
+    culoare = mix(culoare, culoareProcedurala, 0.12);
+
+    vec2 coordonateStele = coordonateLume * 7.4;
+    vec2 celulaStea = floor(coordonateStele);
+    vec2 punctStea = fract(coordonateStele) - 0.5;
+    float samantaStea = hash21(celulaStea);
+    float stea = (1.0 - smoothstep(0.018, 0.075, length(punctStea)))
+      * step(0.972, samantaStea);
+    vec3 culoareStea = mix(
+      vec3(0.34, 0.84, 1.0),
+      vec3(0.76, 0.42, 1.0),
+      uTemaAether
+    );
+    culoare += culoareStea * stea * (0.65 + samantaStea * 1.35);
+
+    vec3 paletaRece = mix(
+      vec3(0.12, 0.68, 0.96),
+      vec3(0.58, 0.18, 1.0),
+      uTemaAether
+    );
+    vec3 paletaCalda = mix(
+      vec3(1.0, 0.31, 0.06),
+      vec3(0.93, 0.33, 1.0),
+      uTemaAether
+    );
+    vec2 decalajTema = vec2(uTemaAether * 0.037, uTemaAether * -0.029);
+
+    culoare = adaugaPlaneta(culoare, vUv, vec2(0.12, 0.16) + decalajTema, 0.0048, paletaRece, 1.0);
+    culoare = adaugaPlaneta(culoare, vUv, vec2(0.79, 0.13) - decalajTema, 0.0034, paletaCalda, 2.0);
+    culoare = adaugaPlaneta(culoare, vUv, vec2(0.91, 0.43) + decalajTema, 0.0062, paletaRece * 0.72, 3.0);
+    culoare = adaugaPlaneta(culoare, vUv, vec2(0.24, 0.68) - decalajTema, 0.0028, paletaCalda * 0.85, 4.0);
+    culoare = adaugaPlaneta(culoare, vUv, vec2(0.69, 0.79) + decalajTema, 0.0042, paletaRece * 0.58, 5.0);
+    culoare = adaugaPlaneta(culoare, vUv, vec2(0.43, 0.91) - decalajTema, 0.0022, paletaCalda * 1.08, 6.0);
+    culoare = adaugaInel(culoare, vUv, vec2(0.69, 0.79) + decalajTema, 0.0082, paletaCalda);
 
     gl_FragColor = vec4(culoare, 1.0);
     #include <colorspace_fragment>
   }
 `;
 
-const FUNDAL_TILE_LATIME = 140;
-const FUNDAL_TILE_INALTIME = FUNDAL_TILE_LATIME * (9 / 16);
-
-function FundalDistant({ texturi, latime, inaltime }) {
+function FundalDistant({ textura, latime, inaltime, temaAether }) {
   const uniforme = useMemo(
     () => ({
-      uTextura0: { value: texturi[0] },
-      uTextura1: { value: texturi[1] },
-      uTextura2: { value: texturi[2] },
-      uScara: {
-        value: new THREE.Vector2(
-          latime / FUNDAL_TILE_LATIME,
-          inaltime / FUNDAL_TILE_INALTIME
-        ),
-      },
+      uTextura0: { value: textura },
+      uScara: { value: new THREE.Vector2(latime / 86, inaltime / 86) },
+      uTemaAether: { value: temaAether ? 1 : 0 },
     }),
-    [inaltime, latime, texturi]
+    [inaltime, latime, temaAether, textura]
   );
 
   return (
@@ -634,11 +722,7 @@ const POZITIE_HANGAR_INITIALA = [505, 0.38, -137];
 
 export default function HartaSpatiala({
   marimeHarta,
-  imaginiFundal = [
-    "assets/harta-spatiala-fundal-hi.jpg",
-    "assets/harta-spatiala-fundal-hi.jpg",
-    "assets/harta-spatiala-fundal-hi.jpg",
-  ],
+  imagineFundal = "assets/harta-standard-v2.png",
   onAlegeTinta,
   tintaJucator,
   onStareClic,
@@ -653,28 +737,26 @@ export default function HartaSpatiala({
   const inaltimeHarta = marimeHarta;
   const factorScalare = marimeHarta / 210;
 
-  const fundalLatime = inaltimeHarta * 2.67 * 1.7768;
-  const fundalInaltime = inaltimeHarta * 2.67;
+  const fundalInaltime = marimeHarta + 360;
+  const fundalLatime = fundalInaltime * (16 / 9);
 
-  const texturiHarta = useLoader(
+  const texturaHarta = useLoader(
     THREE.TextureLoader,
-    imaginiFundal.map((imagine) => `${import.meta.env.BASE_URL}${imagine}`)
+    `${import.meta.env.BASE_URL}${imagineFundal}`
   );
 
   useEffect(() => {
-    texturiHarta.forEach((textura) => {
-      textura.colorSpace = THREE.SRGBColorSpace;
-      textura.anisotropy = 16;
-      textura.wrapS = THREE.RepeatWrapping;
-      textura.wrapT = THREE.RepeatWrapping;
-      textura.repeat.set(1, 1);
-      textura.offset.set(0, 0);
-      textura.generateMipmaps = true;
-      textura.minFilter = THREE.LinearMipmapLinearFilter;
-      textura.magFilter = THREE.LinearFilter;
-      textura.needsUpdate = true;
-    });
-  }, [texturiHarta]);
+    texturaHarta.colorSpace = THREE.SRGBColorSpace;
+    texturaHarta.anisotropy = 16;
+    texturaHarta.wrapS = THREE.MirroredRepeatWrapping;
+    texturaHarta.wrapT = THREE.MirroredRepeatWrapping;
+    texturaHarta.repeat.set(1, 1);
+    texturaHarta.offset.set(0, 0);
+    texturaHarta.generateMipmaps = true;
+    texturaHarta.minFilter = THREE.LinearMipmapLinearFilter;
+    texturaHarta.magFilter = THREE.LinearFilter;
+    texturaHarta.needsUpdate = true;
+  }, [texturaHarta]);
 
   const geometrie = useMemo(
     () => new THREE.PlaneGeometry(latimeHarta, inaltimeHarta),
@@ -709,7 +791,12 @@ export default function HartaSpatiala({
 
   return (
     <group>
-      <FundalDistant texturi={texturiHarta} latime={fundalLatime} inaltime={fundalInaltime} />
+      <FundalDistant
+        textura={texturaHarta}
+        latime={fundalLatime}
+        inaltime={fundalInaltime}
+        temaAether={doarPortal}
+      />
 
       <mesh
         geometry={geometrie}

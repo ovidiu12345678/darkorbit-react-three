@@ -23,16 +23,10 @@ import {
 import { NAVE, NAVE_BY_ID } from "./data/nave.js";
 
 const MARIME_HARTA = 1260;
-const FUNDALURI_HARTA_STANDARD = [
-  "assets/harta-standard-v2.png",
-  "assets/harta-standard-v3.png",
-  "assets/harta-spatiala-fundal-hi.jpg",
-];
-const FUNDALURI_HARTA_AETHER = [
-  "assets/harta-nebuloasa-aether-v2.png",
-  "assets/harta-aether-v3.png",
-  "assets/harta-aether-v4.png",
-];
+const FUNDAL_HARTA_STANDARD = "assets/fundal-standard-nebula-v1.png";
+const FUNDAL_HARTA_AETHER = "assets/fundal-aether-nebula-v1.png";
+const FUNDAL_MINI_STANDARD = "assets/fundal-standard-nebula-v1.png";
+const FUNDAL_MINI_AETHER = "assets/fundal-aether-nebula-v1.png";
 
 const LIMITA_HARTA = MARIME_HARTA / 2 - 4.5;
 const FACTOR_SCALARE_HARTA = MARIME_HARTA / 210;
@@ -496,9 +490,7 @@ export default function App() {
         <Suspense fallback={null}>
           <HartaSpatiala
             marimeHarta={MARIME_HARTA}
-            imaginiFundal={
-              hartaActiva === "aether" ? FUNDALURI_HARTA_AETHER : FUNDALURI_HARTA_STANDARD
-            }
+            imagineFundal={hartaActiva === "aether" ? FUNDAL_HARTA_AETHER : FUNDAL_HARTA_STANDARD}
             onAlegeTinta={alegeTinta}
             tintaJucator={tintaJucator}
             onStareClic={setTintaLive}
@@ -634,9 +626,7 @@ export default function App() {
         pozitiePortal={
           hartaActiva === "aether" ? POZITIE_PORTAL_AETHER : POZITIE_PORTAL_STANDARD
         }
-        imagineFundal={
-          hartaActiva === "aether" ? FUNDALURI_HARTA_AETHER[0] : FUNDALURI_HARTA_STANDARD[0]
-        }
+        imagineFundal={hartaActiva === "aether" ? FUNDAL_MINI_AETHER : FUNDAL_MINI_STANDARD}
       />
 
       <ButonFullscreen />
