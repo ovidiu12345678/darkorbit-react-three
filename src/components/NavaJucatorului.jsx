@@ -1316,7 +1316,7 @@ function BaraStareNavaJucator({ playerRef, viata, scut }) {
   useFrame(({ camera }) => {
     if (!grup.current || !playerRef?.current) return;
 
-    tintaPozitie.set(playerRef.current.x, playerRef.current.y + 5.4, playerRef.current.z);
+    tintaPozitie.set(playerRef.current.x, playerRef.current.y + 7.4, playerRef.current.z);
 
     if (!initializat.current) {
       grup.current.position.copy(tintaPozitie);
