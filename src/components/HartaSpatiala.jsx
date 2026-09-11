@@ -87,9 +87,37 @@ function PoartaSalt({ pozitie, culoare = "#39f5ff" }) {
 
 function PortalAether({ pozitie }) {
   const portal = useRef();
+  const materialPortal = useRef();
+  const insigna = useRef();
+  const inelInsigna = useRef();
+  const efectTransport = useRef();
+  const coloanaEnergie = useRef();
+  const undaSol = useRef();
+  const undaAer = useRef();
+  const flashCentral = useRef();
+  const luminaTransport = useRef();
+  const particule = useRef([]);
+  const efectPornit = useRef(false);
+  const timpEfect = useRef(0);
   const texturaPortal = useLoader(
     THREE.TextureLoader,
     `${import.meta.env.BASE_URL}assets/portal-aether-helix.png`
+  );
+
+  const dateParticule = useMemo(
+    () =>
+      Array.from({ length: 16 }, (_, index) => {
+        const unghi = (index / 16) * Math.PI * 2;
+        const raza = 7 + (index % 4) * 1.45;
+
+        return {
+          x: Math.cos(unghi) * raza,
+          z: Math.sin(unghi) * raza,
+          decalaj: index / 16,
+          viteza: 0.82 + (index % 3) * 0.16,
+        };
+      }),
+    []
   );
 
   texturaPortal.colorSpace = THREE.SRGBColorSpace;
@@ -97,21 +125,123 @@ function PortalAether({ pozitie }) {
   texturaPortal.minFilter = THREE.LinearMipmapLinearFilter;
   texturaPortal.magFilter = THREE.LinearFilter;
 
-  useFrame(({ camera, clock }) => {
+  useFrame(({ camera, clock }, delta) => {
     if (!portal.current) return;
 
     portal.current.quaternion.copy(camera.quaternion);
     portal.current.position.y = 9.4 + Math.sin(clock.elapsedTime * 1.35) * 0.55;
 
-    const puls = 40 + Math.sin(clock.elapsedTime * 2.1) * 0.7;
+    if (insigna.current) {
+      insigna.current.quaternion.copy(camera.quaternion);
+      insigna.current.position.y = 37 + Math.sin(clock.elapsedTime * 1.8) * 0.75;
+    }
+
+    if (inelInsigna.current) {
+      inelInsigna.current.rotation.z = clock.elapsedTime * 0.8;
+      const pulsInsigna = 1 + Math.sin(clock.elapsedTime * 3.2) * 0.055;
+      inelInsigna.current.scale.setScalar(pulsInsigna);
+    }
+
+    let intensitateTransport = 0;
+
+    if (efectPornit.current) {
+      timpEfect.current += delta;
+      const progres = Math.min(timpEfect.current / 2.8, 1);
+      const aparitie = Math.min(progres / 0.12, 1);
+      const disparitie = 1 - Math.max(0, (progres - 0.68) / 0.32);
+      intensitateTransport = aparitie * disparitie;
+
+      if (efectTransport.current) efectTransport.current.visible = true;
+
+      if (coloanaEnergie.current) {
+        coloanaEnergie.current.scale.set(
+          0.7 + progres * 0.65,
+          0.3 + progres * 1.15,
+          0.7 + progres * 0.65
+        );
+        coloanaEnergie.current.rotation.y = clock.elapsedTime * 2.4;
+        coloanaEnergie.current.material.opacity = 0.34 * intensitateTransport;
+      }
+
+      if (undaSol.current) {
+        const scaraSol = 0.65 + progres * 2.8;
+        undaSol.current.scale.setScalar(scaraSol);
+        undaSol.current.rotation.z = -clock.elapsedTime * 1.7;
+        undaSol.current.material.opacity = (1 - progres) * 0.86;
+      }
+
+      if (undaAer.current) {
+        undaAer.current.quaternion.copy(camera.quaternion);
+        const scaraAer = 0.55 + progres * 2.35;
+        undaAer.current.scale.setScalar(scaraAer);
+        undaAer.current.material.opacity = (1 - progres) * 0.72;
+      }
+
+      if (flashCentral.current) {
+        const scaraFlash = 0.8 + Math.sin(Math.min(1, progres * 1.7) * Math.PI) * 1.25;
+        flashCentral.current.quaternion.copy(camera.quaternion);
+        flashCentral.current.scale.setScalar(scaraFlash);
+        flashCentral.current.material.opacity = intensitateTransport * 0.42;
+      }
+
+      particule.current.forEach((particula, index) => {
+        if (!particula) return;
+        const date = dateParticule[index];
+        const progresParticula = (progres * date.viteza * 1.6 + date.decalaj) % 1;
+        const apropiere = 1 - progresParticula * 0.52;
+
+        particula.position.set(
+          date.x * apropiere,
+          1.5 + progresParticula * 34,
+          date.z * apropiere
+        );
+        particula.rotation.y = clock.elapsedTime * 3 + index;
+        particula.scale.setScalar(0.45 + Math.sin(progresParticula * Math.PI) * 0.85);
+        particula.material.opacity = intensitateTransport * (1 - progresParticula) * 0.92;
+      });
+
+      if (luminaTransport.current) {
+        luminaTransport.current.intensity = 5 + intensitateTransport * 18;
+      }
+
+      if (progres >= 1) {
+        efectPornit.current = false;
+        timpEfect.current = 0;
+        intensitateTransport = 0;
+        if (efectTransport.current) efectTransport.current.visible = false;
+        if (luminaTransport.current) luminaTransport.current.intensity = 0;
+      }
+    }
+
+    const puls = (40 + Math.sin(clock.elapsedTime * 2.1) * 0.7) * (1 + intensitateTransport * 0.1);
     portal.current.scale.set(puls, puls, 1);
+
+    if (materialPortal.current) {
+      materialPortal.current.color.setRGB(
+        1 - intensitateTransport * 0.16,
+        1,
+        1
+      );
+    }
   });
+
+  const pornesteTransportul = (eveniment) => {
+    eveniment.stopPropagation();
+    timpEfect.current = 0;
+    efectPornit.current = true;
+    if (efectTransport.current) efectTransport.current.visible = true;
+  };
+
+  const seteazaCursorPortal = (valoare) => {
+    document.body.style.cursor = valoare;
+  };
 
   return (
     <group position={pozitie}>
       <mesh ref={portal} position={[0, 9.4, 0]} renderOrder={3}>
         <planeGeometry args={[1, 1]} />
         <meshBasicMaterial
+          ref={materialPortal}
           map={texturaPortal}
           transparent
           alphaTest={0.025}
@@ -125,6 +255,110 @@ function PortalAether({ pozitie }) {
         <ringGeometry args={[13.5, 15.2, 72]} />
         <meshBasicMaterial color="#6d5cff" transparent opacity={0.34} side={THREE.DoubleSide} />
       </mesh>
+
+      <group ref={insigna} position={[0, 37, 0]} renderOrder={8}>
+        <mesh
+          onPointerDown={(eveniment) => eveniment.stopPropagation()}
+          onClick={pornesteTransportul}
+          onPointerOver={() => seteazaCursorPortal("pointer")}
+          onPointerOut={() => seteazaCursorPortal("default")}
+        >
+          <circleGeometry args={[5.6, 64]} />
+          <meshBasicMaterial
+            map={texturaPortal}
+            transparent
+            alphaTest={0.025}
+            depthWrite={false}
+            depthTest={false}
+            toneMapped={false}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+
+        <mesh ref={inelInsigna} position={[0, 0, -0.05]}>
+          <ringGeometry args={[6.05, 6.72, 64]} />
+          <meshBasicMaterial
+            color="#79edff"
+            transparent
+            opacity={0.88}
+            depthWrite={false}
+            depthTest={false}
+            blending={THREE.AdditiveBlending}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+      </group>
+
+      <group ref={efectTransport} visible={false}>
+        <mesh ref={coloanaEnergie} position={[0, 15, 0]}>
+          <cylinderGeometry args={[5.5, 10.5, 30, 48, 1, true]} />
+          <meshBasicMaterial
+            color="#52dcff"
+            transparent
+            opacity={0}
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+
+        <mesh ref={undaSol} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.3, 0]}>
+          <ringGeometry args={[8.5, 10.4, 96]} />
+          <meshBasicMaterial
+            color="#a66cff"
+            transparent
+            opacity={0}
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+
+        <mesh ref={undaAer} position={[0, 13, 0]}>
+          <ringGeometry args={[8.2, 9.4, 96]} />
+          <meshBasicMaterial
+            color="#71efff"
+            transparent
+            opacity={0}
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+
+        <mesh ref={flashCentral} position={[0, 13, 0]}>
+          <circleGeometry args={[11, 64]} />
+          <meshBasicMaterial
+            color="#c9fbff"
+            transparent
+            opacity={0}
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+
+        {dateParticule.map((particula, index) => (
+          <mesh
+            key={index}
+            ref={(nod) => {
+              particule.current[index] = nod;
+            }}
+            position={[particula.x, 2, particula.z]}
+          >
+            <octahedronGeometry args={[0.62, 0]} />
+            <meshBasicMaterial
+              color={index % 2 === 0 ? "#65ecff" : "#b46cff"}
+              transparent
+              opacity={0}
+              depthWrite={false}
+              blending={THREE.AdditiveBlending}
+            />
+          </mesh>
+        ))}
+
+        <pointLight ref={luminaTransport} color="#7feeff" intensity={0} distance={88} position={[0, 14, 0]} />
+      </group>
 
       <pointLight color="#52dcff" intensity={4.2} distance={58} position={[0, 8, 0]} />
     </group>
