@@ -932,8 +932,8 @@ const fragmentShaderCorpCeresc = `
     float minim = min(mostra.r, min(mostra.g, mostra.b));
     float saturatie = maxim - minim;
     float luminozitate = (mostra.r + mostra.g + mostra.b) / 3.0;
-    float fundalNeutru = 1.0 - smoothstep(0.018, 0.085, saturatie);
-    float fundalDeschis = smoothstep(0.4, 0.58, luminozitate);
+    float fundalNeutru = 1.0 - smoothstep(0.012, 0.055, saturatie);
+    float fundalDeschis = smoothstep(0.16, 0.28, luminozitate);
     float mascaFundal = 1.0 - fundalNeutru * fundalDeschis;
     vec2 margine = abs(vUv - 0.5) * 2.0;
     float distantaMargine = max(margine.x, margine.y);
@@ -976,7 +976,7 @@ function CorpCerescDinHarta({ textura, definitie, limitaHarta }) {
     () => ({
       uTextura: { value: textura },
       uCentru: {
-        value: new THREE.Vector2(definitie.centru[0], definitie.centru[1]),
+        value: new THREE.Vector2(definitie.centru[0], 1 - definitie.centru[1]),
       },
       uDecupaj: { value: new THREE.Vector2(...definitie.decupaj) },
     }),
