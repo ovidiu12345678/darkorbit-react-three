@@ -976,7 +976,7 @@ function CorpCerescDinHarta({ textura, definitie, limitaHarta }) {
     () => ({
       uTextura: { value: textura },
       uCentru: {
-        value: new THREE.Vector2(definitie.centru[0], 1 - definitie.centru[1]),
+        value: new THREE.Vector2(definitie.centru[0], definitie.centru[1]),
       },
       uDecupaj: { value: new THREE.Vector2(...definitie.decupaj) },
     }),
