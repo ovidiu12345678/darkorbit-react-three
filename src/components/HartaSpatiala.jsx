@@ -528,26 +528,117 @@ function HangarSector({ pozitie, playerRef }) {
   );
 }
 
-function FundalDistant({ textura, latime, inaltime }) {
+const vertexShaderFundal = `
+  varying vec2 vUv;
+
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const fragmentShaderFundal = `
+  uniform sampler2D uTextura0;
+  uniform sampler2D uTextura1;
+  uniform sampler2D uTextura2;
+  uniform vec2 uScara;
+  varying vec2 vUv;
+
+  float hash21(vec2 p) {
+    p = fract(p * vec2(123.34, 456.21));
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+  }
+
+  float zgomot(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(
+      mix(hash21(i), hash21(i + vec2(1.0, 0.0)), f.x),
+      mix(hash21(i + vec2(0.0, 1.0)), hash21(i + vec2(1.0, 1.0)), f.x),
+      f.y
+    );
+  }
+
+  float nebulozitate(vec2 p) {
+    float valoare = 0.0;
+    float amplitudine = 0.55;
+    for (int i = 0; i < 4; i++) {
+      valoare += zgomot(p) * amplitudine;
+      p = p * 2.03 + vec2(7.13, 3.71);
+      amplitudine *= 0.5;
+    }
+    return valoare;
+  }
+
+  void main() {
+    vec2 coordonate = vUv * uScara;
+    vec3 culoare0 = texture2D(uTextura0, coordonate).rgb;
+    vec3 culoare1 = texture2D(
+      uTextura1,
+      coordonate * vec2(0.973, 1.027) + vec2(0.371, 0.193)
+    ).rgb;
+    vec3 culoare2 = texture2D(
+      uTextura2,
+      coordonate * vec2(1.031, 0.961) + vec2(0.117, 0.463)
+    ).rgb;
+
+    float masca = nebulozitate(coordonate * 0.19);
+    float amestec1 = smoothstep(0.34, 0.57, masca);
+    float amestec2 = smoothstep(0.64, 0.82, masca);
+    vec3 culoare = mix(culoare0, culoare1, amestec1);
+    culoare = mix(culoare, culoare2, amestec2);
+
+    gl_FragColor = vec4(culoare, 1.0);
+    #include <colorspace_fragment>
+  }
+`;
+
+const FUNDAL_TILE_LATIME = 140;
+const FUNDAL_TILE_INALTIME = FUNDAL_TILE_LATIME * (9 / 16);
+
+function FundalDistant({ texturi, latime, inaltime }) {
+  const uniforme = useMemo(
+    () => ({
+      uTextura0: { value: texturi[0] },
+      uTextura1: { value: texturi[1] },
+      uTextura2: { value: texturi[2] },
+      uScara: {
+        value: new THREE.Vector2(
+          latime / FUNDAL_TILE_LATIME,
+          inaltime / FUNDAL_TILE_INALTIME
+        ),
+      },
+    }),
+    [inaltime, latime, texturi]
+  );
+
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.4, 0]}>
       <planeGeometry args={[latime, inaltime]} />
-      <meshBasicMaterial map={textura} color="#ffffff" toneMapped={false} fog={false} depthWrite={false} />
+      <shaderMaterial
+        uniforms={uniforme}
+        vertexShader={vertexShaderFundal}
+        fragmentShader={fragmentShaderFundal}
+        toneMapped={false}
+        fog={false}
+        depthWrite={false}
+      />
     </mesh>
   );
 }
-
-const FUNDAL_TILE_LATIME = 280;
-const FUNDAL_TILE_INALTIME = 158;
-const FUNDAL_AETHER_TILE_LATIME = 240;
 
 const POZITIE_STATIE_INITIALA = [-550.4, 0.38, -16.1];
 const POZITIE_HANGAR_INITIALA = [505, 0.38, -137];
 
 export default function HartaSpatiala({
   marimeHarta,
-  imagineFundal = "assets/harta-spatiala-fundal-hi.jpg",
-  fundalImagineCompleta = false,
+  imaginiFundal = [
+    "assets/harta-spatiala-fundal-hi.jpg",
+    "assets/harta-spatiala-fundal-hi.jpg",
+    "assets/harta-spatiala-fundal-hi.jpg",
+  ],
   onAlegeTinta,
   tintaJucator,
   onStareClic,
@@ -565,42 +656,25 @@ export default function HartaSpatiala({
   const fundalLatime = inaltimeHarta * 2.67 * 1.7768;
   const fundalInaltime = inaltimeHarta * 2.67;
 
-  const texturaHarta = useLoader(THREE.TextureLoader, `${import.meta.env.BASE_URL}${imagineFundal}`);
+  const texturiHarta = useLoader(
+    THREE.TextureLoader,
+    imaginiFundal.map((imagine) => `${import.meta.env.BASE_URL}${imagine}`)
+  );
 
   useEffect(() => {
-    texturaHarta.colorSpace = THREE.SRGBColorSpace;
-    texturaHarta.anisotropy = 16;
-
-    texturaHarta.generateMipmaps = true;
-    texturaHarta.minFilter = THREE.LinearMipmapLinearFilter;
-    texturaHarta.magFilter = THREE.LinearFilter;
-
-    if (fundalImagineCompleta) {
-      const latimeImagine = texturaHarta.image?.naturalWidth || texturaHarta.image?.width || 1;
-      const inaltimeImagine = texturaHarta.image?.naturalHeight || texturaHarta.image?.height || 1;
-      const inaltimeTileAether = FUNDAL_AETHER_TILE_LATIME * (inaltimeImagine / latimeImagine);
-
-      texturaHarta.wrapS = THREE.MirroredRepeatWrapping;
-      texturaHarta.wrapT = THREE.MirroredRepeatWrapping;
-      texturaHarta.repeat.set(
-        fundalLatime / FUNDAL_AETHER_TILE_LATIME,
-        fundalInaltime / inaltimeTileAether
-      );
-      texturaHarta.offset.set(0.5, 0.5);
-    } else {
-      texturaHarta.wrapS = THREE.RepeatWrapping;
-      texturaHarta.wrapT = THREE.RepeatWrapping;
-      texturaHarta.repeat.set(fundalLatime / FUNDAL_TILE_LATIME, fundalInaltime / FUNDAL_TILE_INALTIME);
-      texturaHarta.offset.set(0.32, 0.4);
-    }
-
-    texturaHarta.needsUpdate = true;
-  }, [
-    texturaHarta,
-    fundalImagineCompleta,
-    fundalLatime,
-    fundalInaltime,
-  ]);
+    texturiHarta.forEach((textura) => {
+      textura.colorSpace = THREE.SRGBColorSpace;
+      textura.anisotropy = 16;
+      textura.wrapS = THREE.RepeatWrapping;
+      textura.wrapT = THREE.RepeatWrapping;
+      textura.repeat.set(1, 1);
+      textura.offset.set(0, 0);
+      textura.generateMipmaps = true;
+      textura.minFilter = THREE.LinearMipmapLinearFilter;
+      textura.magFilter = THREE.LinearFilter;
+      textura.needsUpdate = true;
+    });
+  }, [texturiHarta]);
 
   const geometrie = useMemo(
     () => new THREE.PlaneGeometry(latimeHarta, inaltimeHarta),
@@ -635,7 +709,7 @@ export default function HartaSpatiala({
 
   return (
     <group>
-      <FundalDistant textura={texturaHarta} latime={fundalLatime} inaltime={fundalInaltime} />
+      <FundalDistant texturi={texturiHarta} latime={fundalLatime} inaltime={fundalInaltime} />
 
       <mesh
         geometry={geometrie}
