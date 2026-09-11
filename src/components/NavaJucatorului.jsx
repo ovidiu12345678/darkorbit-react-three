@@ -256,35 +256,9 @@ function incarcaTuningInitial() {
       return TUNING_INITIAL;
     }
 
-    const tuningSalvat = {
+    return {
       ...TUNING_INITIAL,
       ...JSON.parse(salvat),
-    };
-
-    return {
-      ...tuningSalvat,
-      bankEnabled: TUNING_INITIAL.bankEnabled,
-      bankManualDeg: TUNING_INITIAL.bankManualDeg,
-      bankAutoStrength: TUNING_INITIAL.bankAutoStrength,
-      bankMaxDeg: TUNING_INITIAL.bankMaxDeg,
-      cameraOffsetX: 0,
-      cameraOffsetY: 68,
-      cameraOffsetZ: 0,
-      cameraTargetOffsetX: 0,
-      cameraTargetOffsetY: 0,
-      cameraTargetOffsetZ: 0,
-      leftFlameX: TUNING_INITIAL.leftFlameX,
-      leftFlameY: TUNING_INITIAL.leftFlameY,
-      leftFlameZ: TUNING_INITIAL.leftFlameZ,
-      leftFlameRotationDeg: TUNING_INITIAL.leftFlameRotationDeg,
-      leftFlameScaleX: TUNING_INITIAL.leftFlameScaleX,
-      leftFlameScaleY: TUNING_INITIAL.leftFlameScaleY,
-      rightFlameX: TUNING_INITIAL.rightFlameX,
-      rightFlameY: TUNING_INITIAL.rightFlameY,
-      rightFlameZ: TUNING_INITIAL.rightFlameZ,
-      rightFlameRotationDeg: TUNING_INITIAL.rightFlameRotationDeg,
-      rightFlameScaleX: TUNING_INITIAL.rightFlameScaleX,
-      rightFlameScaleY: TUNING_INITIAL.rightFlameScaleY,
     };
   } catch {
     return TUNING_INITIAL;
@@ -1316,7 +1290,7 @@ function BaraStareNavaJucator({ playerRef, viata, scut }) {
   useFrame(({ camera }) => {
     if (!grup.current || !playerRef?.current) return;
 
-    tintaPozitie.set(playerRef.current.x, playerRef.current.y + 7.4, playerRef.current.z);
+    tintaPozitie.set(playerRef.current.x, playerRef.current.y + 10, playerRef.current.z);
 
     if (!initializat.current) {
       grup.current.position.copy(tintaPozitie);

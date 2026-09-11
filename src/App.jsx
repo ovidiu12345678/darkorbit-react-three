@@ -373,8 +373,8 @@ export default function App() {
   const selecteazaInamic = useCallback((id) => {
     setTintaJucator(null);
     setTintaSelectata(id);
-    setAtaca(false);
-    setAmenintare("tinta selectata");
+    setAtaca(true);
+    setAmenintare("tinta blocata");
   }, []);
 
   const atacaInamic = useCallback((id) => {
