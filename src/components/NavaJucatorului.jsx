@@ -1393,6 +1393,8 @@ export default function NavaJucatorului({
   multiplicatorViteza,
   viata,
   scut,
+  pozitieTeleportare,
+  semnalTeleportare = 0,
 }) {
   const [tuning, setTuning] = useState(incarcaTuningInitial);
   const [axesActive, setAxesActive] = useState(false);
@@ -1457,6 +1459,7 @@ export default function NavaJucatorului({
   });
 
   const ultimaTintaId = useRef(null);
+  const ultimulSemnalTeleportare = useRef(semnalTeleportare);
 
   const directieLume = useMemo(() => new THREE.Vector3(), []);
   const cameraDreapta = useMemo(() => new THREE.Vector3(), []);
@@ -1469,6 +1472,33 @@ export default function NavaJucatorului({
     const timpDelta = Math.min(timpDeltaBrut, 0.05);
     const pozitie = nava.current.position;
     const limitaHarta = marimeHarta / 2 - 4.5;
+
+    if (
+      pozitieTeleportare &&
+      semnalTeleportare !== ultimulSemnalTeleportare.current
+    ) {
+      ultimulSemnalTeleportare.current = semnalTeleportare;
+      const [teleportX, teleportY = tuning.shipWorldY, teleportZ] = pozitieTeleportare;
+
+      pozitie.set(teleportX, teleportY, teleportZ);
+      nava.current.userData.unghiVizual = 0;
+      calatorie.current.activa = false;
+      ultimaTintaId.current = null;
+      seteazaTintaJucator(null);
+      seteazaPozitieJucator([teleportX, teleportY, teleportZ]);
+      playerRef?.current?.set(teleportX, teleportY, teleportZ);
+
+      stare.camera.position.set(
+        teleportX + tuning.cameraOffsetX,
+        tuning.cameraOffsetY,
+        teleportZ + tuning.cameraOffsetZ
+      );
+      stare.camera.lookAt(
+        teleportX + tuning.cameraTargetOffsetX,
+        tuning.cameraTargetOffsetY,
+        teleportZ + tuning.cameraTargetOffsetZ
+      );
+    }
 
     const tuningBlocheazaMiscarea =
       tuning.lockMovementWhileTuning >= 0.5 && axesActive;

@@ -23,6 +23,9 @@ import {
 import { NAVE, NAVE_BY_ID } from "./data/nave.js";
 
 const MARIME_HARTA = 1260;
+const FUNDAL_HARTA_STANDARD = "assets/harta-spatiala-fundal-hi.jpg";
+const FUNDAL_HARTA_AETHER = "assets/harta-nebuloasa-aether.jpg";
+const POZITIE_INTRARE_AETHER = [0, 3.2, 0];
 
 const LIMITA_HARTA = MARIME_HARTA / 2 - 4.5;
 const FACTOR_SCALARE_HARTA = MARIME_HARTA / 210;
@@ -110,6 +113,8 @@ export default function App() {
   const [impulsScut, setImpulsScut] = useState(0);
   const [efecteAtmosferice, setEfecteAtmosferice] = useState({ gaz: 0, radiatie: 0 });
   const [vitezaNava, setVitezaNava] = useState(1);
+  const [hartaActiva, setHartaActiva] = useState("standard");
+  const [semnalTeleportare, setSemnalTeleportare] = useState(0);
 
   const [credite, setCredite] = useState(10000000);
   const [uridium, setUridium] = useState(0);
@@ -184,6 +189,14 @@ export default function App() {
 
   const declanseazaImpulsScut = useCallback(() => {
     setImpulsScut((valoare) => valoare + 1);
+  }, []);
+
+  const transportaPeHartaAether = useCallback(() => {
+    setHartaActiva("aether");
+    setTintaJucator(null);
+    setTintaLive(false);
+    setAmenintare("sector Aether");
+    setSemnalTeleportare((valoare) => valoare + 1);
   }, []);
 
   const cumparaMunitie = useCallback(
@@ -460,6 +473,8 @@ export default function App() {
         <Suspense fallback={null}>
           <HartaSpatiala
             marimeHarta={MARIME_HARTA}
+            imagineFundal={hartaActiva === "aether" ? FUNDAL_HARTA_AETHER : FUNDAL_HARTA_STANDARD}
+            fundalImagineCompleta={hartaActiva === "aether"}
             onAlegeTinta={alegeTinta}
             tintaJucator={tintaJucator}
             onStareClic={setTintaLive}
@@ -467,6 +482,7 @@ export default function App() {
             pozitieStatie={POZITIE_STATIE}
             pozitieHangar={POZITIE_HANGAR}
             pozitiePortalAether={POZITIE_PORTAL_AETHER}
+            onTransportAether={transportaPeHartaAether}
           />
 
           {inamici.map((inamic) => (
@@ -506,6 +522,8 @@ export default function App() {
             multiplicatorViteza={vitezaNava * (1 + bonusVitezaProcent / 100)}
             viata={viata}
             scut={scut}
+            pozitieTeleportare={POZITIE_INTRARE_AETHER}
+            semnalTeleportare={semnalTeleportare}
           />
 
           <GestionarLupta
@@ -579,6 +597,7 @@ export default function App() {
         pozitieHangar={POZITIE_HANGAR}
         pozitieAndocareHangar={[PLATFORME_HANGAR[2].x, 0, PLATFORME_HANGAR[2].z]}
         pozitiePortal={POZITIE_PORTAL_AETHER}
+        imagineFundal={hartaActiva === "aether" ? FUNDAL_HARTA_AETHER : FUNDAL_HARTA_STANDARD}
       />
 
       <ButonFullscreen />

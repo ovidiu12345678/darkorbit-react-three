@@ -19,6 +19,7 @@ export default function HartaMini({
   pozitieHangar,
   pozitieAndocareHangar,
   pozitiePortal,
+  imagineFundal = "assets/harta-spatiala-fundal-hi.jpg",
 }) {
   const continutRef = useRef(null);
 
@@ -187,7 +188,7 @@ export default function HartaMini({
           className="harta-mini-continut"
           onClick={laClickHarta}
           style={{
-            backgroundImage: `url("${import.meta.env.BASE_URL}assets/harta-spatiala-fundal-hi.jpg")`,
+            backgroundImage: `url("${import.meta.env.BASE_URL}${imagineFundal}")`,
           }}
         >
           <div className="harta-mini-axa harta-mini-axa-x" />

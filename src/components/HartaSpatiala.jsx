@@ -85,7 +85,7 @@ function PoartaSalt({ pozitie, culoare = "#39f5ff" }) {
   );
 }
 
-function PortalAether({ pozitie }) {
+function PortalAether({ pozitie, onTransport }) {
   const portal = useRef();
   const materialPortal = useRef();
   const insigna = useRef();
@@ -99,6 +99,7 @@ function PortalAether({ pozitie }) {
   const particule = useRef([]);
   const efectPornit = useRef(false);
   const timpEfect = useRef(0);
+  const transportExecutat = useRef(false);
   const texturaPortal = useLoader(
     THREE.TextureLoader,
     `${import.meta.env.BASE_URL}assets/portal-aether-helix.png`
@@ -204,6 +205,11 @@ function PortalAether({ pozitie }) {
         luminaTransport.current.intensity = 5 + intensitateTransport * 18;
       }
 
+      if (progres >= 0.72 && !transportExecutat.current) {
+        transportExecutat.current = true;
+        onTransport?.();
+      }
+
       if (progres >= 1) {
         efectPornit.current = false;
         timpEfect.current = 0;
@@ -229,6 +235,7 @@ function PortalAether({ pozitie }) {
     eveniment.stopPropagation();
     timpEfect.current = 0;
     efectPornit.current = true;
+    transportExecutat.current = false;
     if (efectTransport.current) efectTransport.current.visible = true;
   };
 
@@ -538,6 +545,8 @@ const POZITIE_HANGAR_INITIALA = [505, 0.38, -137];
 
 export default function HartaSpatiala({
   marimeHarta,
+  imagineFundal = "assets/harta-spatiala-fundal-hi.jpg",
+  fundalImagineCompleta = false,
   onAlegeTinta,
   tintaJucator,
   onStareClic,
@@ -545,6 +554,7 @@ export default function HartaSpatiala({
   pozitieStatie = POZITIE_STATIE_INITIALA,
   pozitieHangar = POZITIE_HANGAR_INITIALA,
   pozitiePortalAether,
+  onTransportAether,
 }) {
   const latimeHarta = marimeHarta * (16 / 9);
   const inaltimeHarta = marimeHarta;
@@ -552,18 +562,49 @@ export default function HartaSpatiala({
 
   const fundalLatime = inaltimeHarta * 2.67 * 1.7768;
   const fundalInaltime = inaltimeHarta * 2.67;
+  const latimeFundalRandat = fundalImagineCompleta ? latimeHarta * 1.12 : fundalLatime;
+  const inaltimeFundalRandat = fundalImagineCompleta ? inaltimeHarta * 1.12 : fundalInaltime;
 
-  const texturaHarta = useLoader(THREE.TextureLoader, `${import.meta.env.BASE_URL}assets/harta-spatiala-fundal-hi.jpg`);
+  const texturaHarta = useLoader(THREE.TextureLoader, `${import.meta.env.BASE_URL}${imagineFundal}`);
 
   useEffect(() => {
     texturaHarta.colorSpace = THREE.SRGBColorSpace;
     texturaHarta.anisotropy = 16;
-    texturaHarta.wrapS = THREE.RepeatWrapping;
-    texturaHarta.wrapT = THREE.RepeatWrapping;
-    texturaHarta.repeat.set(fundalLatime / FUNDAL_TILE_LATIME, fundalInaltime / FUNDAL_TILE_INALTIME);
-    texturaHarta.offset.set(0.32, 0.4);
+
+    if (fundalImagineCompleta) {
+      const latimeImagine = texturaHarta.image?.naturalWidth || texturaHarta.image?.width || 1;
+      const inaltimeImagine = texturaHarta.image?.naturalHeight || texturaHarta.image?.height || 1;
+      const raportImagine = latimeImagine / inaltimeImagine;
+      const raportPlan = latimeFundalRandat / inaltimeFundalRandat;
+
+      texturaHarta.wrapS = THREE.ClampToEdgeWrapping;
+      texturaHarta.wrapT = THREE.ClampToEdgeWrapping;
+
+      if (raportImagine > raportPlan) {
+        const repetareX = raportPlan / raportImagine;
+        texturaHarta.repeat.set(repetareX, 1);
+        texturaHarta.offset.set((1 - repetareX) / 2, 0);
+      } else {
+        const repetareY = raportImagine / raportPlan;
+        texturaHarta.repeat.set(1, repetareY);
+        texturaHarta.offset.set(0, (1 - repetareY) / 2);
+      }
+    } else {
+      texturaHarta.wrapS = THREE.RepeatWrapping;
+      texturaHarta.wrapT = THREE.RepeatWrapping;
+      texturaHarta.repeat.set(fundalLatime / FUNDAL_TILE_LATIME, fundalInaltime / FUNDAL_TILE_INALTIME);
+      texturaHarta.offset.set(0.32, 0.4);
+    }
+
     texturaHarta.needsUpdate = true;
-  }, [texturaHarta, fundalLatime, fundalInaltime]);
+  }, [
+    texturaHarta,
+    fundalImagineCompleta,
+    fundalLatime,
+    fundalInaltime,
+    latimeFundalRandat,
+    inaltimeFundalRandat,
+  ]);
 
   const geometrie = useMemo(
     () => new THREE.PlaneGeometry(latimeHarta, inaltimeHarta),
@@ -598,7 +639,7 @@ export default function HartaSpatiala({
 
   return (
     <group>
-      <FundalDistant textura={texturaHarta} latime={fundalLatime} inaltime={fundalInaltime} />
+      <FundalDistant textura={texturaHarta} latime={latimeFundalRandat} inaltime={inaltimeFundalRandat} />
 
       <mesh
         geometry={geometrie}
@@ -616,7 +657,9 @@ export default function HartaSpatiala({
       <PoartaSalt pozitie={[marimeHarta * 0.34, 0.76, marimeHarta * 0.34]} culoare="#32f7ff" />
       <PoartaSalt pozitie={[-marimeHarta * 0.36, 0.76, -marimeHarta * 0.3]} culoare="#ff4add" />
 
-      {pozitiePortalAether && <PortalAether pozitie={pozitiePortalAether} />}
+      {pozitiePortalAether && (
+        <PortalAether pozitie={pozitiePortalAether} onTransport={onTransportAether} />
+      )}
 
       <StatieSector pozitie={pozitieStatie} playerRef={playerRef} />
 
