@@ -30,9 +30,9 @@ const TUNING_INITIAL = {
   spriteScaleX: 1,
   spriteScaleY: 1,
 
-  bankEnabled: 0,
-  bankManualDeg: 0,
-  bankAutoStrength: 0,
+  bankEnabled: 1,
+  bankManualDeg: -49.5361,
+  bankAutoStrength: 4.5,
   bankMaxDeg: 15.273,
   bankLerp: 0.12,
   bankDirection: 1,
@@ -263,11 +263,9 @@ function incarcaTuningInitial() {
 
     return {
       ...tuningSalvat,
-      bankEnabled: 0,
-      bankManualDeg: 0,
-      bankAutoStrength: 0,
-      bankPitchDeg: 0,
-      bankRollDeg: 0,
+      bankEnabled: 1,
+      bankManualDeg: -49.5361,
+      bankAutoStrength: 4.5,
       cameraOffsetX: 0,
       cameraOffsetY: 68,
       cameraOffsetZ: 0,
