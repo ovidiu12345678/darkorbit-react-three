@@ -244,7 +244,7 @@ function PortalAether({ pozitie, onTransport }) {
   };
 
   return (
-    <group position={pozitie} scale={0.117}>
+    <group position={pozitie} scale={0.09}>
       <mesh ref={portal} position={[0, 9.4, 0]} renderOrder={3}>
         <planeGeometry args={[1, 1]} />
         <meshBasicMaterial

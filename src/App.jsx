@@ -373,8 +373,8 @@ export default function App() {
   const selecteazaInamic = useCallback((id) => {
     setTintaJucator(null);
     setTintaSelectata(id);
-    setAtaca(true);
-    setAmenintare("tinta blocata");
+    setAtaca(false);
+    setAmenintare("tinta selectata");
   }, []);
 
   const atacaInamic = useCallback((id) => {
@@ -485,13 +485,7 @@ export default function App() {
       <Canvas
         orthographic
         dpr={[1, 1.5]}
-        camera={{
-          position: [-532.4, 68, -16.1],
-          up: [0, 0, -1],
-          zoom: 18,
-          near: 0.1,
-          far: 600,
-        }}
+        camera={{ position: [-532.4, 68, 37.9], zoom: 18, near: 0.1, far: 600 }}
       >
         <color attach="background" args={["#02040b"]} />
         <ambientLight intensity={0.55} />

@@ -30,10 +30,10 @@ const TUNING_INITIAL = {
   spriteScaleX: 1,
   spriteScaleY: 1,
 
-  bankEnabled: 0,
-  bankManualDeg: 0,
+  bankEnabled: 1,
+  bankManualDeg: -49.5361,
   bankAutoStrength: 4.5,
-  bankMaxDeg: 0,
+  bankMaxDeg: 15.273,
   bankLerp: 0.12,
   bankDirection: 1,
   bankPivotX: 0,
@@ -49,19 +49,19 @@ const TUNING_INITIAL = {
   shipScaleX: 7.2659,
   shipScaleY: 9.5873,
 
-  leftFlameX: -0.506,
-  leftFlameY: -0.2483,
-  leftFlameZ: 0.01,
-  leftFlameRotationDeg: -64,
-  leftFlameScaleX: 0.1789,
-  leftFlameScaleY: 0.3755,
+  leftFlameX: -0.1823,
+  leftFlameY: -5.0977,
+  leftFlameZ: 0.08,
+  leftFlameRotationDeg: 0,
+  leftFlameScaleX: 1.3,
+  leftFlameScaleY: 3.6,
 
-  rightFlameX: 0.4308,
-  rightFlameY: -0.2482,
-  rightFlameZ: 0.01,
-  rightFlameRotationDeg: 60,
-  rightFlameScaleX: 0.1789,
-  rightFlameScaleY: 0.3755,
+  rightFlameX: 0.472,
+  rightFlameY: -5.041,
+  rightFlameZ: 0.08,
+  rightFlameRotationDeg: 0,
+  rightFlameScaleX: 1.3,
+  rightFlameScaleY: 3.6,
 
   flameIdle: 0,
   flameMovingBase: 0.75,
@@ -85,7 +85,7 @@ const TUNING_INITIAL = {
 
   cameraOffsetX: 0,
   cameraOffsetY: 68,
-  cameraOffsetZ: 0,
+  cameraOffsetZ: 54,
 
   cameraTargetOffsetX: 0,
   cameraTargetOffsetY: 0,
@@ -1212,56 +1212,56 @@ function NavaExacta({
                 side={THREE.DoubleSide}
                 toneMapped={false}
               />
+            </mesh>
 
-              <mesh
-                ref={leftFlameMesh}
-                position={[
-                  tuning.leftFlameX,
-                  tuning.leftFlameY,
-                  tuning.leftFlameZ,
-                ]}
-                rotation={[0, 0, degToRad(tuning.leftFlameRotationDeg)]}
-                scale={[tuning.leftFlameScaleX, tuning.leftFlameScaleY, 1]}
-                renderOrder={11}
-              >
-                <planeGeometry args={[1, 1]} />
-                <shaderMaterial
-                  uniforms={uniformeFlacaraStanga}
-                  vertexShader={vertexShaderSimplu}
-                  fragmentShader={fragmentShaderFlacara}
-                  transparent
-                  depthWrite={false}
-                  depthTest={false}
-                  side={THREE.DoubleSide}
-                  blending={THREE.AdditiveBlending}
-                  toneMapped={false}
-                />
-              </mesh>
+            <mesh
+              ref={leftFlameMesh}
+              position={[
+                tuning.leftFlameX,
+                tuning.leftFlameY,
+                tuning.leftFlameZ,
+              ]}
+              rotation={[0, 0, degToRad(tuning.leftFlameRotationDeg)]}
+              scale={[tuning.leftFlameScaleX, tuning.leftFlameScaleY, 1]}
+              renderOrder={11}
+            >
+              <planeGeometry args={[1, 1]} />
+              <shaderMaterial
+                uniforms={uniformeFlacaraStanga}
+                vertexShader={vertexShaderSimplu}
+                fragmentShader={fragmentShaderFlacara}
+                transparent
+                depthWrite={false}
+                depthTest={false}
+                side={THREE.DoubleSide}
+                blending={THREE.AdditiveBlending}
+                toneMapped={false}
+              />
+            </mesh>
 
-              <mesh
-                ref={rightFlameMesh}
-                position={[
-                  tuning.rightFlameX,
-                  tuning.rightFlameY,
-                  tuning.rightFlameZ,
-                ]}
-                rotation={[0, 0, degToRad(tuning.rightFlameRotationDeg)]}
-                scale={[tuning.rightFlameScaleX, tuning.rightFlameScaleY, 1]}
-                renderOrder={11}
-              >
-                <planeGeometry args={[1, 1]} />
-                <shaderMaterial
-                  uniforms={uniformeFlacaraDreapta}
-                  vertexShader={vertexShaderSimplu}
-                  fragmentShader={fragmentShaderFlacara}
-                  transparent
-                  depthWrite={false}
-                  depthTest={false}
-                  side={THREE.DoubleSide}
-                  blending={THREE.AdditiveBlending}
-                  toneMapped={false}
-                />
-              </mesh>
+            <mesh
+              ref={rightFlameMesh}
+              position={[
+                tuning.rightFlameX,
+                tuning.rightFlameY,
+                tuning.rightFlameZ,
+              ]}
+              rotation={[0, 0, degToRad(tuning.rightFlameRotationDeg)]}
+              scale={[tuning.rightFlameScaleX, tuning.rightFlameScaleY, 1]}
+              renderOrder={11}
+            >
+              <planeGeometry args={[1, 1]} />
+              <shaderMaterial
+                uniforms={uniformeFlacaraDreapta}
+                vertexShader={vertexShaderSimplu}
+                fragmentShader={fragmentShaderFlacara}
+                transparent
+                depthWrite={false}
+                depthTest={false}
+                side={THREE.DoubleSide}
+                blending={THREE.AdditiveBlending}
+                toneMapped={false}
+              />
             </mesh>
           </group>
         </group>
@@ -1290,7 +1290,7 @@ function BaraStareNavaJucator({ playerRef, viata, scut }) {
   useFrame(({ camera }) => {
     if (!grup.current || !playerRef?.current) return;
 
-    tintaPozitie.set(playerRef.current.x, playerRef.current.y + 10, playerRef.current.z);
+    tintaPozitie.set(playerRef.current.x, playerRef.current.y + 5.4, playerRef.current.z);
 
     if (!initializat.current) {
       grup.current.position.copy(tintaPozitie);
@@ -1493,7 +1493,6 @@ export default function NavaJucatorului({
         tuning.cameraOffsetY,
         teleportZ + tuning.cameraOffsetZ
       );
-      stare.camera.up.set(0, 0, -1);
       stare.camera.lookAt(
         teleportX + tuning.cameraTargetOffsetX,
         tuning.cameraTargetOffsetY,
@@ -1806,7 +1805,6 @@ export default function NavaJucatorului({
       stare.camera.updateProjectionMatrix();
     }
 
-    stare.camera.up.set(0, 0, -1);
     stare.camera.lookAt(cameraTarget);
 
     if (vizual.current) {
