@@ -12,7 +12,14 @@ import PanouResurse from "./components/PanouResurse.jsx";
 import PanouMagazin from "./components/PanouMagazin.jsx";
 import PanouHangar from "./components/PanouHangar.jsx";
 import NotificareRecompensa from "./components/NotificareRecompensa.jsx";
-import { TUNURI_BY_ID, GENERATOARE_BY_ID, GENERATOARE_VITEZA_BY_ID } from "./data/echipament.js";
+import {
+  TUNURI_BY_ID,
+  GENERATOARE_BY_ID,
+  GENERATOARE_VITEZA_BY_ID,
+  NR_SLOTURI_LASERE,
+  NR_SLOTURI_GENERATOARE,
+  NR_SLOTURI_VITEZA,
+} from "./data/echipament.js";
 import { NAVE, NAVE_BY_ID } from "./data/nave.js";
 
 const MARIME_HARTA = 1260;
@@ -28,6 +35,18 @@ const POZITIE_PORTAL_AETHER = [COORDONATA_PORTAL_AETHER, 0, COORDONATA_PORTAL_AE
 
 const POZITIE_STATIE = [-550.4, 0.38, -16.1];
 const POZITIE_HANGAR = [-360.4, 0.38, 113.9];
+
+function creeazaEchipamentTest(prefix, tipId, numarSloturi) {
+  return Array.from({ length: numarSloturi }, (_, slot) => ({
+    id: `dev-${prefix}-${slot + 1}`,
+    tipId,
+    slot,
+  }));
+}
+
+const TUNURI_TEST = creeazaEchipamentTest("laser", "lf3-pltm", NR_SLOTURI_LASERE);
+const SCUTURI_TEST = creeazaEchipamentTest("scut", "helix-barrier", NR_SLOTURI_GENERATOARE);
+const VITEZA_TEST = creeazaEchipamentTest("viteza", "mg-vpl1066798x", NR_SLOTURI_VITEZA);
 
 const PLATFORME_HANGAR = [
   { x: POZITIE_HANGAR[0] - 52, z: POZITIE_HANGAR[2] + 21 },
@@ -105,11 +124,11 @@ export default function App() {
   const [esteInHangar, setEsteInHangar] = useState(false);
 
   const [munitie, setMunitie] = useState({ x1: 3000, x2: 0, x3: 0, x4: 0, sab: 0, rsb: 0 });
-  const [tunuriDetinute, setTunuriDetinute] = useState([]);
+  const [tunuriDetinute, setTunuriDetinute] = useState(TUNURI_TEST);
   const [naveDetinute, setNaveDetinute] = useState(["orion-01"]);
   const [navaActiva, setNavaActiva] = useState("orion-01");
-  const [generatoareDetinute, setGeneratoareDetinute] = useState([]);
-  const [vitezaDetinute, setVitezaDetinute] = useState([]);
+  const [generatoareDetinute, setGeneratoareDetinute] = useState(SCUTURI_TEST);
+  const [vitezaDetinute, setVitezaDetinute] = useState(VITEZA_TEST);
 
   const damageLasere = tunuriDetinute.reduce(
     (suma, tun) => (tun.slot !== null ? suma + (TUNURI_BY_ID[tun.tipId]?.damage || 0) : suma),
