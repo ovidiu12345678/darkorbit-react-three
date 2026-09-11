@@ -25,7 +25,6 @@ import { NAVE, NAVE_BY_ID } from "./data/nave.js";
 const MARIME_HARTA = 1260;
 const FUNDAL_HARTA_STANDARD = "assets/harta-spatiala-fundal-hi.jpg";
 const FUNDAL_HARTA_AETHER = "assets/harta-nebuloasa-aether.jpg";
-const POZITIE_INTRARE_AETHER = [0, 3.2, 0];
 
 const LIMITA_HARTA = MARIME_HARTA / 2 - 4.5;
 const FACTOR_SCALARE_HARTA = MARIME_HARTA / 210;
@@ -34,11 +33,18 @@ const RAZA_PORTAL_AETHER = 20;
 const MARJA_SIGURANTA_PORTAL = 12;
 const COORDONATA_PORTAL_AETHER =
   LIMITA_HARTA - LATIME_ZONA_RADIATIE - RAZA_PORTAL_AETHER - MARJA_SIGURANTA_PORTAL;
-const POZITIE_PORTAL_AETHER = [COORDONATA_PORTAL_AETHER, 0, COORDONATA_PORTAL_AETHER];
-const POZITIE_REVENIRE_STANDARD = [
-  COORDONATA_PORTAL_AETHER - 34,
+const DISTANTA_REAPARITIE_PORTAL = 34;
+const POZITIE_PORTAL_STANDARD = [COORDONATA_PORTAL_AETHER, 0, COORDONATA_PORTAL_AETHER];
+const POZITIE_PORTAL_AETHER = [-COORDONATA_PORTAL_AETHER, 0, -COORDONATA_PORTAL_AETHER];
+const POZITIE_INTRARE_AETHER = [
+  -COORDONATA_PORTAL_AETHER + DISTANTA_REAPARITIE_PORTAL,
   3.2,
-  COORDONATA_PORTAL_AETHER - 34,
+  -COORDONATA_PORTAL_AETHER + DISTANTA_REAPARITIE_PORTAL,
+];
+const POZITIE_REVENIRE_STANDARD = [
+  COORDONATA_PORTAL_AETHER - DISTANTA_REAPARITIE_PORTAL,
+  3.2,
+  COORDONATA_PORTAL_AETHER - DISTANTA_REAPARITIE_PORTAL,
 ];
 
 const POZITIE_STATIE = [-550.4, 0.38, -16.1];
@@ -490,7 +496,9 @@ export default function App() {
             playerRef={playerRef}
             pozitieStatie={POZITIE_STATIE}
             pozitieHangar={POZITIE_HANGAR}
-            pozitiePortalAether={POZITIE_PORTAL_AETHER}
+            pozitiePortalAether={
+              hartaActiva === "aether" ? POZITIE_PORTAL_AETHER : POZITIE_PORTAL_STANDARD
+            }
             doarPortal={hartaActiva === "aether"}
             onTransportAether={transportaPrinPortal}
           />
@@ -614,7 +622,9 @@ export default function App() {
             ? null
             : [PLATFORME_HANGAR[2].x, 0, PLATFORME_HANGAR[2].z]
         }
-        pozitiePortal={POZITIE_PORTAL_AETHER}
+        pozitiePortal={
+          hartaActiva === "aether" ? POZITIE_PORTAL_AETHER : POZITIE_PORTAL_STANDARD
+        }
         imagineFundal={hartaActiva === "aether" ? FUNDAL_HARTA_AETHER : FUNDAL_HARTA_STANDARD}
       />
 

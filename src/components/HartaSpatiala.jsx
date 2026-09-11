@@ -537,8 +537,23 @@ function FundalDistant({ textura, latime, inaltime }) {
   );
 }
 
-function FundalFixPeEcran({ textura, activ }) {
+function FundalFixPeEcran({ textura, activ, marimeHarta }) {
   const { scene, size } = useThree();
+  const incadrareRef = useRef({ spatiuX: 0, spatiuY: 0 });
+
+  useFrame(({ camera }) => {
+    if (!activ) return;
+
+    const limita = Math.max(1, marimeHarta / 2);
+    const progresX = THREE.MathUtils.clamp(camera.position.x / limita, -1, 1);
+    const progresZ = THREE.MathUtils.clamp(camera.position.z / limita, -1, 1);
+    const { spatiuX, spatiuY } = incadrareRef.current;
+    const tintaX = spatiuX * 0.5 + progresX * spatiuX * 0.48;
+    const tintaY = spatiuY * 0.5 - progresZ * spatiuY * 0.48;
+
+    textura.offset.x = THREE.MathUtils.lerp(textura.offset.x, tintaX, 0.08);
+    textura.offset.y = THREE.MathUtils.lerp(textura.offset.y, tintaY, 0.08);
+  });
 
   useEffect(() => {
     if (!activ) return undefined;
@@ -555,15 +570,17 @@ function FundalFixPeEcran({ textura, activ }) {
     textura.minFilter = THREE.LinearFilter;
     textura.magFilter = THREE.LinearFilter;
 
-    if (raportImagine > raportEcran) {
-      const repetareX = raportEcran / raportImagine;
-      textura.repeat.set(repetareX, 1);
-      textura.offset.set((1 - repetareX) / 2, 0);
-    } else {
-      const repetareY = raportImagine / raportEcran;
-      textura.repeat.set(1, repetareY);
-      textura.offset.set(0, (1 - repetareY) / 2);
-    }
+    let repetareX = raportImagine > raportEcran ? raportEcran / raportImagine : 1;
+    let repetareY = raportImagine > raportEcran ? 1 : raportImagine / raportEcran;
+    const zoomFundal = 0.86;
+    repetareX *= zoomFundal;
+    repetareY *= zoomFundal;
+
+    const spatiuX = 1 - repetareX;
+    const spatiuY = 1 - repetareY;
+    incadrareRef.current = { spatiuX, spatiuY };
+    textura.repeat.set(repetareX, repetareY);
+    textura.offset.set(spatiuX / 2, spatiuY / 2);
 
     textura.needsUpdate = true;
     scene.background = textura;
@@ -660,7 +677,11 @@ export default function HartaSpatiala({
 
   return (
     <group>
-      <FundalFixPeEcran textura={texturaHarta} activ={fundalImagineCompleta} />
+      <FundalFixPeEcran
+        textura={texturaHarta}
+        activ={fundalImagineCompleta}
+        marimeHarta={marimeHarta}
+      />
 
       {!fundalImagineCompleta && (
         <FundalDistant textura={texturaHarta} latime={fundalLatime} inaltime={fundalInaltime} />
