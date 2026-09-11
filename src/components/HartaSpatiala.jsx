@@ -692,28 +692,50 @@ const fragmentShaderFundal = `
   }
 `;
 
-function FundalDistant({ textura, latime, inaltime, temaAether }) {
-  const uniforme = useMemo(
-    () => ({
-      uTextura0: { value: textura },
-      uScara: { value: new THREE.Vector2(latime / 86, inaltime / 86) },
-      uTemaAether: { value: temaAether ? 1 : 0 },
-    }),
-    [inaltime, latime, temaAether, textura]
-  );
+function FundalDistant({ textura, latime, inaltime }) {
+  const texturaSecundara = useMemo(() => textura.clone(), [textura]);
+
+  useEffect(() => {
+    texturaSecundara.colorSpace = THREE.SRGBColorSpace;
+    texturaSecundara.anisotropy = 8;
+    texturaSecundara.wrapS = THREE.MirroredRepeatWrapping;
+    texturaSecundara.wrapT = THREE.MirroredRepeatWrapping;
+    texturaSecundara.repeat.set(5.35, 5.35);
+    texturaSecundara.offset.set(0.31, 0.17);
+    texturaSecundara.center.set(0.5, 0.5);
+    texturaSecundara.rotation = 0.37;
+    texturaSecundara.generateMipmaps = true;
+    texturaSecundara.minFilter = THREE.LinearMipmapLinearFilter;
+    texturaSecundara.magFilter = THREE.LinearFilter;
+    texturaSecundara.needsUpdate = true;
+
+    return () => texturaSecundara.dispose();
+  }, [texturaSecundara]);
 
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.4, 0]}>
-      <planeGeometry args={[latime, inaltime]} />
-      <shaderMaterial
-        uniforms={uniforme}
-        vertexShader={vertexShaderFundal}
-        fragmentShader={fragmentShaderFundal}
-        toneMapped={false}
-        fog={false}
-        depthWrite={false}
-      />
-    </mesh>
+    <group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.4, 0]}>
+        <planeGeometry args={[latime, inaltime]} />
+        <meshBasicMaterial
+          map={textura}
+          toneMapped={false}
+          fog={false}
+          depthWrite={false}
+        />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.34, 0]}>
+        <planeGeometry args={[latime, inaltime]} />
+        <meshBasicMaterial
+          map={texturaSecundara}
+          transparent
+          opacity={0.2}
+          blending={THREE.AdditiveBlending}
+          toneMapped={false}
+          fog={false}
+          depthWrite={false}
+        />
+      </mesh>
+    </group>
   );
 }
 
@@ -747,10 +769,10 @@ export default function HartaSpatiala({
 
   useEffect(() => {
     texturaHarta.colorSpace = THREE.SRGBColorSpace;
-    texturaHarta.anisotropy = 16;
+    texturaHarta.anisotropy = 8;
     texturaHarta.wrapS = THREE.MirroredRepeatWrapping;
     texturaHarta.wrapT = THREE.MirroredRepeatWrapping;
-    texturaHarta.repeat.set(1, 1);
+    texturaHarta.repeat.set(8, 8);
     texturaHarta.offset.set(0, 0);
     texturaHarta.generateMipmaps = true;
     texturaHarta.minFilter = THREE.LinearMipmapLinearFilter;
@@ -795,7 +817,6 @@ export default function HartaSpatiala({
         textura={texturaHarta}
         latime={fundalLatime}
         inaltime={fundalInaltime}
-        temaAether={doarPortal}
       />
 
       <mesh
