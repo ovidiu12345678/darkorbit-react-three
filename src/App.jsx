@@ -25,6 +25,8 @@ import { NAVE, NAVE_BY_ID } from "./data/nave.js";
 const MARIME_HARTA = 1260;
 const FUNDAL_HARTA_STANDARD = "assets/harta-standard-v3.png";
 const FUNDAL_HARTA_AETHER = "assets/harta-nebuloasa-aether-v3.png";
+const FUNDAL_JOC_STANDARD = "assets/harta-standard-nebuloasa.png";
+const FUNDAL_JOC_AETHER = "assets/harta-aether-nebuloasa.png";
 const FUNDAL_MINI_STANDARD = FUNDAL_HARTA_STANDARD;
 const FUNDAL_MINI_AETHER = FUNDAL_HARTA_AETHER;
 
@@ -490,7 +492,7 @@ export default function App() {
         <Suspense fallback={null}>
           <HartaSpatiala
             marimeHarta={MARIME_HARTA}
-            imagineFundal={hartaActiva === "aether" ? FUNDAL_HARTA_AETHER : FUNDAL_HARTA_STANDARD}
+            imagineFundal={hartaActiva === "aether" ? FUNDAL_JOC_AETHER : FUNDAL_JOC_STANDARD}
             onAlegeTinta={alegeTinta}
             tintaJucator={tintaJucator}
             onStareClic={setTintaLive}

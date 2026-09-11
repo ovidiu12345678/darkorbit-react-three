@@ -757,6 +757,159 @@ function FundalDistant({ textura }) {
   );
 }
 
+function generatorDeterminist(samanta) {
+  let stare = samanta >>> 0;
+  return () => {
+    stare = (stare * 1664525 + 1013904223) >>> 0;
+    return stare / 4294967296;
+  };
+}
+
+function creeazaGeometrie(pozitii, culori) {
+  const geometrie = new THREE.BufferGeometry();
+  geometrie.setAttribute(
+    "position",
+    new THREE.Float32BufferAttribute(pozitii, 3)
+  );
+  if (culori) {
+    geometrie.setAttribute(
+      "color",
+      new THREE.Float32BufferAttribute(culori, 3)
+    );
+  }
+  geometrie.computeBoundingSphere();
+  return geometrie;
+}
+
+function DecorSpatialUnic({ marimeHarta, temaAether }) {
+  const decor = useMemo(() => {
+    const aleator = generatorDeterminist(temaAether ? 0xa37ae771 : 0x51c0b17d);
+    const latimeHarta = marimeHarta * (16 / 9);
+    const coloane = 18;
+    const randuri = 11;
+    const pasX = latimeHarta / coloane;
+    const pasZ = marimeHarta / randuri;
+    const pozitiiStele = [];
+    const pozitiiLinii = [];
+    const pozitiiGalaxii = [];
+    const culoriGalaxii = [];
+    const paleta = temaAether
+      ? [new THREE.Color("#f2b4ff"), new THREE.Color("#9a63ff"), new THREE.Color("#65ddff")]
+      : [new THREE.Color("#a9efff"), new THREE.Color("#79a8ff"), new THREE.Color("#ffd38a")];
+
+    for (let rand = 0; rand < randuri; rand += 1) {
+      for (let coloana = 0; coloana < coloane; coloana += 1) {
+        const centruX = -latimeHarta / 2 + (coloana + 0.18 + aleator() * 0.64) * pasX;
+        const centruZ = -marimeHarta / 2 + (rand + 0.18 + aleator() * 0.64) * pasZ;
+        const numarStele = 4 + Math.floor(aleator() * 5);
+        const rotatie = aleator() * Math.PI * 2;
+        const razaX = 13 + aleator() * 23;
+        const razaZ = 9 + aleator() * 17;
+        const noduri = [];
+
+        for (let index = 0; index < numarStele; index += 1) {
+          const progres = index / numarStele;
+          const unghi = rotatie + progres * Math.PI * 2 + (aleator() - 0.5) * 0.72;
+          const raza = 0.32 + aleator() * 0.68;
+          const x = centruX + Math.cos(unghi) * razaX * raza;
+          const z = centruZ + Math.sin(unghi) * razaZ * raza;
+          noduri.push([x, -1.92, z]);
+          pozitiiStele.push(x, -1.92, z);
+        }
+
+        for (let index = 1; index < noduri.length; index += 1) {
+          pozitiiLinii.push(...noduri[index - 1], ...noduri[index]);
+        }
+        if (noduri.length > 5 && aleator() > 0.42) {
+          pozitiiLinii.push(...noduri[0], ...noduri[Math.floor(noduri.length / 2)]);
+        }
+
+        const sector = rand * coloane + coloana;
+        if ((sector + Math.floor(aleator() * 5)) % 7 === 0) {
+          const brate = 2 + Math.floor(aleator() * 4);
+          const puncte = 72 + Math.floor(aleator() * 50);
+          const razaGalaxie = 7 + aleator() * 12;
+          const turtire = 0.32 + aleator() * 0.42;
+          const rotatieGalaxie = aleator() * Math.PI * 2;
+          const culoareBaza = paleta[Math.floor(aleator() * paleta.length)];
+
+          for (let index = 0; index < puncte; index += 1) {
+            const brat = index % brate;
+            const progres = (index + aleator() * 0.8) / puncte;
+            const unghi =
+              rotatieGalaxie +
+              (brat / brate) * Math.PI * 2 +
+              progres * Math.PI * (2.8 + aleator() * 1.7);
+            const raza = Math.pow(progres, 0.72) * razaGalaxie;
+            const imprastiere = (aleator() - 0.5) * (1.2 + progres * 2.8);
+            const x = centruX + Math.cos(unghi) * (raza + imprastiere);
+            const z = centruZ + Math.sin(unghi) * (raza + imprastiere) * turtire;
+            pozitiiGalaxii.push(x, -2.02, z);
+            const lumina = 0.68 + aleator() * 0.44;
+            culoriGalaxii.push(
+              Math.min(1, culoareBaza.r * lumina),
+              Math.min(1, culoareBaza.g * lumina),
+              Math.min(1, culoareBaza.b * lumina)
+            );
+          }
+        }
+      }
+    }
+
+    return {
+      stele: creeazaGeometrie(pozitiiStele),
+      linii: creeazaGeometrie(pozitiiLinii),
+      galaxii: creeazaGeometrie(pozitiiGalaxii, culoriGalaxii),
+    };
+  }, [marimeHarta, temaAether]);
+
+  useEffect(
+    () => () => {
+      decor.stele.dispose();
+      decor.linii.dispose();
+      decor.galaxii.dispose();
+    },
+    [decor]
+  );
+
+  return (
+    <group>
+      <lineSegments geometry={decor.linii} renderOrder={1}>
+        <lineBasicMaterial
+          color={temaAether ? "#d889ff" : "#73cfff"}
+          transparent
+          opacity={0.24}
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </lineSegments>
+      <points geometry={decor.stele} renderOrder={2}>
+        <pointsMaterial
+          color={temaAether ? "#f1c4ff" : "#d8f6ff"}
+          size={0.82}
+          transparent
+          opacity={0.9}
+          sizeAttenuation
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </points>
+      <points geometry={decor.galaxii} renderOrder={1}>
+        <pointsMaterial
+          vertexColors
+          size={0.64}
+          transparent
+          opacity={0.72}
+          sizeAttenuation
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+          toneMapped={false}
+        />
+      </points>
+    </group>
+  );
+}
+
 const POZITIE_STATIE_INITIALA = [-550.4, 0.38, -16.1];
 const POZITIE_HANGAR_INITIALA = [505, 0.38, -137];
 
@@ -829,6 +982,7 @@ export default function HartaSpatiala({
   return (
     <group>
       <FundalDistant textura={texturaHarta} />
+      <DecorSpatialUnic marimeHarta={marimeHarta} temaAether={doarPortal} />
 
       <mesh
         geometry={geometrie}
