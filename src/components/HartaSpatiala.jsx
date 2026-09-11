@@ -85,6 +85,52 @@ function PoartaSalt({ pozitie, culoare = "#39f5ff" }) {
   );
 }
 
+function PortalAether({ pozitie }) {
+  const portal = useRef();
+  const texturaPortal = useLoader(
+    THREE.TextureLoader,
+    `${import.meta.env.BASE_URL}assets/portal-aether-helix.png`
+  );
+
+  texturaPortal.colorSpace = THREE.SRGBColorSpace;
+  texturaPortal.generateMipmaps = true;
+  texturaPortal.minFilter = THREE.LinearMipmapLinearFilter;
+  texturaPortal.magFilter = THREE.LinearFilter;
+
+  useFrame(({ camera, clock }) => {
+    if (!portal.current) return;
+
+    portal.current.quaternion.copy(camera.quaternion);
+    portal.current.position.y = 9.4 + Math.sin(clock.elapsedTime * 1.35) * 0.55;
+
+    const puls = 40 + Math.sin(clock.elapsedTime * 2.1) * 0.7;
+    portal.current.scale.set(puls, puls, 1);
+  });
+
+  return (
+    <group position={pozitie}>
+      <mesh ref={portal} position={[0, 9.4, 0]} renderOrder={3}>
+        <planeGeometry args={[1, 1]} />
+        <meshBasicMaterial
+          map={texturaPortal}
+          transparent
+          alphaTest={0.025}
+          depthWrite={false}
+          toneMapped={false}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.12, 0]}>
+        <ringGeometry args={[13.5, 15.2, 72]} />
+        <meshBasicMaterial color="#6d5cff" transparent opacity={0.34} side={THREE.DoubleSide} />
+      </mesh>
+
+      <pointLight color="#52dcff" intensity={4.2} distance={58} position={[0, 8, 0]} />
+    </group>
+  );
+}
+
 function NodExtractie({ pozitie, culoare = "#7dffef" }) {
   const cristal = useRef();
 
@@ -264,6 +310,7 @@ export default function HartaSpatiala({
   playerRef,
   pozitieStatie = POZITIE_STATIE_INITIALA,
   pozitieHangar = POZITIE_HANGAR_INITIALA,
+  pozitiePortalAether,
 }) {
   const latimeHarta = marimeHarta * (16 / 9);
   const inaltimeHarta = marimeHarta;
@@ -334,6 +381,8 @@ export default function HartaSpatiala({
 
       <PoartaSalt pozitie={[marimeHarta * 0.34, 0.76, marimeHarta * 0.34]} culoare="#32f7ff" />
       <PoartaSalt pozitie={[-marimeHarta * 0.36, 0.76, -marimeHarta * 0.3]} culoare="#ff4add" />
+
+      {pozitiePortalAether && <PortalAether pozitie={pozitiePortalAether} />}
 
       <StatieSector pozitie={pozitieStatie} playerRef={playerRef} />
 

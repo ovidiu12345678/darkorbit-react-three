@@ -17,6 +17,15 @@ import { NAVE, NAVE_BY_ID } from "./data/nave.js";
 
 const MARIME_HARTA = 1260;
 
+const LIMITA_HARTA = MARIME_HARTA / 2 - 4.5;
+const FACTOR_SCALARE_HARTA = MARIME_HARTA / 210;
+const LATIME_ZONA_RADIATIE = 4.5 * FACTOR_SCALARE_HARTA * 2;
+const RAZA_PORTAL_AETHER = 20;
+const MARJA_SIGURANTA_PORTAL = 12;
+const COORDONATA_PORTAL_AETHER =
+  LIMITA_HARTA - LATIME_ZONA_RADIATIE - RAZA_PORTAL_AETHER - MARJA_SIGURANTA_PORTAL;
+const POZITIE_PORTAL_AETHER = [COORDONATA_PORTAL_AETHER, 0, COORDONATA_PORTAL_AETHER];
+
 const POZITIE_STATIE = [-550.4, 0.38, -16.1];
 const POZITIE_HANGAR = [-360.4, 0.38, 113.9];
 
@@ -438,6 +447,7 @@ export default function App() {
             playerRef={playerRef}
             pozitieStatie={POZITIE_STATIE}
             pozitieHangar={POZITIE_HANGAR}
+            pozitiePortalAether={POZITIE_PORTAL_AETHER}
           />
 
           {inamici.map((inamic) => (
@@ -549,6 +559,7 @@ export default function App() {
         pozitieStatie={POZITIE_STATIE}
         pozitieHangar={POZITIE_HANGAR}
         pozitieAndocareHangar={[PLATFORME_HANGAR[2].x, 0, PLATFORME_HANGAR[2].z]}
+        pozitiePortal={POZITIE_PORTAL_AETHER}
       />
 
       <ButonFullscreen />

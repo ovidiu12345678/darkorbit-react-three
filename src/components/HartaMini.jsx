@@ -18,6 +18,7 @@ export default function HartaMini({
   pozitieStatie,
   pozitieHangar,
   pozitieAndocareHangar,
+  pozitiePortal,
 }) {
   const continutRef = useRef(null);
 
@@ -143,6 +144,7 @@ export default function HartaMini({
 
   const pozitieStatieMini = pozitieStatie ? lumeLaProcent(pozitieStatie[0], pozitieStatie[2]) : null;
   const pozitieHangarMini = pozitieHangar ? lumeLaProcent(pozitieHangar[0], pozitieHangar[2]) : null;
+  const pozitiePortalMini = pozitiePortal ? lumeLaProcent(pozitiePortal[0], pozitiePortal[2]) : null;
 
   const laClickRepere = useCallback(
     (eveniment, pozitie) => {
@@ -184,7 +186,9 @@ export default function HartaMini({
           ref={continutRef}
           className="harta-mini-continut"
           onClick={laClickHarta}
-          style={{ backgroundImage: "url(/assets/harta-spatiala-fundal-hi.jpg)" }}
+          style={{
+            backgroundImage: `url("${import.meta.env.BASE_URL}assets/harta-spatiala-fundal-hi.jpg")`,
+          }}
         >
           <div className="harta-mini-axa harta-mini-axa-x" />
           <div className="harta-mini-axa harta-mini-axa-y" />
@@ -219,6 +223,16 @@ export default function HartaMini({
               title="Hangar"
               onMouseDown={(eveniment) => eveniment.stopPropagation()}
               onClick={(eveniment) => laClickRepere(eveniment, pozitieAndocareHangar || pozitieHangar)}
+            />
+          )}
+
+          {pozitiePortalMini && (
+            <span
+              className="harta-mini-marker harta-mini-portal"
+              style={{ left: `${pozitiePortalMini.left}%`, top: `${pozitiePortalMini.top}%` }}
+              title="Portal Aether"
+              onMouseDown={(eveniment) => eveniment.stopPropagation()}
+              onClick={(eveniment) => laClickRepere(eveniment, pozitiePortal)}
             />
           )}
 
