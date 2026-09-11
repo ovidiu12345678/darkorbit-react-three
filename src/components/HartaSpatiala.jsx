@@ -244,7 +244,7 @@ function PortalAether({ pozitie, onTransport }) {
   };
 
   return (
-    <group position={pozitie} scale={0.09}>
+    <group position={pozitie}>
       <mesh ref={portal} position={[0, 9.4, 0]} renderOrder={3}>
         <planeGeometry args={[1, 1]} />
         <meshBasicMaterial
@@ -692,10 +692,7 @@ const fragmentShaderFundal = `
   }
 `;
 
-const LATIME_FUNDAL_VIZIBIL = 128;
-const INALTIME_FUNDAL_VIZIBIL = 72;
-
-function FundalDistant({ textura }) {
+function FundalDistant({ textura, limitaDeplasare }) {
   const fundalRef = useRef();
   const texturaPanorama = useMemo(() => textura.clone(), [textura]);
   const directiePrivire = useMemo(() => new THREE.Vector3(), []);
@@ -704,12 +701,12 @@ function FundalDistant({ textura }) {
   useEffect(() => {
     texturaPanorama.colorSpace = THREE.SRGBColorSpace;
     texturaPanorama.anisotropy = 16;
-    texturaPanorama.wrapS = THREE.MirroredRepeatWrapping;
-    texturaPanorama.wrapT = THREE.MirroredRepeatWrapping;
-    texturaPanorama.repeat.set(1, 1);
-    texturaPanorama.offset.set(0.44, 0.04);
+    texturaPanorama.wrapS = THREE.ClampToEdgeWrapping;
+    texturaPanorama.wrapT = THREE.ClampToEdgeWrapping;
+    texturaPanorama.repeat.set(0.92, 0.92);
+    texturaPanorama.offset.set(0.04, 0.04);
     texturaPanorama.generateMipmaps = true;
-    texturaPanorama.minFilter = THREE.LinearMipmapNearestFilter;
+    texturaPanorama.minFilter = THREE.LinearMipmapLinearFilter;
     texturaPanorama.magFilter = THREE.LinearFilter;
     texturaPanorama.needsUpdate = true;
 
@@ -729,14 +726,20 @@ function FundalDistant({ textura }) {
     fundalRef.current.position.x = centruVizibil.x;
     fundalRef.current.position.z = centruVizibil.z;
 
-    texturaPanorama.offset.x = THREE.MathUtils.euclideanModulo(
-      0.44 + centruVizibil.x / LATIME_FUNDAL_VIZIBIL,
-      2
+    const progresX = THREE.MathUtils.clamp(
+      (centruVizibil.x + limitaDeplasare) / (limitaDeplasare * 2),
+      0,
+      1
     );
-    texturaPanorama.offset.y = THREE.MathUtils.euclideanModulo(
-      0.04 - centruVizibil.z / INALTIME_FUNDAL_VIZIBIL,
-      2
+    const progresZ = THREE.MathUtils.clamp(
+      (centruVizibil.z + limitaDeplasare) / (limitaDeplasare * 2),
+      0,
+      1
     );
+    const spatiuPanorama = 1 - texturaPanorama.repeat.x;
+
+    texturaPanorama.offset.x = progresX * spatiuPanorama;
+    texturaPanorama.offset.y = (1 - progresZ) * spatiuPanorama;
   });
 
   return (
@@ -746,7 +749,7 @@ function FundalDistant({ textura }) {
       position={[0, -2.4, 0]}
       frustumCulled={false}
     >
-      <planeGeometry args={[LATIME_FUNDAL_VIZIBIL, INALTIME_FUNDAL_VIZIBIL]} />
+      <planeGeometry args={[112, 74]} />
       <meshBasicMaterial
         map={texturaPanorama}
         toneMapped={false}
@@ -757,331 +760,66 @@ function FundalDistant({ textura }) {
   );
 }
 
-function generatorDeterminist(samanta) {
-  let stare = samanta >>> 0;
-  return () => {
-    stare = (stare * 1664525 + 1013904223) >>> 0;
-    return stare / 4294967296;
-  };
-}
+function CampSteleDeplasare({
+  marimeHarta,
+  temaAether,
+  numarStele,
+  dimensiune,
+  opacitate,
+  samantaStrat,
+  inaltime,
+}) {
+  const geometrieStele = useMemo(() => {
+    const pozitii = new Float32Array(numarStele * 3);
+    const culori = new Float32Array(numarStele * 3);
+    const intindere = marimeHarta + 260;
+    let samanta = (temaAether ? 918273 : 471103) + samantaStrat;
 
-function creeazaGeometrie(pozitii, culori) {
-  const geometrie = new THREE.BufferGeometry();
-  geometrie.setAttribute(
-    "position",
-    new THREE.Float32BufferAttribute(pozitii, 3)
-  );
-  if (culori) {
-    geometrie.setAttribute(
-      "color",
-      new THREE.Float32BufferAttribute(culori, 3)
-    );
-  }
-  geometrie.computeBoundingSphere();
-  return geometrie;
-}
+    const aleator = () => {
+      samanta = (samanta * 1664525 + 1013904223) >>> 0;
+      return samanta / 4294967296;
+    };
 
-function DecorSpatialUnic({ marimeHarta, temaAether }) {
-  const decor = useMemo(() => {
-    const aleator = generatorDeterminist(temaAether ? 0xa37ae771 : 0x51c0b17d);
-    const latimeHarta = marimeHarta * (16 / 9);
-    const coloane = 18;
-    const randuri = 11;
-    const pasX = latimeHarta / coloane;
-    const pasZ = marimeHarta / randuri;
-    const pozitiiStele = [];
-    const pozitiiLinii = [];
-    const pozitiiGalaxii = [];
-    const culoriGalaxii = [];
-    const paleta = temaAether
-      ? [new THREE.Color("#f2b4ff"), new THREE.Color("#9a63ff"), new THREE.Color("#65ddff")]
-      : [new THREE.Color("#a9efff"), new THREE.Color("#79a8ff"), new THREE.Color("#ffd38a")];
+    const culoareRece = new THREE.Color(temaAether ? "#bc8cff" : "#8edfff");
+    const culoareCalda = new THREE.Color(temaAether ? "#ff9cec" : "#ffd2a0");
+    const culoareStea = new THREE.Color();
 
-    for (let rand = 0; rand < randuri; rand += 1) {
-      for (let coloana = 0; coloana < coloane; coloana += 1) {
-        const centruX = -latimeHarta / 2 + (coloana + 0.18 + aleator() * 0.64) * pasX;
-        const centruZ = -marimeHarta / 2 + (rand + 0.18 + aleator() * 0.64) * pasZ;
-        const numarStele = 4 + Math.floor(aleator() * 5);
-        const rotatie = aleator() * Math.PI * 2;
-        const razaX = 13 + aleator() * 23;
-        const razaZ = 9 + aleator() * 17;
-        const noduri = [];
+    for (let index = 0; index < numarStele; index += 1) {
+      const offset = index * 3;
+      pozitii[offset] = (aleator() - 0.5) * intindere;
+      pozitii[offset + 1] = inaltime + aleator() * 0.08;
+      pozitii[offset + 2] = (aleator() - 0.5) * intindere;
 
-        for (let index = 0; index < numarStele; index += 1) {
-          const progres = index / numarStele;
-          const unghi = rotatie + progres * Math.PI * 2 + (aleator() - 0.5) * 0.72;
-          const raza = 0.32 + aleator() * 0.68;
-          const x = centruX + Math.cos(unghi) * razaX * raza;
-          const z = centruZ + Math.sin(unghi) * razaZ * raza;
-          noduri.push([x, -1.92, z]);
-          pozitiiStele.push(x, -1.92, z);
-        }
-
-        for (let index = 1; index < noduri.length; index += 1) {
-          pozitiiLinii.push(...noduri[index - 1], ...noduri[index]);
-        }
-        if (noduri.length > 5 && aleator() > 0.42) {
-          pozitiiLinii.push(...noduri[0], ...noduri[Math.floor(noduri.length / 2)]);
-        }
-
-        const sector = rand * coloane + coloana;
-        if ((sector + Math.floor(aleator() * 5)) % 7 === 0) {
-          const brate = 2 + Math.floor(aleator() * 4);
-          const puncte = 72 + Math.floor(aleator() * 50);
-          const razaGalaxie = 7 + aleator() * 12;
-          const turtire = 0.32 + aleator() * 0.42;
-          const rotatieGalaxie = aleator() * Math.PI * 2;
-          const culoareBaza = paleta[Math.floor(aleator() * paleta.length)];
-
-          for (let index = 0; index < puncte; index += 1) {
-            const brat = index % brate;
-            const progres = (index + aleator() * 0.8) / puncte;
-            const unghi =
-              rotatieGalaxie +
-              (brat / brate) * Math.PI * 2 +
-              progres * Math.PI * (2.8 + aleator() * 1.7);
-            const raza = Math.pow(progres, 0.72) * razaGalaxie;
-            const imprastiere = (aleator() - 0.5) * (1.2 + progres * 2.8);
-            const x = centruX + Math.cos(unghi) * (raza + imprastiere);
-            const z = centruZ + Math.sin(unghi) * (raza + imprastiere) * turtire;
-            pozitiiGalaxii.push(x, -2.02, z);
-            const lumina = 0.68 + aleator() * 0.44;
-            culoriGalaxii.push(
-              Math.min(1, culoareBaza.r * lumina),
-              Math.min(1, culoareBaza.g * lumina),
-              Math.min(1, culoareBaza.b * lumina)
-            );
-          }
-        }
-      }
+      culoareStea
+        .copy(culoareRece)
+        .lerp(culoareCalda, aleator())
+        .multiplyScalar(0.58 + aleator() * 0.42);
+      culori[offset] = culoareStea.r;
+      culori[offset + 1] = culoareStea.g;
+      culori[offset + 2] = culoareStea.b;
     }
 
-    return {
-      stele: creeazaGeometrie(pozitiiStele),
-      linii: creeazaGeometrie(pozitiiLinii),
-      galaxii: creeazaGeometrie(pozitiiGalaxii, culoriGalaxii),
-    };
-  }, [marimeHarta, temaAether]);
+    const geometrie = new THREE.BufferGeometry();
+    geometrie.setAttribute("position", new THREE.BufferAttribute(pozitii, 3));
+    geometrie.setAttribute("color", new THREE.BufferAttribute(culori, 3));
+    geometrie.computeBoundingSphere();
+    return geometrie;
+  }, [inaltime, marimeHarta, numarStele, samantaStrat, temaAether]);
 
-  useEffect(
-    () => () => {
-      decor.stele.dispose();
-      decor.linii.dispose();
-      decor.galaxii.dispose();
-    },
-    [decor]
-  );
+  useEffect(() => () => geometrieStele.dispose(), [geometrieStele]);
 
   return (
-    <group>
-      <lineSegments geometry={decor.linii} renderOrder={1}>
-        <lineBasicMaterial
-          color={temaAether ? "#d889ff" : "#73cfff"}
-          transparent
-          opacity={0.24}
-          depthWrite={false}
-          toneMapped={false}
-        />
-      </lineSegments>
-      <points geometry={decor.stele} renderOrder={2}>
-        <pointsMaterial
-          color={temaAether ? "#f1c4ff" : "#d8f6ff"}
-          size={0.82}
-          transparent
-          opacity={0.9}
-          sizeAttenuation
-          depthWrite={false}
-          toneMapped={false}
-        />
-      </points>
-      <points geometry={decor.galaxii} renderOrder={1}>
-        <pointsMaterial
-          vertexColors
-          size={0.64}
-          transparent
-          opacity={0.72}
-          sizeAttenuation
-          depthWrite={false}
-          blending={THREE.AdditiveBlending}
-          toneMapped={false}
-        />
-      </points>
-    </group>
-  );
-}
-
-const vertexShaderCorpCeresc = `
-  varying vec2 vUv;
-
-  void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
-
-const fragmentShaderCorpCeresc = `
-  uniform sampler2D uTextura;
-  uniform vec2 uCentru;
-  uniform vec2 uDecupaj;
-  uniform float uPragSaturatie;
-  varying vec2 vUv;
-
-  void main() {
-    vec2 uvSursa = uCentru + (vUv - 0.5) * uDecupaj;
-    vec4 mostra = texture2D(uTextura, uvSursa);
-    float maxim = max(mostra.r, max(mostra.g, mostra.b));
-    float minim = min(mostra.r, min(mostra.g, mostra.b));
-    float saturatie = maxim - minim;
-    float luminozitate = (mostra.r + mostra.g + mostra.b) / 3.0;
-    float fundalNeutru = 1.0 - smoothstep(0.035, uPragSaturatie, saturatie);
-    float fundalDeschis = smoothstep(0.005, 0.08, luminozitate);
-    float mascaFundal = 1.0 - fundalNeutru * fundalDeschis;
-    vec2 margine = abs(vUv - 0.5) * 2.0;
-    float distantaMargine = max(margine.x, margine.y);
-    float mascaDreptunghi = 1.0 - smoothstep(0.68, 1.0, distantaMargine);
-    float mascaRotunda = 1.0 - smoothstep(0.72, 1.0, length((vUv - 0.5) * 2.0));
-    float masca = max(mascaRotunda, mascaDreptunghi * 0.42);
-    float alphaFinal = mostra.a * masca * mascaFundal;
-    if (alphaFinal < 0.015) discard;
-    vec3 culoareClara = mostra.rgb * 1.45 + pow(maxim, 2.2) * 0.12;
-    gl_FragColor = vec4(culoareClara, alphaFinal);
-    #include <colorspace_fragment>
-  }
-`;
-
-const CORPURI_STANDARD = [
-  { centru: [0.144, 0.218], decupaj: [0.25, 0.42], marime: [28, 26] },
-  { centru: [0.848, 0.21], decupaj: [0.2, 0.36], marime: [27, 25] },
-  { centru: [0.171, 0.696], decupaj: [0.34, 0.32], marime: [34, 20] },
-  { centru: [0.866, 0.785], decupaj: [0.26, 0.32], marime: [31, 27] },
-  { centru: [0.9, 0.507], decupaj: [0.1, 0.15], marime: [21, 18], pragSaturatie: 0.45 },
-  { centru: [0.963, 0.304], decupaj: [0.07, 0.11], marime: [18, 13] },
-];
-
-const fragmentShaderCometa = `
-  varying vec2 vUv;
-
-  float zgomot(vec2 punct) {
-    return fract(sin(dot(punct, vec2(127.1, 311.7))) * 43758.5453);
-  }
-
-  void main() {
-    vec2 p = (vUv - 0.5) * 2.0;
-    vec2 cap = vec2(-0.5, -0.05);
-    float distantaCap = length((p - cap) * vec2(1.0, 1.35));
-    float nucleu = 1.0 - smoothstep(0.08, 0.26, distantaCap);
-    float aura = 1.0 - smoothstep(0.12, 0.48, distantaCap);
-
-    float progresCoada = clamp((p.x + 0.42) / 1.35, 0.0, 1.0);
-    float axaCoada = p.y + 0.05 - progresCoada * 0.42;
-    float latimeCoada = mix(0.25, 0.025, progresCoada);
-    float coada = (1.0 - smoothstep(latimeCoada * 0.35, latimeCoada, abs(axaCoada)))
-      * smoothstep(-0.5, -0.25, p.x)
-      * (1.0 - smoothstep(0.72, 0.98, p.x));
-
-    float scantei = step(0.972, zgomot(floor(vUv * vec2(48.0, 24.0))))
-      * smoothstep(-0.35, 0.8, p.x)
-      * (1.0 - smoothstep(0.12, 0.42, abs(axaCoada)));
-
-    float alpha = max(aura * 0.76, max(nucleu, coada * 0.88));
-    alpha = max(alpha, scantei * 0.72);
-    if (alpha < 0.018) discard;
-
-    vec3 cyan = vec3(0.08, 0.72, 1.0);
-    vec3 alb = vec3(0.84, 0.98, 1.0);
-    vec3 culoare = mix(cyan, alb, clamp(nucleu + coada * 0.48 + scantei, 0.0, 1.0));
-    gl_FragColor = vec4(culoare, alpha);
-    #include <colorspace_fragment>
-  }
-`;
-
-function CometaEnergetica({ limitaHarta }) {
-  const centru = [0.477, 0.723];
-  const x = (centru[0] * 2 - 1) * limitaHarta;
-  const z = (centru[1] * 2 - 1) * limitaHarta;
-
-  return (
-    <mesh
-      position={[x, -1.8, z]}
-      rotation={[-Math.PI / 2, 0, -0.34]}
-      renderOrder={4}
-    >
-      <planeGeometry args={[34, 18]} />
-      <shaderMaterial
-        vertexShader={vertexShaderCorpCeresc}
-        fragmentShader={fragmentShaderCometa}
+    <points geometry={geometrieStele} frustumCulled={false}>
+      <pointsMaterial
+        size={dimensiune}
+        vertexColors
         transparent
-        depthWrite={false}
-        toneMapped={false}
-        blending={THREE.AdditiveBlending}
-      />
-    </mesh>
-  );
-}
-
-const CORPURI_AETHER = [
-  { centru: [0.152, 0.176], decupaj: [0.27, 0.36], marime: [30, 30] },
-  { centru: [0.517, 0.109], decupaj: [0.2, 0.2], marime: [30, 18] },
-  { centru: [0.787, 0.185], decupaj: [0.28, 0.32], marime: [30, 25] },
-  { centru: [0.906, 0.515], decupaj: [0.2, 0.34], marime: [30, 28] },
-  { centru: [0.072, 0.593], decupaj: [0.18, 0.27], marime: [24, 27] },
-  { centru: [0.34, 0.42], decupaj: [0.11, 0.15], marime: [20, 17] },
-  { centru: [0.341, 0.789], decupaj: [0.18, 0.28], marime: [24, 24] },
-  { centru: [0.763, 0.795], decupaj: [0.25, 0.36], marime: [26, 28] },
-  { centru: [0.785, 0.454], decupaj: [0.1, 0.14], marime: [20, 15], pragSaturatie: 0.28 },
-  { centru: [0.955, 0.077], decupaj: [0.11, 0.14], marime: [24, 15] },
-];
-
-function CorpCerescDinHarta({ textura, definitie, limitaHarta }) {
-  const uniforme = useMemo(
-    () => ({
-      uTextura: { value: textura },
-      uCentru: {
-        value: new THREE.Vector2(definitie.centru[0], 1 - definitie.centru[1]),
-      },
-      uDecupaj: { value: new THREE.Vector2(...definitie.decupaj) },
-      uPragSaturatie: { value: definitie.pragSaturatie ?? 0.2 },
-    }),
-    [textura, definitie]
-  );
-  const x = (definitie.centru[0] * 2 - 1) * limitaHarta;
-  const z = (definitie.centru[1] * 2 - 1) * limitaHarta;
-
-  return (
-    <mesh
-      position={[x, -1.82, z]}
-      rotation={[-Math.PI / 2, 0, 0]}
-      renderOrder={3}
-    >
-      <planeGeometry args={definitie.marime} />
-      <shaderMaterial
-        uniforms={uniforme}
-        vertexShader={vertexShaderCorpCeresc}
-        fragmentShader={fragmentShaderCorpCeresc}
-        transparent
+        opacity={opacitate}
+        sizeAttenuation
         depthWrite={false}
         toneMapped={false}
       />
-    </mesh>
-  );
-}
-
-function CorpuriCerestiUnice({ textura, marimeHarta, temaAether }) {
-  const limitaHarta = marimeHarta / 2 - 4.5;
-  const corpuri = temaAether ? CORPURI_AETHER : CORPURI_STANDARD;
-
-  return (
-    <group>
-      {corpuri.map((definitie, index) => (
-        <CorpCerescDinHarta
-          key={`${temaAether ? "aether" : "standard"}-${index}`}
-          textura={textura}
-          definitie={definitie}
-          limitaHarta={limitaHarta}
-        />
-      ))}
-      {!temaAether && <CometaEnergetica limitaHarta={limitaHarta} />}
-    </group>
+    </points>
   );
 }
 
@@ -1091,7 +829,6 @@ const POZITIE_HANGAR_INITIALA = [505, 0.38, -137];
 export default function HartaSpatiala({
   marimeHarta,
   imagineFundal = "assets/harta-standard-v2.png",
-  imagineCorpuri = "assets/corpuri-standard-transparente.png",
   onAlegeTinta,
   tintaJucator,
   onStareClic,
@@ -1106,12 +843,9 @@ export default function HartaSpatiala({
   const inaltimeHarta = marimeHarta;
   const factorScalare = marimeHarta / 210;
 
-  const [texturaHarta, texturaCorpuri] = useLoader(
+  const texturaHarta = useLoader(
     THREE.TextureLoader,
-    [
-      `${import.meta.env.BASE_URL}${imagineFundal}`,
-      `${import.meta.env.BASE_URL}${imagineCorpuri}`,
-    ]
+    `${import.meta.env.BASE_URL}${imagineFundal}`
   );
 
   useEffect(() => {
@@ -1126,16 +860,6 @@ export default function HartaSpatiala({
     texturaHarta.magFilter = THREE.LinearFilter;
     texturaHarta.needsUpdate = true;
   }, [texturaHarta]);
-
-  useEffect(() => {
-    texturaCorpuri.colorSpace = THREE.SRGBColorSpace;
-    texturaCorpuri.anisotropy = 16;
-    texturaCorpuri.wrapS = THREE.ClampToEdgeWrapping;
-    texturaCorpuri.wrapT = THREE.ClampToEdgeWrapping;
-    texturaCorpuri.minFilter = THREE.LinearMipmapLinearFilter;
-    texturaCorpuri.magFilter = THREE.LinearFilter;
-    texturaCorpuri.needsUpdate = true;
-  }, [texturaCorpuri]);
 
   const geometrie = useMemo(
     () => new THREE.PlaneGeometry(latimeHarta, inaltimeHarta),
@@ -1170,12 +894,28 @@ export default function HartaSpatiala({
 
   return (
     <group>
-      <FundalDistant textura={texturaHarta} />
-      <DecorSpatialUnic marimeHarta={marimeHarta} temaAether={doarPortal} />
-      <CorpuriCerestiUnice
-        textura={texturaCorpuri}
+      <FundalDistant
+        textura={texturaHarta}
+        limitaDeplasare={marimeHarta / 2}
+      />
+
+      <CampSteleDeplasare
         marimeHarta={marimeHarta}
         temaAether={doarPortal}
+        numarStele={15000}
+        dimensiune={0.12}
+        opacitate={0.76}
+        samantaStrat={0}
+        inaltime={-1.72}
+      />
+      <CampSteleDeplasare
+        marimeHarta={marimeHarta}
+        temaAether={doarPortal}
+        numarStele={4200}
+        dimensiune={0.3}
+        opacitate={0.58}
+        samantaStrat={700001}
+        inaltime={-1.48}
       />
 
       <mesh
