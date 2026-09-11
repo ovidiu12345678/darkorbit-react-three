@@ -30,9 +30,9 @@ const TUNING_INITIAL = {
   spriteScaleX: 1,
   spriteScaleY: 1,
 
-  bankEnabled: 1,
-  bankManualDeg: -49.5361,
-  bankAutoStrength: 4.5,
+  bankEnabled: 0,
+  bankManualDeg: 0,
+  bankAutoStrength: 0,
   bankMaxDeg: 15.273,
   bankLerp: 0.12,
   bankDirection: 1,
@@ -85,7 +85,7 @@ const TUNING_INITIAL = {
 
   cameraOffsetX: 0,
   cameraOffsetY: 68,
-  cameraOffsetZ: 54,
+  cameraOffsetZ: 0,
 
   cameraTargetOffsetX: 0,
   cameraTargetOffsetY: 0,
@@ -256,9 +256,24 @@ function incarcaTuningInitial() {
       return TUNING_INITIAL;
     }
 
-    return {
+    const tuningSalvat = {
       ...TUNING_INITIAL,
       ...JSON.parse(salvat),
+    };
+
+    return {
+      ...tuningSalvat,
+      bankEnabled: 0,
+      bankManualDeg: 0,
+      bankAutoStrength: 0,
+      bankPitchDeg: 0,
+      bankRollDeg: 0,
+      cameraOffsetX: 0,
+      cameraOffsetY: 68,
+      cameraOffsetZ: 0,
+      cameraTargetOffsetX: 0,
+      cameraTargetOffsetY: 0,
+      cameraTargetOffsetZ: 0,
     };
   } catch {
     return TUNING_INITIAL;
@@ -1493,6 +1508,7 @@ export default function NavaJucatorului({
         tuning.cameraOffsetY,
         teleportZ + tuning.cameraOffsetZ
       );
+      stare.camera.up.set(0, 0, -1);
       stare.camera.lookAt(
         teleportX + tuning.cameraTargetOffsetX,
         tuning.cameraTargetOffsetY,
@@ -1805,6 +1821,7 @@ export default function NavaJucatorului({
       stare.camera.updateProjectionMatrix();
     }
 
+    stare.camera.up.set(0, 0, -1);
     stare.camera.lookAt(cameraTarget);
 
     if (vizual.current) {
