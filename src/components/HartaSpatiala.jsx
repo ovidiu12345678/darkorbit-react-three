@@ -703,8 +703,8 @@ function FundalDistant({ textura, limitaDeplasare }) {
     texturaPanorama.anisotropy = 16;
     texturaPanorama.wrapS = THREE.ClampToEdgeWrapping;
     texturaPanorama.wrapT = THREE.ClampToEdgeWrapping;
-    texturaPanorama.repeat.set(0.68, 0.68);
-    texturaPanorama.offset.set(0.16, 0.16);
+    texturaPanorama.repeat.set(0.92, 0.92);
+    texturaPanorama.offset.set(0.04, 0.04);
     texturaPanorama.generateMipmaps = true;
     texturaPanorama.minFilter = THREE.LinearMipmapLinearFilter;
     texturaPanorama.magFilter = THREE.LinearFilter;
@@ -749,7 +749,7 @@ function FundalDistant({ textura, limitaDeplasare }) {
       position={[0, -2.4, 0]}
       frustumCulled={false}
     >
-      <planeGeometry args={[120, 80]} />
+      <planeGeometry args={[112, 74]} />
       <meshBasicMaterial
         map={texturaPanorama}
         toneMapped={false}
@@ -760,13 +760,20 @@ function FundalDistant({ textura, limitaDeplasare }) {
   );
 }
 
-function CampSteleDeplasare({ marimeHarta, temaAether }) {
+function CampSteleDeplasare({
+  marimeHarta,
+  temaAether,
+  numarStele,
+  dimensiune,
+  opacitate,
+  samantaStrat,
+  inaltime,
+}) {
   const geometrieStele = useMemo(() => {
-    const numarStele = 18000;
     const pozitii = new Float32Array(numarStele * 3);
     const culori = new Float32Array(numarStele * 3);
     const intindere = marimeHarta + 260;
-    let samanta = temaAether ? 918273 : 471103;
+    let samanta = (temaAether ? 918273 : 471103) + samantaStrat;
 
     const aleator = () => {
       samanta = (samanta * 1664525 + 1013904223) >>> 0;
@@ -780,7 +787,7 @@ function CampSteleDeplasare({ marimeHarta, temaAether }) {
     for (let index = 0; index < numarStele; index += 1) {
       const offset = index * 3;
       pozitii[offset] = (aleator() - 0.5) * intindere;
-      pozitii[offset + 1] = -1.72 + aleator() * 0.08;
+      pozitii[offset + 1] = inaltime + aleator() * 0.08;
       pozitii[offset + 2] = (aleator() - 0.5) * intindere;
 
       culoareStea
@@ -797,17 +804,17 @@ function CampSteleDeplasare({ marimeHarta, temaAether }) {
     geometrie.setAttribute("color", new THREE.BufferAttribute(culori, 3));
     geometrie.computeBoundingSphere();
     return geometrie;
-  }, [marimeHarta, temaAether]);
+  }, [inaltime, marimeHarta, numarStele, samantaStrat, temaAether]);
 
   useEffect(() => () => geometrieStele.dispose(), [geometrieStele]);
 
   return (
     <points geometry={geometrieStele} frustumCulled={false}>
       <pointsMaterial
-        size={0.105}
+        size={dimensiune}
         vertexColors
         transparent
-        opacity={0.82}
+        opacity={opacitate}
         sizeAttenuation
         depthWrite={false}
         toneMapped={false}
@@ -892,7 +899,24 @@ export default function HartaSpatiala({
         limitaDeplasare={marimeHarta / 2}
       />
 
-      <CampSteleDeplasare marimeHarta={marimeHarta} temaAether={doarPortal} />
+      <CampSteleDeplasare
+        marimeHarta={marimeHarta}
+        temaAether={doarPortal}
+        numarStele={15000}
+        dimensiune={0.12}
+        opacitate={0.76}
+        samantaStrat={0}
+        inaltime={-1.72}
+      />
+      <CampSteleDeplasare
+        marimeHarta={marimeHarta}
+        temaAether={doarPortal}
+        numarStele={4200}
+        dimensiune={0.3}
+        opacitate={0.58}
+        samantaStrat={700001}
+        inaltime={-1.48}
+      />
 
       <mesh
         geometry={geometrie}
