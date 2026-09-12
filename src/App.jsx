@@ -73,7 +73,7 @@ const PLATFORME_HANGAR = [
   { x: POZITIE_HANGAR[0] + 48, z: POZITIE_HANGAR[2] + 21 },
   { x: POZITIE_HANGAR[0] - 1, z: POZITIE_HANGAR[2] + 47 },
 ];
-const RAZA_DOCARE_HANGAR = 75;
+const RAZA_DOCARE_PLATFORMA = 11;
 
 const AMMO_TYPES = [
   { id: "x1", label: "x1", color: "#59e6ff", multiplicator: 1,  shieldDamage: 4,  descriere: "Munitie laser de baza",       imagine: `${import.meta.env.BASE_URL}assets/Munitie x1 (1).png` },
@@ -187,11 +187,11 @@ export default function App() {
   }, [inamici]);
 
   useEffect(() => {
-    const inZona =
-      Math.hypot(
-        pozitieJucator[0] - POZITIE_HANGAR[0],
-        pozitieJucator[2] - POZITIE_HANGAR[2]
-      ) < RAZA_DOCARE_HANGAR;
+    const inZona = PLATFORME_HANGAR.some((platforma) => {
+      const dx = pozitieJucator[0] - platforma.x;
+      const dz = pozitieJucator[2] - platforma.z;
+      return Math.hypot(dx, dz) < RAZA_DOCARE_PLATFORMA;
+    });
 
     if (inZona && !inHangarRef.current) {
       inHangarRef.current = true;
