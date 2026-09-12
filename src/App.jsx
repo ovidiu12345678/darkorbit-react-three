@@ -97,6 +97,11 @@ const INAMICI_INITIALI = [
   { id: "x-02", pozitie: [-622.4, 2.2, 38.9], culoare: "#ff4add" },
   { id: "x-03", pozitie: [-462.4, 2.2, -111.1], culoare: "#36f5ff" },
   { id: "x-04", pozitie: [-617.4, 2.2, -96.1], culoare: "#ffd35a" },
+  { id: "x-05", pozitie: [220.4, 2.2, 310.9], culoare: "#8cff6b" },
+  { id: "x-06", pozitie: [380.4, 2.2, -260.1], culoare: "#ff4add" },
+  { id: "x-07", pozitie: [40.4, 2.2, -420.9], culoare: "#36f5ff" },
+  { id: "x-08", pozitie: [470.4, 2.2, 90.1], culoare: "#ffd35a" },
+  { id: "x-09", pozitie: [-120.4, 2.2, 460.9], culoare: "#8cff6b" },
 ].map((inamic) => ({
   ...inamic,
   scara: 3,
@@ -554,6 +559,7 @@ export default function App() {
 
           {hartaActiva !== "aether" && (
             <GestionarLupta
+              marimeHarta={MARIME_HARTA}
               playerRef={playerRef}
               pozitiiInamici={pozitiiInamici}
               inamici={inamici}

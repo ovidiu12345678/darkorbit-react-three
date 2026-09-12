@@ -17,7 +17,33 @@ const LUNGIME_BOLT_LASER = 7.2;
 const DURATA_FADE_BOLT = 0.12;
 const DURATA_FLASH_TUN = 0.12;
 
+const POZITIE_ZONA_SIGURA = new THREE.Vector3(-532.4, 0, -16.1);
+const RAZA_ZONA_SIGURA_RESPAWN = 120;
+const PRAG_FUGA_INAMIC = 0.1;
+const RATA_REGENERARE_RADIATIE = 0.05 / 60;
+
+function alegePozitieRespawn(marimeHarta) {
+  const limitaHarta = marimeHarta / 2 - 4.5;
+  let x = 0;
+  let z = 0;
+
+  for (let incercare = 0; incercare < 20; incercare += 1) {
+    x = (Math.random() - 0.5) * 2 * limitaHarta;
+    z = (Math.random() - 0.5) * 2 * limitaHarta;
+
+    const distantaZonaSigura = Math.hypot(
+      x - POZITIE_ZONA_SIGURA.x,
+      z - POZITIE_ZONA_SIGURA.z
+    );
+
+    if (distantaZonaSigura >= RAZA_ZONA_SIGURA_RESPAWN) break;
+  }
+
+  return [x, 2.2, z];
+}
+
 export default function GestionarLupta({
+  marimeHarta = 1260,
   playerRef,
   pozitiiInamici,
   inamici,
@@ -80,8 +106,54 @@ export default function GestionarLupta({
             activ: true,
             hp: inamic.hpMax ?? 100,
             scut: inamic.scutMax ?? 70,
+            pozitie: alegePozitieRespawn(marimeHarta),
             respawnLa: null,
             nonce: inamic.nonce + 1,
+          };
+        })
+      );
+    }
+
+    const limitaHartaRadiatie = marimeHarta / 2 - 4.5;
+    const latimeRadiatie = 4.5 * (marimeHarta / 210) * 2;
+
+    const areDeVindecatDinRadiatie = inamici.some((inamic) => {
+      if (!inamic.activ) return false;
+      if (inamic.hp > inamic.hpMax * PRAG_FUGA_INAMIC || inamic.scut > inamic.scutMax * PRAG_FUGA_INAMIC) {
+        return false;
+      }
+      if (inamic.hp >= inamic.hpMax && inamic.scut >= inamic.scutMax) return false;
+
+      const pozitieCurenta = pozitiiInamici.current[inamic.id];
+      if (!pozitieCurenta) return false;
+
+      const distantaPanaLaMargine =
+        limitaHartaRadiatie - Math.max(Math.abs(pozitieCurenta.x), Math.abs(pozitieCurenta.z));
+
+      return distantaPanaLaMargine < latimeRadiatie;
+    });
+
+    if (areDeVindecatDinRadiatie) {
+      seteazaInamici((lista) =>
+        lista.map((inamic) => {
+          if (!inamic.activ) return inamic;
+          if (inamic.hp > inamic.hpMax * PRAG_FUGA_INAMIC || inamic.scut > inamic.scutMax * PRAG_FUGA_INAMIC) {
+            return inamic;
+          }
+          if (inamic.hp >= inamic.hpMax && inamic.scut >= inamic.scutMax) return inamic;
+
+          const pozitieCurenta = pozitiiInamici.current[inamic.id];
+          if (!pozitieCurenta) return inamic;
+
+          const distantaPanaLaMargine =
+            limitaHartaRadiatie - Math.max(Math.abs(pozitieCurenta.x), Math.abs(pozitieCurenta.z));
+
+          if (distantaPanaLaMargine >= latimeRadiatie) return inamic;
+
+          return {
+            ...inamic,
+            hp: Math.min(inamic.hpMax, inamic.hp + inamic.hpMax * RATA_REGENERARE_RADIATIE * delta),
+            scut: Math.min(inamic.scutMax, inamic.scut + inamic.scutMax * RATA_REGENERARE_RADIATIE * delta),
           };
         })
       );

@@ -10,7 +10,7 @@ const POZITIE_ZONA_SIGURA = new THREE.Vector3(-532.4, 0, -16.1);
 const RAZA_ZONA_SIGURA = 26;
 const VITEZA_PROIECTIL = 30;
 const PRAG_FUGA = 0.1;
-const VITEZA_FUGA = 6;
+const VITEZA_FUGA = VITEZA_INAMIC * 1.5;
 const RAZA_SOSIRE_FUGA = 6;
 
 function alegePunctFuga(marimeHarta) {
