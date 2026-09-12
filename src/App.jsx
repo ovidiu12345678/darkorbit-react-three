@@ -3,6 +3,7 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import HartaSpatiala from "./components/HartaSpatiala.jsx";
 import InamicGheata from "./components/InamicGheata.jsx";
+import InamicOrnament from "./components/InamicOrnament.jsx";
 import NavaJucatorului from "./components/NavaJucatorului.jsx";
 import GestionarLupta from "./components/GestionarLupta.jsx";
 import InterfataJoc from "./components/InterfataJoc.jsx";
@@ -91,6 +92,7 @@ function formateazaNumarMunitie(numar) {
 const AMMO_BY_ID = Object.fromEntries(AMMO_TYPES.map((ammo) => [ammo.id, ammo]));
 
 const RECOMPENSA_INAMIC_GHEATA = { uridium: 350, credite: 650000, onoare: 250, experienta: 6000 };
+const RECOMPENSA_INAMIC_ORNAMENT = { credite: 17000000, uridium: 6300, onoare: 10000, experienta: 1000000 };
 
 const INAMICI_INITIALI = [
   { id: "x-01", pozitie: [-432.4, 2.2, 23.9], culoare: "#8cff6b" },
@@ -104,28 +106,49 @@ const INAMICI_INITIALI = [
   { id: "x-09", pozitie: [-120.4, 2.2, 460.9], culoare: "#8cff6b" },
 ].map((inamic) => ({
   ...inamic,
+  tip: "gheata",
   scara: 3,
   hp: 3000,
   scut: 300,
   hpMax: 3000,
   scutMax: 300,
+  recompensa: RECOMPENSA_INAMIC_GHEATA,
   activ: true,
   respawnLa: null,
   nonce: 0,
   impulsLovitura: 0,
 }));
 
+const INAMICI_ORNAMENT_INITIALI = [
+  { id: "orn-01", pozitie: [300.4, 2.2, 180.9], culoare: "#ff4a4a" },
+].map((inamic) => ({
+  ...inamic,
+  tip: "ornament",
+  scara: 3,
+  hp: 1450000,
+  scut: 560000,
+  hpMax: 1450000,
+  scutMax: 560000,
+  recompensa: RECOMPENSA_INAMIC_ORNAMENT,
+  activ: true,
+  respawnLa: null,
+  nonce: 0,
+  impulsLovitura: 0,
+}));
+
+const TOATE_INAMICII_INITIALI = [...INAMICI_INITIALI, ...INAMICI_ORNAMENT_INITIALI];
+
 export default function App() {
   const playerRef = useRef(new THREE.Vector3(-532.4, 3.2, -16.1));
   const pozitiiInamici = useRef({});
   const ultimaLovituraRef = useRef(0);
-  const inamiciRef = useRef(INAMICI_INITIALI);
+  const inamiciRef = useRef(TOATE_INAMICII_INITIALI);
 
   const [selectedAmmo, setSelectedAmmo] = useState("x1");
   const [tintaJucator, setTintaJucator] = useState(null);
   const [tintaLive, setTintaLive] = useState(false);
   const [pozitieJucator, setPozitieJucator] = useState([-532.4, 0, -16.1]);
-  const [inamici, setInamici] = useState(INAMICI_INITIALI);
+  const [inamici, setInamici] = useState(TOATE_INAMICII_INITIALI);
   const [tintaSelectata, setTintaSelectata] = useState(null);
   const [ataca, setAtaca] = useState(false);
   const [viata, setViata] = useState(100);
@@ -356,12 +379,12 @@ export default function App() {
     });
   }, []);
 
-  const acordaRecompensaInamic = useCallback(() => {
-    setCredite((valoare) => valoare + RECOMPENSA_INAMIC_GHEATA.credite);
-    setUridium((valoare) => valoare + RECOMPENSA_INAMIC_GHEATA.uridium);
-    setOnoare((valoare) => valoare + RECOMPENSA_INAMIC_GHEATA.onoare);
-    setExperienta((valoare) => valoare + RECOMPENSA_INAMIC_GHEATA.experienta);
-    setRecompensaActiva({ id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, ...RECOMPENSA_INAMIC_GHEATA });
+  const acordaRecompensaInamic = useCallback((recompensa = RECOMPENSA_INAMIC_GHEATA) => {
+    setCredite((valoare) => valoare + recompensa.credite);
+    setUridium((valoare) => valoare + recompensa.uridium);
+    setOnoare((valoare) => valoare + recompensa.onoare);
+    setExperienta((valoare) => valoare + recompensa.experienta);
+    setRecompensaActiva({ id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, ...recompensa });
   }, []);
 
   const alegeTinta = useCallback((punct) => {
@@ -514,28 +537,32 @@ export default function App() {
             onTransportAether={transportaPrinPortal}
           />
 
-          {hartaActiva !== "aether" && inamici.map((inamic) => (
-            <InamicGheata
-              key={`${inamic.id}-${inamic.nonce}`}
-              id={inamic.id}
-              pozitie={inamic.pozitie}
-              culoare={inamic.culoare}
-              scara={inamic.scara}
-              playerRef={playerRef}
-              onLovitura={primesteLovitura}
-              activ={inamic.activ}
-              selectat={inamic.id === tintaSelectata}
-              impulsLovitura={inamic.impulsLovitura}
-              hp={inamic.hp}
-              scut={inamic.scut}
-              hpMax={inamic.hpMax}
-              scutMax={inamic.scutMax}
-              marimeHarta={MARIME_HARTA}
-              onSelectare={selecteazaInamic}
-              onAtac={atacaInamic}
-              onPozitie={raporteazaPozitieInamic}
-            />
-          ))}
+          {hartaActiva !== "aether" && inamici.map((inamic) => {
+            const ComponentaInamic = inamic.tip === "ornament" ? InamicOrnament : InamicGheata;
+
+            return (
+              <ComponentaInamic
+                key={`${inamic.id}-${inamic.nonce}`}
+                id={inamic.id}
+                pozitie={inamic.pozitie}
+                culoare={inamic.culoare}
+                scara={inamic.scara}
+                playerRef={playerRef}
+                onLovitura={primesteLovitura}
+                activ={inamic.activ}
+                selectat={inamic.id === tintaSelectata}
+                impulsLovitura={inamic.impulsLovitura}
+                hp={inamic.hp}
+                scut={inamic.scut}
+                hpMax={inamic.hpMax}
+                scutMax={inamic.scutMax}
+                marimeHarta={MARIME_HARTA}
+                onSelectare={selecteazaInamic}
+                onAtac={atacaInamic}
+                onPozitie={raporteazaPozitieInamic}
+              />
+            );
+          })}
 
           <NavaJucatorului
             playerRef={playerRef}

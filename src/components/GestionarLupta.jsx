@@ -311,7 +311,7 @@ export default function GestionarLupta({
 
       if (aFostDistrus) {
         onStatus?.("tinta distrusa");
-        onDistrugeInamic?.();
+        onDistrugeInamic?.(inamic.recompensa);
       }
     }
 
