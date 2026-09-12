@@ -12,7 +12,7 @@ const VITEZA_PROIECTIL = 30;
 const PRAG_FUGA = 0.1;
 const VITEZA_FUGA = VITEZA_INAMIC * 1.5;
 const RAZA_SOSIRE_FUGA = 6;
-const DAUNA_PROIECTIL = 2700;
+const DAUNA_PROIECTIL = 27000;
 
 function alegePunctFuga(marimeHarta) {
   const limitaHarta = marimeHarta / 2 - 4.5;

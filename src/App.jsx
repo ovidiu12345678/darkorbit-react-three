@@ -121,6 +121,14 @@ const INAMICI_INITIALI = [
 
 const INAMICI_ORNAMENT_INITIALI = [
   { id: "orn-01", pozitie: [300.4, 2.2, 180.9], culoare: "#ff4a4a" },
+  { id: "orn-02", pozitie: [-300.4, 2.2, 200.9], culoare: "#ff4a4a" },
+  { id: "orn-03", pozitie: [500.4, 2.2, -450.9], culoare: "#ff4a4a" },
+  { id: "orn-04", pozitie: [-500.4, 2.2, -300.9], culoare: "#ff4a4a" },
+  { id: "orn-05", pozitie: [150.4, 2.2, -150.9], culoare: "#ff4a4a" },
+  { id: "orn-06", pozitie: [-200.4, 2.2, -500.9], culoare: "#ff4a4a" },
+  { id: "orn-07", pozitie: [550.4, 2.2, 350.9], culoare: "#ff4a4a" },
+  { id: "orn-08", pozitie: [-550.4, 2.2, 350.9], culoare: "#ff4a4a" },
+  { id: "orn-09", pozitie: [100.4, 2.2, 550.9], culoare: "#ff4a4a" },
 ].map((inamic) => ({
   ...inamic,
   tip: "ornament",
