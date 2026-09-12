@@ -874,15 +874,6 @@ function DecorSpatialUnic({ marimeHarta, temaAether }) {
 
   return (
     <group>
-      <lineSegments geometry={decor.linii} renderOrder={1}>
-        <lineBasicMaterial
-          color={temaAether ? "#d889ff" : "#73cfff"}
-          transparent
-          opacity={0.24}
-          depthWrite={false}
-          toneMapped={false}
-        />
-      </lineSegments>
       <points geometry={decor.stele} renderOrder={2}>
         <pointsMaterial
           color={temaAether ? "#f1c4ff" : "#d8f6ff"}
