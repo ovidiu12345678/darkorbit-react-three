@@ -257,7 +257,7 @@ export default function GestionarLupta({
         const exces = dauneScut - inamic.scut;
         daunaReala = exces * 0.3;
       } else {
-        daunaReala = 0;
+        daunaReala = daunaCorp * 0.05;
       }
 
       const hpNou = Math.max(0, inamic.hp - daunaReala);
