@@ -692,8 +692,8 @@ const fragmentShaderFundal = `
   }
 `;
 
-const LATIME_FUNDAL_VIZIBIL = 128;
-const INALTIME_FUNDAL_VIZIBIL = 72;
+const LATIME_FUNDAL_VIZIBIL = 220;
+const INALTIME_FUNDAL_VIZIBIL = 160;
 
 function FundalDistant({ textura }) {
   const fundalRef = useRef();
