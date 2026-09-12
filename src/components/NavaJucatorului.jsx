@@ -85,7 +85,7 @@ const TUNING_INITIAL = {
 
   cameraOffsetX: 0,
   cameraOffsetY: 68,
-  cameraOffsetZ: 0,
+  cameraOffsetZ: 54,
 
   cameraTargetOffsetX: 0,
   cameraTargetOffsetY: 0,
