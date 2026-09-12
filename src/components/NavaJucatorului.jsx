@@ -1760,12 +1760,6 @@ export default function NavaJucatorului({
       seteazaEfecteAtmosferice?.({ gaz: nivelGaz, radiatie: nivelRadiatie });
     }
 
-    const cameraTarget = cameraTargetTemp.set(
-      pozitie.x + tuning.cameraTargetOffsetX,
-      tuning.cameraTargetOffsetY,
-      pozitie.z + tuning.cameraTargetOffsetZ
-    );
-
     const cameraLerpPosition = THREE.MathUtils.clamp(
       tuning.cameraLerpPosition,
       0,
@@ -1804,6 +1798,16 @@ export default function NavaJucatorului({
 
       stare.camera.updateProjectionMatrix();
     }
+
+    // Look at a point defined relative to the camera's own (possibly still
+    // lerping) position, not the ship's raw position, so the orientation
+    // stays perfectly rigid — the camera pans to follow the ship without
+    // ever rotating/wobbling while it catches up.
+    const cameraTarget = cameraTargetTemp.set(
+      stare.camera.position.x + (tuning.cameraTargetOffsetX - tuning.cameraOffsetX),
+      tuning.cameraTargetOffsetY,
+      stare.camera.position.z + (tuning.cameraTargetOffsetZ - tuning.cameraOffsetZ)
+    );
 
     stare.camera.lookAt(cameraTarget);
 
