@@ -695,59 +695,11 @@ const fragmentShaderFundal = `
 const LATIME_FUNDAL_VIZIBIL = 220;
 const INALTIME_FUNDAL_VIZIBIL = 160;
 
-const vertexShaderPanoramaRecolorata = `
-  varying vec2 vUv;
-
-  void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
-
-const fragmentShaderPanoramaRecolorata = `
-  uniform sampler2D uTextura;
-  uniform float uOffsetX;
-  uniform float uOffsetY;
-  varying vec2 vUv;
-
-  vec3 rgb2hsv(vec3 c) {
-    vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
-    vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
-    vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
-    float d = q.x - min(q.w, q.y);
-    float e = 1.0e-10;
-    return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
-  }
-
-  void main() {
-    vec2 uv = vUv + vec2(uOffsetX, uOffsetY);
-    vec3 culoare = texture2D(uTextura, uv).rgb;
-    vec3 hsv = rgb2hsv(culoare);
-
-    float cald = smoothstep(0.60, 0.86, hsv.x);
-    vec3 rece = vec3(0.10, 0.62, 0.95);
-    vec3 fierbinte = vec3(1.0, 0.36, 0.07);
-    vec3 duoton = mix(rece, fierbinte, cald) * hsv.z;
-    vec3 rezultat = mix(vec3(hsv.z), duoton, clamp(hsv.y * 1.7, 0.0, 1.0));
-
-    gl_FragColor = vec4(rezultat, 1.0);
-  }
-`;
-
-function FundalDistant({ textura, temaAether }) {
+function FundalDistant({ textura }) {
   const fundalRef = useRef();
   const texturaPanorama = useMemo(() => textura.clone(), [textura]);
   const directiePrivire = useMemo(() => new THREE.Vector3(), []);
   const centruVizibil = useMemo(() => new THREE.Vector3(), []);
-
-  const uniformeRecolorare = useMemo(
-    () => ({
-      uTextura: { value: texturaPanorama },
-      uOffsetX: { value: 0 },
-      uOffsetY: { value: 0 },
-    }),
-    [texturaPanorama]
-  );
 
   useEffect(() => {
     texturaPanorama.colorSpace = THREE.SRGBColorSpace;
@@ -785,9 +737,6 @@ function FundalDistant({ textura, temaAether }) {
       0.04 - centruVizibil.z / INALTIME_FUNDAL_VIZIBIL,
       2
     );
-
-    uniformeRecolorare.uOffsetX.value = texturaPanorama.offset.x;
-    uniformeRecolorare.uOffsetY.value = texturaPanorama.offset.y;
   });
 
   return (
@@ -798,22 +747,12 @@ function FundalDistant({ textura, temaAether }) {
       frustumCulled={false}
     >
       <planeGeometry args={[LATIME_FUNDAL_VIZIBIL, INALTIME_FUNDAL_VIZIBIL]} />
-      {temaAether ? (
-        <shaderMaterial
-          uniforms={uniformeRecolorare}
-          vertexShader={vertexShaderPanoramaRecolorata}
-          fragmentShader={fragmentShaderPanoramaRecolorata}
-          toneMapped={false}
-          depthWrite={false}
-        />
-      ) : (
-        <meshBasicMaterial
-          map={texturaPanorama}
-          toneMapped={false}
-          fog={false}
-          depthWrite={false}
-        />
-      )}
+      <meshBasicMaterial
+        map={texturaPanorama}
+        toneMapped={false}
+        fog={false}
+        depthWrite={false}
+      />
     </mesh>
   );
 }
@@ -1159,7 +1098,7 @@ export default function HartaSpatiala({
 
   return (
     <group>
-      <FundalDistant textura={texturaHarta} temaAether={doarPortal} />
+      <FundalDistant textura={texturaHarta} />
       <DecorSpatialUnic marimeHarta={marimeHarta} temaAether={doarPortal} />
       <CorpuriCerestiUnice
         textura={texturaCorpuri}
