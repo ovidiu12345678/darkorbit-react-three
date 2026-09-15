@@ -85,7 +85,12 @@ function PoartaSalt({ pozitie, culoare = "#39f5ff" }) {
   );
 }
 
-function PortalAether({ pozitie, onTransport }) {
+function PortalAether({
+  pozitie,
+  onTransport,
+  imagine = "assets/portal-aether-helix.png",
+  tema = "aether",
+}) {
   const portal = useRef();
   const materialPortal = useRef();
   const insigna = useRef();
@@ -102,8 +107,12 @@ function PortalAether({ pozitie, onTransport }) {
   const transportExecutat = useRef(false);
   const texturaPortal = useLoader(
     THREE.TextureLoader,
-    `${import.meta.env.BASE_URL}assets/portal-aether-helix.png`
+    `${import.meta.env.BASE_URL}${imagine}`
   );
+  const esteNoctis = tema === "noctis";
+  const culoareEnergie = esteNoctis ? "#ff5b1f" : "#52dcff";
+  const culoareAccent = esteNoctis ? "#ffc04a" : "#a66cff";
+  const culoareRece = esteNoctis ? "#56e9ef" : "#71efff";
 
   const dateParticule = useMemo(
     () =>
@@ -260,7 +269,7 @@ function PortalAether({ pozitie, onTransport }) {
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.12, 0]}>
         <ringGeometry args={[13.5, 15.2, 72]} />
-        <meshBasicMaterial color="#6d5cff" transparent opacity={0.34} side={THREE.DoubleSide} />
+        <meshBasicMaterial color={esteNoctis ? "#ff5b1f" : "#6d5cff"} transparent opacity={0.34} side={THREE.DoubleSide} />
       </mesh>
 
       <group ref={insigna} position={[0, 37, 0]} renderOrder={8}>
@@ -285,7 +294,7 @@ function PortalAether({ pozitie, onTransport }) {
         <mesh ref={inelInsigna} position={[0, 0, -0.05]}>
           <ringGeometry args={[6.05, 6.72, 64]} />
           <meshBasicMaterial
-            color="#79edff"
+            color={esteNoctis ? "#ffbf4b" : "#79edff"}
             transparent
             opacity={0.88}
             depthWrite={false}
@@ -300,7 +309,7 @@ function PortalAether({ pozitie, onTransport }) {
         <mesh ref={coloanaEnergie} position={[0, 15, 0]}>
           <cylinderGeometry args={[5.5, 10.5, 30, 48, 1, true]} />
           <meshBasicMaterial
-            color="#52dcff"
+            color={culoareEnergie}
             transparent
             opacity={0}
             depthWrite={false}
@@ -312,7 +321,7 @@ function PortalAether({ pozitie, onTransport }) {
         <mesh ref={undaSol} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.3, 0]}>
           <ringGeometry args={[8.5, 10.4, 96]} />
           <meshBasicMaterial
-            color="#a66cff"
+            color={culoareAccent}
             transparent
             opacity={0}
             depthWrite={false}
@@ -324,7 +333,7 @@ function PortalAether({ pozitie, onTransport }) {
         <mesh ref={undaAer} position={[0, 13, 0]}>
           <ringGeometry args={[8.2, 9.4, 96]} />
           <meshBasicMaterial
-            color="#71efff"
+            color={culoareRece}
             transparent
             opacity={0}
             depthWrite={false}
@@ -336,7 +345,7 @@ function PortalAether({ pozitie, onTransport }) {
         <mesh ref={flashCentral} position={[0, 13, 0]}>
           <circleGeometry args={[11, 64]} />
           <meshBasicMaterial
-            color="#c9fbff"
+            color={esteNoctis ? "#fff0ba" : "#c9fbff"}
             transparent
             opacity={0}
             depthWrite={false}
@@ -355,7 +364,7 @@ function PortalAether({ pozitie, onTransport }) {
           >
             <octahedronGeometry args={[0.62, 0]} />
             <meshBasicMaterial
-              color={index % 2 === 0 ? "#65ecff" : "#b46cff"}
+              color={index % 2 === 0 ? culoareRece : culoareAccent}
               transparent
               opacity={0}
               depthWrite={false}
@@ -364,10 +373,10 @@ function PortalAether({ pozitie, onTransport }) {
           </mesh>
         ))}
 
-        <pointLight ref={luminaTransport} color="#7feeff" intensity={0} distance={88} position={[0, 14, 0]} />
+        <pointLight ref={luminaTransport} color={culoareEnergie} intensity={0} distance={88} position={[0, 14, 0]} />
       </group>
 
-      <pointLight color="#52dcff" intensity={4.2} distance={58} position={[0, 8, 0]} />
+      <pointLight color={culoareEnergie} intensity={4.2} distance={58} position={[0, 8, 0]} />
     </group>
   );
 }
@@ -781,9 +790,11 @@ function creeazaGeometrie(pozitii, culori) {
   return geometrie;
 }
 
-function DecorSpatialUnic({ marimeHarta, temaAether }) {
+function DecorSpatialUnic({ marimeHarta, temaAether, temaNoctis = false }) {
   const decor = useMemo(() => {
-    const aleator = generatorDeterminist(temaAether ? 0xa37ae771 : 0x51c0b17d);
+    const aleator = generatorDeterminist(
+      temaNoctis ? 0x4e0c715a : temaAether ? 0xa37ae771 : 0x51c0b17d
+    );
     const latimeHarta = marimeHarta * (16 / 9);
     const coloane = 18;
     const randuri = 11;
@@ -793,7 +804,9 @@ function DecorSpatialUnic({ marimeHarta, temaAether }) {
     const pozitiiLinii = [];
     const pozitiiGalaxii = [];
     const culoriGalaxii = [];
-    const paleta = temaAether
+    const paleta = temaNoctis
+      ? [new THREE.Color("#ffb24a"), new THREE.Color("#e7542c"), new THREE.Color("#51d9df")]
+      : temaAether
       ? [new THREE.Color("#f2b4ff"), new THREE.Color("#9a63ff"), new THREE.Color("#65ddff")]
       : [new THREE.Color("#a9efff"), new THREE.Color("#79a8ff"), new THREE.Color("#ffd38a")];
 
@@ -861,7 +874,7 @@ function DecorSpatialUnic({ marimeHarta, temaAether }) {
       linii: creeazaGeometrie(pozitiiLinii),
       galaxii: creeazaGeometrie(pozitiiGalaxii, culoriGalaxii),
     };
-  }, [marimeHarta, temaAether]);
+  }, [marimeHarta, temaAether, temaNoctis]);
 
   useEffect(
     () => () => {
@@ -876,7 +889,7 @@ function DecorSpatialUnic({ marimeHarta, temaAether }) {
     <group>
       <points geometry={decor.stele} renderOrder={2}>
         <pointsMaterial
-          color={temaAether ? "#f1c4ff" : "#d8f6ff"}
+          color={temaNoctis ? "#ffd19a" : temaAether ? "#f1c4ff" : "#d8f6ff"}
           size={0.82}
           transparent
           opacity={0.9}
@@ -962,6 +975,16 @@ const CORPURI_AETHER = [
   { centru: [0.955, 0.07], decupaj: [0.11, 0.14], marime: [6, 5] },
 ];
 
+const CORPURI_NOCTIS = [
+  { centru: [0.16, 0.18], decupaj: [0.34, 0.36], marime: [18, 13] },
+  { centru: [0.5, 0.12], decupaj: [0.24, 0.22], marime: [13, 7] },
+  { centru: [0.85, 0.17], decupaj: [0.27, 0.26], marime: [14, 9] },
+  { centru: [0.9, 0.47], decupaj: [0.2, 0.29], marime: [12, 11] },
+  { centru: [0.17, 0.71], decupaj: [0.36, 0.43], marime: [18, 15] },
+  { centru: [0.5, 0.8], decupaj: [0.23, 0.24], marime: [12, 7] },
+  { centru: [0.86, 0.76], decupaj: [0.29, 0.24], marime: [16, 8] },
+];
+
 function CorpCerescDinHarta({ textura, definitie, limitaHarta }) {
   const uniforme = useMemo(
     () => ({
@@ -995,15 +1018,16 @@ function CorpCerescDinHarta({ textura, definitie, limitaHarta }) {
   );
 }
 
-function CorpuriCerestiUnice({ textura, marimeHarta, temaAether }) {
+function CorpuriCerestiUnice({ textura, marimeHarta, temaAether, temaNoctis = false }) {
   const limitaHarta = marimeHarta / 2 - 4.5;
-  const corpuri = temaAether ? CORPURI_AETHER : CORPURI_STANDARD;
+  const corpuri = temaNoctis ? CORPURI_NOCTIS : temaAether ? CORPURI_AETHER : CORPURI_STANDARD;
+  const cheieTema = temaNoctis ? "noctis" : temaAether ? "aether" : "standard";
 
   return (
     <group>
       {corpuri.map((definitie, index) => (
         <CorpCerescDinHarta
-          key={`${temaAether ? "aether" : "standard"}-${index}`}
+          key={`${cheieTema}-${index}`}
           textura={textura}
           definitie={definitie}
           limitaHarta={limitaHarta}
@@ -1027,8 +1051,13 @@ export default function HartaSpatiala({
   pozitieStatie = POZITIE_STATIE_INITIALA,
   pozitieHangar = POZITIE_HANGAR_INITIALA,
   pozitiePortalAether,
+  pozitiePortalSecundar,
+  imaginePortalSecundar,
+  temaPortalSecundar = "aether",
+  temaHarta = "standard",
   doarPortal = false,
   onTransportAether,
+  onTransportSecundar,
 }) {
   const latimeHarta = marimeHarta * (16 / 9);
   const inaltimeHarta = marimeHarta;
@@ -1099,11 +1128,16 @@ export default function HartaSpatiala({
   return (
     <group>
       <FundalDistant textura={texturaHarta} />
-      <DecorSpatialUnic marimeHarta={marimeHarta} temaAether={doarPortal} />
+      <DecorSpatialUnic
+        marimeHarta={marimeHarta}
+        temaAether={doarPortal}
+        temaNoctis={temaHarta === "noctis"}
+      />
       <CorpuriCerestiUnice
         textura={texturaCorpuri}
         marimeHarta={marimeHarta}
         temaAether={doarPortal}
+        temaNoctis={temaHarta === "noctis"}
       />
 
       <mesh
@@ -1142,6 +1176,15 @@ export default function HartaSpatiala({
 
       {pozitiePortalAether && (
         <PortalAether pozitie={pozitiePortalAether} onTransport={onTransportAether} />
+      )}
+
+      {pozitiePortalSecundar && (
+        <PortalAether
+          pozitie={pozitiePortalSecundar}
+          onTransport={onTransportSecundar}
+          imagine={imaginePortalSecundar}
+          tema={temaPortalSecundar}
+        />
       )}
 
       <TintaIndicator tinta={tintaJucator} />

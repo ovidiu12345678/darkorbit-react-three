@@ -27,12 +27,16 @@ import { NAVE, NAVE_BY_ID } from "./data/nave.js";
 const MARIME_HARTA = 1260;
 const FUNDAL_HARTA_STANDARD = "assets/harta-standard-v3.png";
 const FUNDAL_HARTA_AETHER = "assets/harta-nebuloasa-aether-v3.png";
+const FUNDAL_HARTA_NOCTIS = "assets/harta-ares-noctis.png";
 const FUNDAL_JOC_STANDARD = "assets/harta-standard-nebuloasa.png";
 const FUNDAL_JOC_AETHER = "assets/harta-aether-nebuloasa.png";
+const FUNDAL_JOC_NOCTIS = "assets/fundal-ares-noctis.png";
 const CORPURI_HARTA_STANDARD = "assets/corpuri-standard-transparente.png";
 const CORPURI_HARTA_AETHER = "assets/corpuri-aether-transparente.png";
+const CORPURI_HARTA_NOCTIS = "assets/corpuri-ares-noctis-transparente.png";
 const FUNDAL_MINI_STANDARD = FUNDAL_HARTA_STANDARD;
 const FUNDAL_MINI_AETHER = FUNDAL_HARTA_AETHER;
+const FUNDAL_MINI_NOCTIS = FUNDAL_HARTA_NOCTIS;
 
 const LIMITA_HARTA = MARIME_HARTA / 2 - 4.5;
 const FACTOR_SCALARE_HARTA = MARIME_HARTA / 210;
@@ -44,6 +48,8 @@ const COORDONATA_PORTAL_AETHER =
 const DISTANTA_REAPARITIE_PORTAL = 34;
 const POZITIE_PORTAL_STANDARD = [COORDONATA_PORTAL_AETHER, 0, COORDONATA_PORTAL_AETHER];
 const POZITIE_PORTAL_AETHER = [-COORDONATA_PORTAL_AETHER, 0, -COORDONATA_PORTAL_AETHER];
+const POZITIE_PORTAL_NOCTIS_AETHER = [COORDONATA_PORTAL_AETHER, 0, -COORDONATA_PORTAL_AETHER];
+const POZITIE_PORTAL_NOCTIS = [COORDONATA_PORTAL_AETHER, 0, -COORDONATA_PORTAL_AETHER];
 const POZITIE_INTRARE_AETHER = [
   -COORDONATA_PORTAL_AETHER + DISTANTA_REAPARITIE_PORTAL,
   3.2,
@@ -190,6 +196,16 @@ const TOATE_INAMICII_INITIALI = [
   ...INAMICI_ORNAMENT_INITIALI,
   ...INAMICI_AETHER_INITIALI,
 ];
+const POZITIE_INTRARE_NOCTIS = [
+  COORDONATA_PORTAL_AETHER - DISTANTA_REAPARITIE_PORTAL,
+  3.2,
+  -COORDONATA_PORTAL_AETHER + DISTANTA_REAPARITIE_PORTAL,
+];
+const POZITIE_REVENIRE_AETHER_DIN_NOCTIS = [
+  COORDONATA_PORTAL_AETHER - DISTANTA_REAPARITIE_PORTAL,
+  3.2,
+  -COORDONATA_PORTAL_AETHER + DISTANTA_REAPARITIE_PORTAL,
+];
 
 export default function App() {
   const playerRef = useRef(new THREE.Vector3(-532.4, 3.2, -16.1));
@@ -213,6 +229,7 @@ export default function App() {
   const [vitezaNava, setVitezaNava] = useState(1);
   const [hartaActiva, setHartaActiva] = useState("standard");
   const [semnalTeleportare, setSemnalTeleportare] = useState(0);
+  const [pozitieTeleportare, setPozitieTeleportare] = useState(POZITIE_REVENIRE_STANDARD);
 
   const [credite, setCredite] = useState(10000000);
   const [uridium, setUridium] = useState(0);
@@ -292,6 +309,7 @@ export default function App() {
   const transportaPrinPortal = useCallback(() => {
     const intraInAether = hartaActiva !== "aether";
 
+    setPozitieTeleportare(intraInAether ? POZITIE_INTRARE_AETHER : POZITIE_REVENIRE_STANDARD);
     setHartaActiva(intraInAether ? "aether" : "standard");
     setTintaJucator(null);
     setTintaLive(false);
@@ -559,11 +577,44 @@ export default function App() {
     return () => window.removeEventListener("keydown", laApasareTasta);
   }, [hartaActiva]);
 
+  const transportaPrinPortalNoctis = useCallback(() => {
+    const intraInNoctis = hartaActiva !== "noctis";
+
+    setPozitieTeleportare(
+      intraInNoctis ? POZITIE_INTRARE_NOCTIS : POZITIE_REVENIRE_AETHER_DIN_NOCTIS
+    );
+    setHartaActiva(intraInNoctis ? "noctis" : "aether");
+    setTintaJucator(null);
+    setTintaLive(false);
+    setTintaSelectata(null);
+    setAtaca(false);
+    setAmenintare(intraInNoctis ? "sector Ares Noctis" : "sector Aether");
+    setSemnalTeleportare((valoare) => valoare + 1);
+  }, [hartaActiva]);
+
   const scutProcent = scutMaxNava > 0 ? (scut / scutMaxNava) * 100 : 0;
   const statistici = { viata, scut: scutProcent, scutMax: scutMaxNava, atacuri, amenintare };
   const inamiciHartaActiva = inamici.filter(
     (inamic) => (inamic.harta ?? "standard") === hartaActiva
   );
+  const esteNoctis = hartaActiva === "noctis";
+  const esteAether = hartaActiva === "aether";
+  const esteStandard = hartaActiva === "standard";
+  const fundalJoc = esteNoctis
+    ? FUNDAL_JOC_NOCTIS
+    : esteAether
+      ? FUNDAL_JOC_AETHER
+      : FUNDAL_JOC_STANDARD;
+  const corpuriHarta = esteNoctis
+    ? CORPURI_HARTA_NOCTIS
+    : esteAether
+      ? CORPURI_HARTA_AETHER
+      : CORPURI_HARTA_STANDARD;
+  const fundalMini = esteNoctis
+    ? FUNDAL_MINI_NOCTIS
+    : esteAether
+      ? FUNDAL_MINI_AETHER
+      : FUNDAL_MINI_STANDARD;
 
   return (
     <>
@@ -579,19 +630,24 @@ export default function App() {
         <Suspense fallback={null}>
           <HartaSpatiala
             marimeHarta={MARIME_HARTA}
-            imagineFundal={hartaActiva === "aether" ? FUNDAL_JOC_AETHER : FUNDAL_JOC_STANDARD}
-            imagineCorpuri={hartaActiva === "aether" ? CORPURI_HARTA_AETHER : CORPURI_HARTA_STANDARD}
+            imagineFundal={fundalJoc}
+            imagineCorpuri={corpuriHarta}
             onAlegeTinta={alegeTinta}
             tintaJucator={tintaJucator}
             onStareClic={setTintaLive}
             playerRef={playerRef}
             pozitieStatie={POZITIE_STATIE}
             pozitieHangar={POZITIE_HANGAR}
-            pozitiePortalAether={
-              hartaActiva === "aether" ? POZITIE_PORTAL_AETHER : POZITIE_PORTAL_STANDARD
+            pozitiePortalAether={esteNoctis ? null : esteAether ? POZITIE_PORTAL_AETHER : POZITIE_PORTAL_STANDARD}
+            pozitiePortalSecundar={
+              esteNoctis ? POZITIE_PORTAL_NOCTIS : esteAether ? POZITIE_PORTAL_NOCTIS_AETHER : null
             }
-            doarPortal={hartaActiva === "aether"}
+            imaginePortalSecundar="assets/portal-ares-noctis.png"
+            temaPortalSecundar="noctis"
+            temaHarta={esteNoctis ? "noctis" : esteAether ? "aether" : "standard"}
+            doarPortal={!esteStandard}
             onTransportAether={transportaPrinPortal}
+            onTransportSecundar={transportaPrinPortalNoctis}
           />
 
           {inamiciHartaActiva.map((inamic) => {
@@ -640,9 +696,7 @@ export default function App() {
             multiplicatorViteza={vitezaNava * (1 + bonusVitezaProcent / 100)}
             viata={viata}
             scut={scut}
-            pozitieTeleportare={
-              hartaActiva === "aether" ? POZITIE_INTRARE_AETHER : POZITIE_REVENIRE_STANDARD
-            }
+            pozitieTeleportare={pozitieTeleportare}
             semnalTeleportare={semnalTeleportare}
           />
 
@@ -710,21 +764,24 @@ export default function App() {
 
       <HartaMini
         marimeHarta={MARIME_HARTA}
+        numeHarta={esteNoctis ? "Ares Noctis" : esteAether ? "Aether" : "Sector standard"}
         pozitieJucator={pozitieJucator}
         tintaJucator={tintaJucator}
         inamici={inamiciHartaActiva}
         onAlegeTinta={alegeTinta}
-        pozitieStatie={hartaActiva === "aether" ? null : POZITIE_STATIE}
-        pozitieHangar={hartaActiva === "aether" ? null : POZITIE_HANGAR}
+        pozitieStatie={esteStandard ? POZITIE_STATIE : null}
+        pozitieHangar={esteStandard ? POZITIE_HANGAR : null}
         pozitieAndocareHangar={
-          hartaActiva === "aether"
-            ? null
-            : [PLATFORME_HANGAR[2].x, 0, PLATFORME_HANGAR[2].z]
+          esteStandard ? [PLATFORME_HANGAR[2].x, 0, PLATFORME_HANGAR[2].z] : null
         }
         pozitiePortal={
-          hartaActiva === "aether" ? POZITIE_PORTAL_AETHER : POZITIE_PORTAL_STANDARD
+          esteNoctis ? POZITIE_PORTAL_NOCTIS : esteAether ? POZITIE_PORTAL_AETHER : POZITIE_PORTAL_STANDARD
         }
-        imagineFundal={hartaActiva === "aether" ? FUNDAL_MINI_AETHER : FUNDAL_MINI_STANDARD}
+        etichetaPortal={esteNoctis ? "Portal spre Aether" : esteAether ? "Portal spre sectorul standard" : "Portal spre Aether"}
+        temaPortal={esteNoctis ? "noctis" : "aether"}
+        pozitiePortalSecundar={esteAether ? POZITIE_PORTAL_NOCTIS_AETHER : null}
+        etichetaPortalSecundar="Portal spre Ares Noctis"
+        imagineFundal={fundalMini}
       />
 
       <ButonFullscreen />

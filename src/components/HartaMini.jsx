@@ -11,6 +11,7 @@ function clamp(valoare, min, max) {
 
 export default function HartaMini({
   marimeHarta,
+  numeHarta = "Sector standard",
   pozitieJucator,
   tintaJucator,
   inamici,
@@ -19,6 +20,10 @@ export default function HartaMini({
   pozitieHangar,
   pozitieAndocareHangar,
   pozitiePortal,
+  etichetaPortal = "Portal Aether",
+  temaPortal = "aether",
+  pozitiePortalSecundar,
+  etichetaPortalSecundar = "Portal secundar",
   imagineFundal = "assets/harta-spatiala-fundal-hi.jpg",
 }) {
   const continutRef = useRef(null);
@@ -146,6 +151,9 @@ export default function HartaMini({
   const pozitieStatieMini = pozitieStatie ? lumeLaProcent(pozitieStatie[0], pozitieStatie[2]) : null;
   const pozitieHangarMini = pozitieHangar ? lumeLaProcent(pozitieHangar[0], pozitieHangar[2]) : null;
   const pozitiePortalMini = pozitiePortal ? lumeLaProcent(pozitiePortal[0], pozitiePortal[2]) : null;
+  const pozitiePortalSecundarMini = pozitiePortalSecundar
+    ? lumeLaProcent(pozitiePortalSecundar[0], pozitiePortalSecundar[2])
+    : null;
 
   const laClickRepere = useCallback(
     (eveniment, pozitie) => {
@@ -166,7 +174,7 @@ export default function HartaMini({
       }}
     >
       <div className="harta-mini-antet" onMouseDown={pornesteTragerePanou}>
-        <span>Harta mini</span>
+        <span>Harta mini · {numeHarta}</span>
         {tintaJucator && (
           <span className="harta-mini-ruta">
             Ruta: {tintaJucator[0].toFixed(0)} / {tintaJucator[2].toFixed(0)}
@@ -229,11 +237,21 @@ export default function HartaMini({
 
           {pozitiePortalMini && (
             <span
-              className="harta-mini-marker harta-mini-portal"
+              className={`harta-mini-marker harta-mini-portal ${temaPortal === "noctis" ? "harta-mini-portal-secundar" : ""}`}
               style={{ left: `${pozitiePortalMini.left}%`, top: `${pozitiePortalMini.top}%` }}
-              title="Portal Aether"
+              title={etichetaPortal}
               onMouseDown={(eveniment) => eveniment.stopPropagation()}
               onClick={(eveniment) => laClickRepere(eveniment, pozitiePortal)}
+            />
+          )}
+
+          {pozitiePortalSecundarMini && (
+            <span
+              className="harta-mini-marker harta-mini-portal harta-mini-portal-secundar"
+              style={{ left: `${pozitiePortalSecundarMini.left}%`, top: `${pozitiePortalSecundarMini.top}%` }}
+              title={etichetaPortalSecundar}
+              onMouseDown={(eveniment) => eveniment.stopPropagation()}
+              onClick={(eveniment) => laClickRepere(eveniment, pozitiePortalSecundar)}
             />
           )}
 
