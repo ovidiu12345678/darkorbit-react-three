@@ -4,6 +4,7 @@ import * as THREE from "three";
 import HartaSpatiala from "./components/HartaSpatiala.jsx";
 import InamicGheata from "./components/InamicGheata.jsx";
 import InamicOrnament from "./components/InamicOrnament.jsx";
+import InamicAether from "./components/InamicAether.jsx";
 import NavaJucatorului from "./components/NavaJucatorului.jsx";
 import GestionarLupta from "./components/GestionarLupta.jsx";
 import InterfataJoc from "./components/InterfataJoc.jsx";
@@ -93,6 +94,11 @@ const AMMO_BY_ID = Object.fromEntries(AMMO_TYPES.map((ammo) => [ammo.id, ammo]))
 
 const RECOMPENSA_INAMIC_GHEATA = { uridium: 350, credite: 650000, onoare: 250, experienta: 6000 };
 const RECOMPENSA_INAMIC_ORNAMENT = { credite: 17000000, uridium: 6300, onoare: 10000, experienta: 1000000 };
+const RECOMPENSE_AETHER = {
+  manta: { credite: 1600000, uridium: 1500, onoare: 1800, experienta: 120000 },
+  oculus: { credite: 3800000, uridium: 2700, onoare: 3500, experienta: 280000 },
+  chronolith: { credite: 8000000, uridium: 4800, onoare: 7000, experienta: 650000 },
+};
 
 const INAMICI_INITIALI = [
   { id: "x-01", pozitie: [-432.4, 2.2, 23.9], culoare: "#8cff6b" },
@@ -144,7 +150,46 @@ const INAMICI_ORNAMENT_INITIALI = [
   impulsLovitura: 0,
 }));
 
-const TOATE_INAMICII_INITIALI = [...INAMICI_INITIALI, ...INAMICI_ORNAMENT_INITIALI];
+const INAMICI_AETHER_INITIALI = [
+  { id: "aether-manta-01", tipAether: "manta", pozitie: [-360, 2.2, 180] },
+  { id: "aether-manta-02", tipAether: "manta", pozitie: [120, 2.2, -280] },
+  { id: "aether-manta-03", tipAether: "manta", pozitie: [420, 2.2, 310] },
+  { id: "aether-oculus-01", tipAether: "oculus", pozitie: [-110, 2.2, 410] },
+  { id: "aether-oculus-02", tipAether: "oculus", pozitie: [330, 2.2, -90] },
+  { id: "aether-oculus-03", tipAether: "oculus", pozitie: [-450, 2.2, -260] },
+  { id: "aether-chronolith-01", tipAether: "chronolith", pozitie: [210, 2.2, 440] },
+  { id: "aether-chronolith-02", tipAether: "chronolith", pozitie: [-350, 2.2, 340] },
+  { id: "aether-chronolith-03", tipAether: "chronolith", pozitie: [450, 2.2, -410] },
+].map((inamic) => {
+  const statistici = {
+    manta: { hp: 140000, scut: 90000 },
+    oculus: { hp: 260000, scut: 180000 },
+    chronolith: { hp: 600000, scut: 420000 },
+  }[inamic.tipAether];
+
+  return {
+    ...inamic,
+    harta: "aether",
+    tip: "aether",
+    culoare: inamic.tipAether === "manta" ? "#75e9ff" : inamic.tipAether === "oculus" ? "#ff573d" : "#8dff88",
+    scara: 2.15,
+    hp: statistici.hp,
+    scut: statistici.scut,
+    hpMax: statistici.hp,
+    scutMax: statistici.scut,
+    recompensa: RECOMPENSE_AETHER[inamic.tipAether],
+    activ: true,
+    respawnLa: null,
+    nonce: 0,
+    impulsLovitura: 0,
+  };
+});
+
+const TOATE_INAMICII_INITIALI = [
+  ...INAMICI_INITIALI,
+  ...INAMICI_ORNAMENT_INITIALI,
+  ...INAMICI_AETHER_INITIALI,
+];
 
 export default function App() {
   const playerRef = useRef(new THREE.Vector3(-532.4, 3.2, -16.1));
@@ -474,6 +519,7 @@ export default function App() {
 
       for (const inamic of inamiciRef.current) {
         if (!inamic.activ) continue;
+        if ((inamic.harta ?? "standard") !== hartaActiva) continue;
         const pozitie = pozitiiInamici.current[inamic.id];
         if (!pozitie) continue;
         const distanta = playerRef.current.distanceTo(pozitie);
@@ -511,10 +557,13 @@ export default function App() {
 
     window.addEventListener("keydown", laApasareTasta);
     return () => window.removeEventListener("keydown", laApasareTasta);
-  }, []);
+  }, [hartaActiva]);
 
   const scutProcent = scutMaxNava > 0 ? (scut / scutMaxNava) * 100 : 0;
   const statistici = { viata, scut: scutProcent, scutMax: scutMaxNava, atacuri, amenintare };
+  const inamiciHartaActiva = inamici.filter(
+    (inamic) => (inamic.harta ?? "standard") === hartaActiva
+  );
 
   return (
     <>
@@ -545,13 +594,18 @@ export default function App() {
             onTransportAether={transportaPrinPortal}
           />
 
-          {hartaActiva !== "aether" && inamici.map((inamic) => {
-            const ComponentaInamic = inamic.tip === "ornament" ? InamicOrnament : InamicGheata;
+          {inamiciHartaActiva.map((inamic) => {
+            const ComponentaInamic = inamic.tip === "ornament"
+              ? InamicOrnament
+              : inamic.tip === "aether"
+                ? InamicAether
+                : InamicGheata;
 
             return (
               <ComponentaInamic
                 key={`${inamic.id}-${inamic.nonce}`}
                 id={inamic.id}
+                tipAether={inamic.tipAether}
                 pozitie={inamic.pozitie}
                 culoare={inamic.culoare}
                 scara={inamic.scara}
@@ -592,12 +646,11 @@ export default function App() {
             semnalTeleportare={semnalTeleportare}
           />
 
-          {hartaActiva !== "aether" && (
-            <GestionarLupta
+          <GestionarLupta
               marimeHarta={MARIME_HARTA}
               playerRef={playerRef}
               pozitiiInamici={pozitiiInamici}
-              inamici={inamici}
+              inamici={inamiciHartaActiva}
               seteazaInamici={setInamici}
               tintaSelectata={tintaSelectata}
               seteazaTintaSelectata={setTintaSelectata}
@@ -615,8 +668,7 @@ export default function App() {
               onDistrugeInamic={acordaRecompensaInamic}
               daunePrimiteJucator={daunePrimiteJucator}
               setDaunePrimiteJucator={setDaunePrimiteJucator}
-            />
-          )}
+          />
         </Suspense>
       </Canvas>
 
@@ -660,7 +712,7 @@ export default function App() {
         marimeHarta={MARIME_HARTA}
         pozitieJucator={pozitieJucator}
         tintaJucator={tintaJucator}
-        inamici={hartaActiva === "aether" ? [] : inamici}
+        inamici={inamiciHartaActiva}
         onAlegeTinta={alegeTinta}
         pozitieStatie={hartaActiva === "aether" ? null : POZITIE_STATIE}
         pozitieHangar={hartaActiva === "aether" ? null : POZITIE_HANGAR}
