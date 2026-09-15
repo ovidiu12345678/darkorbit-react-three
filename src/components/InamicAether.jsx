@@ -97,7 +97,7 @@ const fragmentShader = `
   }
 `;
 
-function ProiectilAether({ id, start, directie, configuratie, playerRef, onLovitura, onSterge }) {
+function ProiectilAether({ id, start, directie, configuratie, playerRef, onLovitura, onSterge, zonaSiguraJucator }) {
   const grup = useRef();
   const viata = useRef(2.8);
   const eliminat = useRef(false);
@@ -108,6 +108,11 @@ function ProiectilAether({ id, start, directie, configuratie, playerRef, onLovit
 
   useFrame(({ clock }, deltaBrut) => {
     if (!grup.current || eliminat.current) return;
+    if (zonaSiguraJucator) {
+      eliminat.current = true;
+      onSterge(id);
+      return;
+    }
     const delta = Math.min(deltaBrut, 0.05);
     grup.current.position.addScaledVector(vectorDirectie, VITEZA_PROIECTIL * delta);
     grup.current.rotation.y += delta * (configuratie.tipProiectil === "timp" ? 8 : 3.5);
@@ -163,6 +168,8 @@ export default function InamicAether({
   activ = true,
   selectat = false,
   impulsLovitura = 0,
+  provocat = false,
+  zonaSiguraJucator = false,
   hp,
   scut,
   hpMax,
@@ -249,7 +256,7 @@ export default function InamicAether({
     const distanta = catreJucator.length();
     const inPragFuga = hp <= hpMax * PRAG_FUGA && scut <= scutMax * PRAG_FUGA;
 
-    if (inPragFuga) {
+    if (inPragFuga && provocat && !zonaSiguraJucator) {
       local.fuga = true;
       if (!local.tintaFuga || obiect.position.distanceTo(local.tintaFuga) < 6) {
         local.tintaFuga = punctFuga(marimeHarta);
@@ -257,7 +264,7 @@ export default function InamicAether({
       catreJucator.copy(local.tintaFuga).sub(obiect.position).setY(0).normalize();
       obiect.position.addScaledVector(catreJucator, configuratie.viteza * 1.6 * delta);
       local.unghi = Math.atan2(catreJucator.x, catreJucator.z);
-    } else if (distanta < configuratie.detectie) {
+    } else if (provocat && !zonaSiguraJucator) {
       local.fuga = false;
       catreJucator.normalize();
       const lateral = temp.lateral.set(-catreJucator.z, 0, catreJucator.x);
@@ -398,6 +405,7 @@ export default function InamicAether({
           playerRef={playerRef}
           onLovitura={onLovitura}
           onSterge={stergeProiectil}
+          zonaSiguraJucator={zonaSiguraJucator}
         />
       ))}
     </>

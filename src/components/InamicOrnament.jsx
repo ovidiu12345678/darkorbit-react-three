@@ -68,7 +68,7 @@ const fragmentShaderOrnament = `
   }
 `;
 
-function ProiectilOrnament({ id, start, directie, culoare, playerRef, onLovitura, onSterge }) {
+function ProiectilOrnament({ id, start, directie, culoare, playerRef, onLovitura, onSterge, zonaSiguraJucator }) {
   const proiectil = useRef();
   const viata = useRef(2.6);
   const eliminat = useRef(false);
@@ -79,6 +79,11 @@ function ProiectilOrnament({ id, start, directie, culoare, playerRef, onLovitura
 
   useFrame((_, deltaBrut) => {
     if (!proiectil.current || eliminat.current) return;
+    if (zonaSiguraJucator || playerRef.current.distanceTo(POZITIE_ZONA_SIGURA) < RAZA_ZONA_SIGURA) {
+      eliminat.current = true;
+      onSterge(id);
+      return;
+    }
 
     const delta = Math.min(deltaBrut, 0.05);
     proiectil.current.position.addScaledVector(directieVector, VITEZA_PROIECTIL * delta);
@@ -126,6 +131,8 @@ export default function InamicOrnament({
   activ = true,
   selectat = false,
   impulsLovitura = 0,
+  provocat = false,
+  zonaSiguraJucator = false,
   hp = HP_MAX,
   scut = SCUT_MAX,
   hpMax = HP_MAX,
@@ -220,10 +227,10 @@ export default function InamicOrnament({
     const distanta = catreJucator.length();
     stare.current.cooldown -= delta;
 
-    const jucatorInZonaSigura = player.distanceTo(POZITIE_ZONA_SIGURA) < RAZA_ZONA_SIGURA;
+    const jucatorInZonaSigura = zonaSiguraJucator || player.distanceTo(POZITIE_ZONA_SIGURA) < RAZA_ZONA_SIGURA;
     const inPragFuga = hp <= hpMax * PRAG_FUGA && scut <= scutMax * PRAG_FUGA;
 
-    if (inPragFuga) {
+    if (inPragFuga && provocat && !jucatorInZonaSigura) {
       stare.current.modAgresiv = false;
       stare.current.modFuga = true;
 
@@ -245,7 +252,7 @@ export default function InamicOrnament({
           0.12
         );
       }
-    } else if (distanta < RAZA_DETECTIE && !jucatorInZonaSigura) {
+    } else if (provocat && !jucatorInZonaSigura) {
       stare.current.modFuga = false;
       stare.current.modAgresiv = true;
       const directie = catreJucator.normalize();
@@ -383,6 +390,7 @@ export default function InamicOrnament({
           playerRef={playerRef}
           onLovitura={onLovitura}
           onSterge={stergeProiectil}
+          zonaSiguraJucator={zonaSiguraJucator}
         />
       ))}
     </>

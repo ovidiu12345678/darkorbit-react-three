@@ -51,6 +51,19 @@ const POZITIE_PORTAL_STANDARD = [COORDONATA_PORTAL_AETHER, 0, COORDONATA_PORTAL_
 const POZITIE_PORTAL_AETHER = [-COORDONATA_PORTAL_AETHER, 0, -COORDONATA_PORTAL_AETHER];
 const POZITIE_PORTAL_NOCTIS_AETHER = [COORDONATA_PORTAL_AETHER, 0, -COORDONATA_PORTAL_AETHER];
 const POZITIE_PORTAL_NOCTIS = [COORDONATA_PORTAL_AETHER, 0, -COORDONATA_PORTAL_AETHER];
+const RAZA_ZONA_SIGURA_PORTAL = 58;
+
+function esteInZonaSiguraPortal(harta, pozitie) {
+  const portaluri = harta === "aether"
+    ? [POZITIE_PORTAL_AETHER, POZITIE_PORTAL_NOCTIS_AETHER]
+    : harta === "noctis"
+      ? [POZITIE_PORTAL_NOCTIS]
+      : [POZITIE_PORTAL_STANDARD];
+
+  return portaluri.some((portal) =>
+    Math.hypot(pozitie[0] - portal[0], pozitie[2] - portal[2]) <= RAZA_ZONA_SIGURA_PORTAL
+  );
+}
 const POZITIE_INTRARE_AETHER = [
   -COORDONATA_PORTAL_AETHER + DISTANTA_REAPARITIE_PORTAL,
   3.2,
@@ -286,6 +299,7 @@ export default function App() {
   const [hartaActiva, setHartaActiva] = useState("standard");
   const [semnalTeleportare, setSemnalTeleportare] = useState(0);
   const [pozitieTeleportare, setPozitieTeleportare] = useState(POZITIE_REVENIRE_STANDARD);
+  const jucatorInZonaSiguraPortal = esteInZonaSiguraPortal(hartaActiva, pozitieJucator);
 
   const [credite, setCredite] = useState(10000000);
   const [uridium, setUridium] = useState(0);
@@ -533,15 +547,21 @@ export default function App() {
   }, []);
 
   const atacaInamic = useCallback((id) => {
+    if (jucatorInZonaSiguraPortal) {
+      setAtaca(false);
+      setAmenintare("zona portal protejata");
+      return;
+    }
     setTintaJucator(null);
     setTintaSelectata(id);
     setAtaca(true);
     setAmenintare("tinta blocata");
-  }, []);
+  }, [jucatorInZonaSiguraPortal]);
 
   const [daunePrimiteJucator, setDaunePrimiteJucator] = useState([]);
 
   const primesteLovitura = useCallback((cantitate, damageScut) => {
+    if (jucatorInZonaSiguraPortal) return;
     ultimaLovituraRef.current = performance.now();
     declanseazaImpulsScut();
     setAtacuri((valoare) => valoare + 1);
@@ -580,7 +600,7 @@ export default function App() {
     }
 
     setAmenintare("contact ostil");
-  }, [declanseazaImpulsScut, absorbtieScut]);
+  }, [declanseazaImpulsScut, absorbtieScut, jucatorInZonaSiguraPortal]);
 
   const raporteazaPozitieInamic = useCallback((id, vector) => {
     pozitiiInamici.current[id] = vector.clone();
@@ -616,6 +636,12 @@ export default function App() {
 
       if (eveniment.code === "Space" && !eveniment.repeat) {
         eveniment.preventDefault();
+        if (jucatorInZonaSiguraPortal) {
+          setAtaca(false);
+          setTintaSelectata(null);
+          setAmenintare("zona portal protejata");
+          return;
+        }
         const tinta = gaseseTintaApropiata();
         if (!tinta) return;
 
@@ -631,7 +657,24 @@ export default function App() {
 
     window.addEventListener("keydown", laApasareTasta);
     return () => window.removeEventListener("keydown", laApasareTasta);
-  }, [hartaActiva]);
+  }, [hartaActiva, jucatorInZonaSiguraPortal]);
+
+  useEffect(() => {
+    if (!jucatorInZonaSiguraPortal) return;
+
+    setAtaca(false);
+    setTintaSelectata(null);
+    setAmenintare("zona portal protejata");
+    setInamici((lista) => {
+      let schimbat = false;
+      const urmatoarea = lista.map((inamic) => {
+        if ((inamic.harta ?? "standard") !== hartaActiva || !inamic.provocat) return inamic;
+        schimbat = true;
+        return { ...inamic, provocat: false };
+      });
+      return schimbat ? urmatoarea : lista;
+    });
+  }, [hartaActiva, jucatorInZonaSiguraPortal]);
 
   const transportaPrinPortalNoctis = useCallback(() => {
     const intraInNoctis = hartaActiva !== "noctis";
@@ -729,6 +772,8 @@ export default function App() {
                 activ={inamic.activ}
                 selectat={inamic.id === tintaSelectata}
                 impulsLovitura={inamic.impulsLovitura}
+                provocat={Boolean(inamic.provocat)}
+                zonaSiguraJucator={jucatorInZonaSiguraPortal}
                 hp={inamic.hp}
                 scut={inamic.scut}
                 hpMax={inamic.hpMax}
@@ -768,6 +813,7 @@ export default function App() {
               tintaSelectata={tintaSelectata}
               seteazaTintaSelectata={setTintaSelectata}
               ataca={ataca}
+              zonaSiguraJucator={jucatorInZonaSiguraPortal}
               seteazaAtaca={setAtaca}
               munitie={AMMO_BY_ID[selectedAmmo]}
               cantitateMunitie={munitie[selectedAmmo] || 0}

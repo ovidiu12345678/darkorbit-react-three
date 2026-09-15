@@ -44,7 +44,7 @@ const CONFIGURATII = {
     dimensiune: [3.15, 3.15],
     culoare: "#8ff9ef",
     viteza: 3.85,
-    detectie: 24,
+    detectie: 70,
     atac: 14,
     orbita: 8,
     cooldown: 2.35,
@@ -127,7 +127,7 @@ const fragmentShader = `
   }
 `;
 
-function ProiectilNoctis({ id, start, directie, configuratie, playerRef, onLovitura, onSterge }) {
+function ProiectilNoctis({ id, start, directie, configuratie, playerRef, onLovitura, onSterge, zonaSiguraJucator }) {
   const grup = useRef();
   const viata = useRef(2.8);
   const eliminat = useRef(false);
@@ -138,6 +138,11 @@ function ProiectilNoctis({ id, start, directie, configuratie, playerRef, onLovit
 
   useFrame(({ clock }, deltaBrut) => {
     if (!grup.current || eliminat.current) return;
+    if (zonaSiguraJucator) {
+      eliminat.current = true;
+      onSterge(id);
+      return;
+    }
     const delta = Math.min(deltaBrut, 0.05);
     grup.current.position.addScaledVector(vectorDirectie, VITEZA_PROIECTIL * delta);
     grup.current.rotation.y += delta * (configuratie.tipProiectil === "molecular" ? 8 : 3.5);
@@ -193,6 +198,8 @@ export default function InamicNoctis({
   activ = true,
   selectat = false,
   impulsLovitura = 0,
+  provocat = false,
+  zonaSiguraJucator = false,
   hp,
   scut,
   hpMax,
@@ -281,8 +288,11 @@ export default function InamicNoctis({
     );
     const distanta = catreJucator.length();
     const inPragFuga = hp <= hpMax * PRAG_FUGA && scut <= scutMax * PRAG_FUGA;
+    const poateUrmari = !zonaSiguraJucator && (
+      provocat || (tipNoctis === "puiStea" && distanta < configuratie.detectie)
+    );
 
-    if (inPragFuga) {
+    if (inPragFuga && provocat && !zonaSiguraJucator) {
       local.fuga = true;
       if (!local.tintaFuga || obiect.position.distanceTo(local.tintaFuga) < 6) {
         local.tintaFuga = punctFuga(marimeHarta);
@@ -290,7 +300,7 @@ export default function InamicNoctis({
       catreJucator.copy(local.tintaFuga).sub(obiect.position).setY(0).normalize();
       obiect.position.addScaledVector(catreJucator, configuratie.viteza * 1.6 * delta);
       local.unghi = Math.atan2(catreJucator.x, catreJucator.z);
-    } else if (distanta < configuratie.detectie) {
+    } else if (poateUrmari) {
       local.fuga = false;
       catreJucator.normalize();
       const lateral = temp.lateral.set(-catreJucator.z, 0, catreJucator.x);
@@ -319,7 +329,7 @@ export default function InamicNoctis({
       obiect.position.addScaledVector(lateral, balans * delta);
       local.unghi = THREE.MathUtils.lerp(local.unghi, Math.atan2(catreJucator.x, catreJucator.z), 0.12);
 
-      if (distanta < configuratie.atac && local.cooldown <= 0) {
+      if (provocat && distanta < configuratie.atac && local.cooldown <= 0) {
         const start = obiect.position.clone().add(new THREE.Vector3(0, 0.15, 0));
         const directie = playerRef.current.clone().sub(start).normalize();
         setProiectile((lista) => [...lista.slice(-8), {
@@ -497,6 +507,7 @@ export default function InamicNoctis({
           playerRef={playerRef}
           onLovitura={onLovitura}
           onSterge={stergeProiectil}
+          zonaSiguraJucator={zonaSiguraJucator}
         />
       ))}
     </>

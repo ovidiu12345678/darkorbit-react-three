@@ -51,6 +51,7 @@ export default function GestionarLupta({
   tintaSelectata,
   seteazaTintaSelectata,
   ataca,
+  zonaSiguraJucator = false,
   seteazaAtaca,
   munitie,
   cantitateMunitie = 0,
@@ -109,6 +110,7 @@ export default function GestionarLupta({
             pozitie: alegePozitieRespawn(marimeHarta),
             respawnLa: null,
             nonce: inamic.nonce + 1,
+            provocat: false,
           };
         })
       );
@@ -190,6 +192,11 @@ export default function GestionarLupta({
         .filter((n) => n.viata > 0);
     });
 
+    if (zonaSiguraJucator) {
+      if (ataca) seteazaAtaca(false);
+      return;
+    }
+
     if (!ataca || !tintaSelectata || !playerRef?.current) return;
 
     const inamic = inamici.find((item) => item.id === tintaSelectata);
@@ -225,6 +232,10 @@ export default function GestionarLupta({
 
     racireLaser.current = RACIRE_LASER;
     onConsumaMunitie?.();
+
+    seteazaInamici((lista) =>
+      lista.map((item) => item.id === tintaSelectata ? { ...item, provocat: true } : item)
+    );
 
     const aRatat = Math.random() < RATA_RATARE;
 
