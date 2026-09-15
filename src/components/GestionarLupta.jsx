@@ -51,7 +51,6 @@ export default function GestionarLupta({
   tintaSelectata,
   seteazaTintaSelectata,
   ataca,
-  zonaSiguraJucator = false,
   seteazaAtaca,
   munitie,
   cantitateMunitie = 0,
@@ -191,11 +190,6 @@ export default function GestionarLupta({
         .map((n) => ({ ...n, viata: n.viata - delta }))
         .filter((n) => n.viata > 0);
     });
-
-    if (zonaSiguraJucator) {
-      if (ataca) seteazaAtaca(false);
-      return;
-    }
 
     if (!ataca || !tintaSelectata || !playerRef?.current) return;
 

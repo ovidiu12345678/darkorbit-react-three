@@ -97,7 +97,7 @@ const fragmentShader = `
   }
 `;
 
-function ProiectilAether({ id, start, directie, configuratie, playerRef, onLovitura, onSterge, zonaSiguraJucator }) {
+function ProiectilAether({ id, start, directie, configuratie, playerRef, onLovitura, onSterge, zonaSiguraJucator, provocat }) {
   const grup = useRef();
   const viata = useRef(2.8);
   const eliminat = useRef(false);
@@ -108,7 +108,7 @@ function ProiectilAether({ id, start, directie, configuratie, playerRef, onLovit
 
   useFrame(({ clock }, deltaBrut) => {
     if (!grup.current || eliminat.current) return;
-    if (zonaSiguraJucator) {
+    if (zonaSiguraJucator && !provocat) {
       eliminat.current = true;
       onSterge(id);
       return;
@@ -256,7 +256,7 @@ export default function InamicAether({
     const distanta = catreJucator.length();
     const inPragFuga = hp <= hpMax * PRAG_FUGA && scut <= scutMax * PRAG_FUGA;
 
-    if (inPragFuga && provocat && !zonaSiguraJucator) {
+    if (inPragFuga && provocat) {
       local.fuga = true;
       if (!local.tintaFuga || obiect.position.distanceTo(local.tintaFuga) < 6) {
         local.tintaFuga = punctFuga(marimeHarta);
@@ -264,7 +264,7 @@ export default function InamicAether({
       catreJucator.copy(local.tintaFuga).sub(obiect.position).setY(0).normalize();
       obiect.position.addScaledVector(catreJucator, configuratie.viteza * 1.6 * delta);
       local.unghi = Math.atan2(catreJucator.x, catreJucator.z);
-    } else if (provocat && !zonaSiguraJucator) {
+    } else if (provocat) {
       local.fuga = false;
       catreJucator.normalize();
       const lateral = temp.lateral.set(-catreJucator.z, 0, catreJucator.x);
@@ -406,6 +406,7 @@ export default function InamicAether({
           onLovitura={onLovitura}
           onSterge={stergeProiectil}
           zonaSiguraJucator={zonaSiguraJucator}
+          provocat={provocat}
         />
       ))}
     </>

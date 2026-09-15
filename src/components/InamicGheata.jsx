@@ -56,7 +56,7 @@ const fragmentShaderAlien = `
   }
 `;
 
-function ProiectilAlien({ id, start, directie, culoare, playerRef, onLovitura, onSterge, zonaSiguraJucator }) {
+function ProiectilAlien({ id, start, directie, culoare, playerRef, onLovitura, onSterge, zonaSiguraJucator, provocat }) {
   const proiectil = useRef();
   const viata = useRef(2.6);
   const eliminat = useRef(false);
@@ -67,7 +67,7 @@ function ProiectilAlien({ id, start, directie, culoare, playerRef, onLovitura, o
 
   useFrame((_, deltaBrut) => {
     if (!proiectil.current || eliminat.current) return;
-    if (zonaSiguraJucator || playerRef.current.distanceTo(POZITIE_ZONA_SIGURA) < RAZA_ZONA_SIGURA) {
+    if ((zonaSiguraJucator || playerRef.current.distanceTo(POZITIE_ZONA_SIGURA) < RAZA_ZONA_SIGURA) && !provocat) {
       eliminat.current = true;
       onSterge(id);
       return;
@@ -216,10 +216,9 @@ export default function InamicGheata({
     const distanta = catreJucator.length();
     stare.current.cooldown -= delta;
 
-    const jucatorInZonaSigura = zonaSiguraJucator || player.distanceTo(POZITIE_ZONA_SIGURA) < RAZA_ZONA_SIGURA;
     const inPragFuga = hp <= hpMax * PRAG_FUGA && scut <= scutMax * PRAG_FUGA;
 
-    if (inPragFuga && provocat && !jucatorInZonaSigura) {
+    if (inPragFuga && provocat) {
       stare.current.modAgresiv = false;
       stare.current.modFuga = true;
 
@@ -241,7 +240,7 @@ export default function InamicGheata({
           0.12
         );
       }
-    } else if (provocat && !jucatorInZonaSigura) {
+    } else if (provocat) {
       stare.current.modFuga = false;
       stare.current.modAgresiv = true;
       const directie = catreJucator.normalize();
@@ -379,6 +378,7 @@ export default function InamicGheata({
           onLovitura={onLovitura}
           onSterge={stergeProiectil}
           zonaSiguraJucator={zonaSiguraJucator}
+          provocat={provocat}
         />
       ))}
     </>

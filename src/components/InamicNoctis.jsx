@@ -127,7 +127,7 @@ const fragmentShader = `
   }
 `;
 
-function ProiectilNoctis({ id, start, directie, configuratie, playerRef, onLovitura, onSterge, zonaSiguraJucator }) {
+function ProiectilNoctis({ id, start, directie, configuratie, playerRef, onLovitura, onSterge, zonaSiguraJucator, provocat }) {
   const grup = useRef();
   const viata = useRef(2.8);
   const eliminat = useRef(false);
@@ -138,7 +138,7 @@ function ProiectilNoctis({ id, start, directie, configuratie, playerRef, onLovit
 
   useFrame(({ clock }, deltaBrut) => {
     if (!grup.current || eliminat.current) return;
-    if (zonaSiguraJucator) {
+    if (zonaSiguraJucator && !provocat) {
       eliminat.current = true;
       onSterge(id);
       return;
@@ -288,11 +288,11 @@ export default function InamicNoctis({
     );
     const distanta = catreJucator.length();
     const inPragFuga = hp <= hpMax * PRAG_FUGA && scut <= scutMax * PRAG_FUGA;
-    const poateUrmari = !zonaSiguraJucator && (
-      provocat || (tipNoctis === "puiStea" && distanta < configuratie.detectie)
+    const poateUrmari = provocat || (
+      !zonaSiguraJucator && tipNoctis === "puiStea" && distanta < configuratie.detectie
     );
 
-    if (inPragFuga && provocat && !zonaSiguraJucator) {
+    if (inPragFuga && provocat) {
       local.fuga = true;
       if (!local.tintaFuga || obiect.position.distanceTo(local.tintaFuga) < 6) {
         local.tintaFuga = punctFuga(marimeHarta);
@@ -508,6 +508,7 @@ export default function InamicNoctis({
           onLovitura={onLovitura}
           onSterge={stergeProiectil}
           zonaSiguraJucator={zonaSiguraJucator}
+          provocat={provocat}
         />
       ))}
     </>

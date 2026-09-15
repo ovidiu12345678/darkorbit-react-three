@@ -547,21 +547,15 @@ export default function App() {
   }, []);
 
   const atacaInamic = useCallback((id) => {
-    if (jucatorInZonaSiguraPortal) {
-      setAtaca(false);
-      setAmenintare("zona portal protejata");
-      return;
-    }
     setTintaJucator(null);
     setTintaSelectata(id);
     setAtaca(true);
     setAmenintare("tinta blocata");
-  }, [jucatorInZonaSiguraPortal]);
+  }, []);
 
   const [daunePrimiteJucator, setDaunePrimiteJucator] = useState([]);
 
   const primesteLovitura = useCallback((cantitate, damageScut) => {
-    if (jucatorInZonaSiguraPortal) return;
     ultimaLovituraRef.current = performance.now();
     declanseazaImpulsScut();
     setAtacuri((valoare) => valoare + 1);
@@ -600,7 +594,7 @@ export default function App() {
     }
 
     setAmenintare("contact ostil");
-  }, [declanseazaImpulsScut, absorbtieScut, jucatorInZonaSiguraPortal]);
+  }, [declanseazaImpulsScut, absorbtieScut]);
 
   const raporteazaPozitieInamic = useCallback((id, vector) => {
     pozitiiInamici.current[id] = vector.clone();
@@ -636,12 +630,6 @@ export default function App() {
 
       if (eveniment.code === "Space" && !eveniment.repeat) {
         eveniment.preventDefault();
-        if (jucatorInZonaSiguraPortal) {
-          setAtaca(false);
-          setTintaSelectata(null);
-          setAmenintare("zona portal protejata");
-          return;
-        }
         const tinta = gaseseTintaApropiata();
         if (!tinta) return;
 
@@ -657,7 +645,7 @@ export default function App() {
 
     window.addEventListener("keydown", laApasareTasta);
     return () => window.removeEventListener("keydown", laApasareTasta);
-  }, [hartaActiva, jucatorInZonaSiguraPortal]);
+  }, [hartaActiva]);
 
   useEffect(() => {
     if (!jucatorInZonaSiguraPortal) return;
@@ -813,7 +801,6 @@ export default function App() {
               tintaSelectata={tintaSelectata}
               seteazaTintaSelectata={setTintaSelectata}
               ataca={ataca}
-              zonaSiguraJucator={jucatorInZonaSiguraPortal}
               seteazaAtaca={setAtaca}
               munitie={AMMO_BY_ID[selectedAmmo]}
               cantitateMunitie={munitie[selectedAmmo] || 0}
