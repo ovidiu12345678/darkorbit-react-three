@@ -5,6 +5,7 @@ import HartaSpatiala from "./components/HartaSpatiala.jsx";
 import InamicGheata from "./components/InamicGheata.jsx";
 import InamicOrnament from "./components/InamicOrnament.jsx";
 import InamicAether from "./components/InamicAether.jsx";
+import InamicNoctis from "./components/InamicNoctis.jsx";
 import NavaJucatorului from "./components/NavaJucatorului.jsx";
 import GestionarLupta from "./components/GestionarLupta.jsx";
 import InterfataJoc from "./components/InterfataJoc.jsx";
@@ -105,6 +106,11 @@ const RECOMPENSE_AETHER = {
   oculus: { credite: 3800000, uridium: 2700, onoare: 3500, experienta: 280000 },
   chronolith: { credite: 8000000, uridium: 4800, onoare: 7000, experienta: 650000 },
 };
+const RECOMPENSE_NOCTIS = {
+  arici: { credite: 4800000, uridium: 3400, onoare: 4200, experienta: 360000 },
+  butoi: { credite: 9800000, uridium: 6200, onoare: 7800, experienta: 820000 },
+  stea: { credite: 7600000, uridium: 5400, onoare: 6900, experienta: 670000 },
+};
 
 const INAMICI_INITIALI = [
   { id: "x-01", pozitie: [-432.4, 2.2, 23.9], culoare: "#8cff6b" },
@@ -191,10 +197,46 @@ const INAMICI_AETHER_INITIALI = [
   };
 });
 
+const INAMICI_NOCTIS_INITIALI = [
+  { id: "noctis-arici-01", tipNoctis: "arici", pozitie: [-390, 2.2, -320] },
+  { id: "noctis-arici-02", tipNoctis: "arici", pozitie: [70, 2.2, 330] },
+  { id: "noctis-arici-03", tipNoctis: "arici", pozitie: [380, 2.2, 170] },
+  { id: "noctis-butoi-01", tipNoctis: "butoi", pozitie: [-250, 2.2, 80] },
+  { id: "noctis-butoi-02", tipNoctis: "butoi", pozitie: [270, 2.2, -250] },
+  { id: "noctis-butoi-03", tipNoctis: "butoi", pozitie: [430, 2.2, 400] },
+  { id: "noctis-stea-01", tipNoctis: "stea", pozitie: [-430, 2.2, 350] },
+  { id: "noctis-stea-02", tipNoctis: "stea", pozitie: [30, 2.2, -50] },
+  { id: "noctis-stea-03", tipNoctis: "stea", pozitie: [260, 2.2, 440] },
+].map((inamic) => {
+  const statistici = {
+    arici: { hp: 340000, scut: 220000 },
+    butoi: { hp: 780000, scut: 520000 },
+    stea: { hp: 520000, scut: 700000 },
+  }[inamic.tipNoctis];
+
+  return {
+    ...inamic,
+    harta: "noctis",
+    tip: "noctis",
+    culoare: inamic.tipNoctis === "arici" ? "#ff6a24" : inamic.tipNoctis === "butoi" ? "#ff352a" : "#64eff0",
+    scara: 2.15,
+    hp: statistici.hp,
+    scut: statistici.scut,
+    hpMax: statistici.hp,
+    scutMax: statistici.scut,
+    recompensa: RECOMPENSE_NOCTIS[inamic.tipNoctis],
+    activ: true,
+    respawnLa: null,
+    nonce: 0,
+    impulsLovitura: 0,
+  };
+});
+
 const TOATE_INAMICII_INITIALI = [
   ...INAMICI_INITIALI,
   ...INAMICI_ORNAMENT_INITIALI,
   ...INAMICI_AETHER_INITIALI,
+  ...INAMICI_NOCTIS_INITIALI,
 ];
 const POZITIE_INTRARE_NOCTIS = [
   COORDONATA_PORTAL_AETHER - DISTANTA_REAPARITIE_PORTAL,
@@ -655,13 +697,16 @@ export default function App() {
               ? InamicOrnament
               : inamic.tip === "aether"
                 ? InamicAether
-                : InamicGheata;
+                : inamic.tip === "noctis"
+                  ? InamicNoctis
+                  : InamicGheata;
 
             return (
               <ComponentaInamic
                 key={`${inamic.id}-${inamic.nonce}`}
                 id={inamic.id}
                 tipAether={inamic.tipAether}
+                tipNoctis={inamic.tipNoctis}
                 pozitie={inamic.pozitie}
                 culoare={inamic.culoare}
                 scara={inamic.scara}
