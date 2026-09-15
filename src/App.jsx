@@ -822,7 +822,7 @@ export default function App() {
         </Suspense>
       </Canvas>
 
-      <MuzicaMartiana luptaActiva={luptaMuzicalaActiva} />
+      <MuzicaMartiana hartaActiva={hartaActiva} luptaActiva={luptaMuzicalaActiva} />
 
       <div className="bara-munitie" onPointerDown={(event) => event.stopPropagation()}>
         {AMMO_TYPES.map((ammo, index) => {
