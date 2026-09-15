@@ -1106,6 +1106,61 @@ canvas {
   }
 }
 
+.buton-muzica-martiana {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 32;
+  width: 54px;
+  height: 46px;
+  display: grid;
+  place-content: center;
+  gap: 0;
+  border: 1px solid rgba(255, 107, 54, 0.78);
+  border-radius: 9px;
+  color: #ffd2ad;
+  background: linear-gradient(160deg, rgba(58, 13, 8, 0.92), rgba(13, 7, 12, 0.94));
+  box-shadow: 0 0 16px rgba(255, 71, 24, 0.24), inset 0 0 12px rgba(255, 120, 54, 0.1);
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.buton-muzica-martiana span {
+  font-size: 20px;
+  line-height: 18px;
+}
+
+.buton-muzica-martiana small {
+  color: #ff8a55;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 1.1px;
+}
+
+.buton-muzica-martiana:hover,
+.buton-muzica-martiana:focus-visible {
+  border-color: #ffc08b;
+  box-shadow: 0 0 20px rgba(255, 89, 30, 0.42), inset 0 0 14px rgba(255, 145, 76, 0.16);
+  outline: none;
+}
+
+.buton-muzica-martiana.oprita {
+  color: #8c929d;
+  border-color: rgba(120, 128, 142, 0.55);
+  background: rgba(8, 12, 19, 0.9);
+  box-shadow: none;
+}
+
+@media (max-width: 720px) {
+  .buton-muzica-martiana {
+    right: 8px;
+    bottom: 68px;
+    width: 46px;
+    height: 40px;
+  }
+}
+
 .harta-mini {
   position: fixed;
   z-index: 50;

@@ -15,6 +15,7 @@ import PanouResurse from "./components/PanouResurse.jsx";
 import PanouMagazin from "./components/PanouMagazin.jsx";
 import PanouHangar from "./components/PanouHangar.jsx";
 import NotificareRecompensa from "./components/NotificareRecompensa.jsx";
+import MuzicaMartiana from "./components/MuzicaMartiana.jsx";
 import {
   TUNURI_BY_ID,
   GENERATOARE_BY_ID,
@@ -684,6 +685,9 @@ export default function App() {
   const inamiciHartaActiva = inamici.filter(
     (inamic) => (inamic.harta ?? "standard") === hartaActiva
   );
+  const luptaMuzicalaActiva = ataca || inamiciHartaActiva.some(
+    (inamic) => inamic.activ && inamic.provocat
+  );
   const esteNoctis = hartaActiva === "noctis";
   const esteAether = hartaActiva === "aether";
   const esteStandard = hartaActiva === "standard";
@@ -817,6 +821,8 @@ export default function App() {
           />
         </Suspense>
       </Canvas>
+
+      <MuzicaMartiana luptaActiva={luptaMuzicalaActiva} />
 
       <div className="bara-munitie" onPointerDown={(event) => event.stopPropagation()}>
         {AMMO_TYPES.map((ammo, index) => {
