@@ -39,6 +39,18 @@ const CONFIGURATII = {
     dauna: 14500,
     tipProiectil: "molecular",
   },
+  puiStea: {
+    textura: "assets/noctis-pui-stea-moleculara.png",
+    dimensiune: [3.15, 3.15],
+    culoare: "#8ff9ef",
+    viteza: 3.85,
+    detectie: 24,
+    atac: 14,
+    orbita: 8,
+    cooldown: 2.35,
+    dauna: 2100,
+    tipProiectil: "molecular",
+  },
 };
 
 const PRAG_FUGA = 0.1;
@@ -83,7 +95,7 @@ const fragmentShader = `
       float pasMecanic = step(0.55, fract(uTimp * 1.7));
       uv.x += sin(floor(uv.y * 7.0) + uTimp * 4.0) * 0.0025 * pasMecanic;
       uv.y += sin(uTimp * 3.4) * 0.004;
-    } else {
+    } else if (uTip < 2.5) {
       vec2 centru = uv - 0.5;
       float raza = length(centru);
       vec2 unda = vec2(
@@ -91,6 +103,16 @@ const fragmentShader = `
         cos(uv.x * 14.0 - uTimp * 2.6)
       );
       uv += unda * 0.012 * smoothstep(0.12, 0.7, raza);
+    } else {
+      vec2 centru = uv - 0.5;
+      float raza = length(centru);
+      float respiratieRapida = 1.0 + sin(uTimp * 4.2) * 0.026;
+      uv = 0.5 + centru * respiratieRapida;
+      vec2 undaMica = vec2(
+        sin(uv.y * 18.0 + uTimp * 4.8),
+        cos(uv.x * 17.0 - uTimp * 4.1)
+      );
+      uv += undaMica * 0.016 * smoothstep(0.08, 0.66, raza);
     }
 
     vec4 tex = texture2D(uTextura, uv);
@@ -188,7 +210,7 @@ export default function InamicNoctis({
   textura.colorSpace = THREE.SRGBColorSpace;
   textura.anisotropy = 16;
 
-  const indiceTip = tipNoctis === "arici" ? 0 : tipNoctis === "butoi" ? 1 : 2;
+  const indiceTip = tipNoctis === "arici" ? 0 : tipNoctis === "butoi" ? 1 : tipNoctis === "stea" ? 2 : 3;
   const uniforme = useMemo(
     () => ({
       uTextura: { value: textura },
@@ -281,9 +303,12 @@ export default function InamicNoctis({
       } else if (tipNoctis === "butoi") {
         factorViteza = Math.sin(timp * 3.2 + local.offset) > 0.05 ? 1.45 : 0.18;
         balans = Math.sin(timp * 3.2 + local.offset) * 0.9;
-      } else {
+      } else if (tipNoctis === "stea") {
         factorViteza = 0.88 + Math.sin(timp * 1.4 + local.offset) * 0.24;
         balans = Math.sin(timp * 1.15 + local.offset) * 4.1;
+      } else {
+        factorViteza = 1.05 + Math.max(0, Math.sin(timp * 4.6 + local.offset)) * 0.72;
+        balans = Math.sin(timp * 5.2 + local.offset) * 5.2;
       }
 
       if (distanta > configuratie.orbita) {
@@ -313,9 +338,12 @@ export default function InamicNoctis({
         const pas = Math.floor(timp * 0.72 + local.offset) * 1.45;
         obiect.position.x = THREE.MathUtils.lerp(obiect.position.x, baza.x + Math.cos(pas) * 6, 0.04);
         obiect.position.z = THREE.MathUtils.lerp(obiect.position.z, baza.z + Math.sin(pas) * 5, 0.04);
-      } else {
+      } else if (tipNoctis === "stea") {
         obiect.position.x = THREE.MathUtils.lerp(obiect.position.x, baza.x + Math.cos(timp * 0.28 + local.offset) * 12, 0.02);
         obiect.position.z = THREE.MathUtils.lerp(obiect.position.z, baza.z + Math.sin(timp * 0.41 + local.offset) * 9, 0.02);
+      } else {
+        obiect.position.x = THREE.MathUtils.lerp(obiect.position.x, baza.x + Math.cos(timp * 0.88 + local.offset) * 7, 0.045);
+        obiect.position.z = THREE.MathUtils.lerp(obiect.position.z, baza.z + Math.sin(timp * 1.12 + local.offset) * 6, 0.045);
       }
     }
 
@@ -323,17 +351,27 @@ export default function InamicNoctis({
       ? Math.sin(timp * 2.2 + local.offset) * 0.22
       : tipNoctis === "butoi"
         ? Math.abs(Math.sin(timp * 3.2 + local.offset)) * 0.18
-        : Math.sin(timp * 1.15 + local.offset) * 0.58;
+        : tipNoctis === "stea"
+          ? Math.sin(timp * 1.15 + local.offset) * 0.58
+          : Math.sin(timp * 3.1 + local.offset) * 0.42;
     obiect.position.y = local.baza.y + plutire;
 
     if (sprite.current) {
       sprite.current.quaternion.copy(camera.quaternion);
-      sprite.current.rotation.z -= local.unghi + (tipNoctis === "stea" ? Math.sin(timp * 0.7 + local.offset) * 0.16 : 0);
+      sprite.current.rotation.z -= local.unghi + (
+        tipNoctis === "stea"
+          ? Math.sin(timp * 0.7 + local.offset) * 0.16
+          : tipNoctis === "puiStea"
+            ? Math.sin(timp * 2.2 + local.offset) * 0.24
+            : 0
+      );
       const puls = tipNoctis === "arici"
         ? 1 + Math.sin(timp * 2.8 + local.offset) * 0.055
         : tipNoctis === "butoi"
           ? 1 + Math.sin(timp * 3.2 + local.offset) * 0.035
-          : 1 + Math.sin(timp * 1.9 + local.offset) * 0.045;
+          : tipNoctis === "stea"
+            ? 1 + Math.sin(timp * 1.9 + local.offset) * 0.045
+            : 1 + Math.sin(timp * 4.2 + local.offset) * 0.07;
       sprite.current.scale.set(
         configuratie.dimensiune[0] * puls,
         configuratie.dimensiune[1] * (tipNoctis === "arici" ? puls : 2 - puls),
@@ -360,7 +398,9 @@ export default function InamicNoctis({
       nod.scale.setScalar(0.75 + Math.sin(timp * 2.4 + index) * 0.22);
     });
 
-    if (inel.current) inel.current.rotation.z += delta * (tipNoctis === "stea" ? 1.35 : 0.62);
+    if (inel.current) inel.current.rotation.z += delta * (
+      tipNoctis === "puiStea" ? 2.25 : tipNoctis === "stea" ? 1.35 : 0.62
+    );
     if (bara.current) bara.current.quaternion.copy(camera.quaternion);
   });
 
@@ -390,13 +430,13 @@ export default function InamicNoctis({
           />
         </mesh>
 
-        {tipNoctis === "stea" && (
+        {(tipNoctis === "stea" || tipNoctis === "puiStea") && (
           <group ref={detaliiVii} position={[0, 0, 0.08]} renderOrder={13}>
             <mesh ref={ochiMobil}>
-              <circleGeometry args={[0.22, 32]} />
+              <circleGeometry args={[tipNoctis === "puiStea" ? 0.25 : 0.22, 32]} />
               <meshBasicMaterial color="#5b0906" transparent opacity={0.72} depthWrite={false} toneMapped={false} />
             </mesh>
-            {Array.from({ length: 7 }, (_, index) => (
+            {Array.from({ length: tipNoctis === "puiStea" ? 4 : 7 }, (_, index) => (
               <mesh
                 key={index}
                 ref={(nod) => {

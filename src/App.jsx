@@ -110,6 +110,7 @@ const RECOMPENSE_NOCTIS = {
   arici: { credite: 4800000, uridium: 3400, onoare: 4200, experienta: 360000 },
   butoi: { credite: 9800000, uridium: 6200, onoare: 7800, experienta: 820000 },
   stea: { credite: 7600000, uridium: 5400, onoare: 6900, experienta: 670000 },
+  puiStea: { credite: 280000, uridium: 220, onoare: 260, experienta: 18000 },
 };
 
 const INAMICI_INITIALI = [
@@ -207,11 +208,24 @@ const INAMICI_NOCTIS_INITIALI = [
   { id: "noctis-stea-01", tipNoctis: "stea", pozitie: [-430, 2.2, 350] },
   { id: "noctis-stea-02", tipNoctis: "stea", pozitie: [30, 2.2, -50] },
   { id: "noctis-stea-03", tipNoctis: "stea", pozitie: [260, 2.2, 440] },
+  { id: "noctis-pui-stea-01", tipNoctis: "puiStea", pozitie: [-390, 2.2, 310] },
+  { id: "noctis-pui-stea-02", tipNoctis: "puiStea", pozitie: [-470, 2.2, 310] },
+  { id: "noctis-pui-stea-03", tipNoctis: "puiStea", pozitie: [-390, 2.2, 400] },
+  { id: "noctis-pui-stea-04", tipNoctis: "puiStea", pozitie: [-490, 2.2, 410] },
+  { id: "noctis-pui-stea-05", tipNoctis: "puiStea", pozitie: [-20, 2.2, -100] },
+  { id: "noctis-pui-stea-06", tipNoctis: "puiStea", pozitie: [75, 2.2, -105] },
+  { id: "noctis-pui-stea-07", tipNoctis: "puiStea", pozitie: [-30, 2.2, 15] },
+  { id: "noctis-pui-stea-08", tipNoctis: "puiStea", pozitie: [90, 2.2, 25] },
+  { id: "noctis-pui-stea-09", tipNoctis: "puiStea", pozitie: [210, 2.2, 390] },
+  { id: "noctis-pui-stea-10", tipNoctis: "puiStea", pozitie: [315, 2.2, 390] },
+  { id: "noctis-pui-stea-11", tipNoctis: "puiStea", pozitie: [205, 2.2, 500] },
+  { id: "noctis-pui-stea-12", tipNoctis: "puiStea", pozitie: [330, 2.2, 500] },
 ].map((inamic) => {
   const statistici = {
     arici: { hp: 340000, scut: 220000 },
     butoi: { hp: 780000, scut: 520000 },
     stea: { hp: 520000, scut: 700000 },
+    puiStea: { hp: 42000, scut: 28000 },
   }[inamic.tipNoctis];
 
   return {
@@ -219,7 +233,7 @@ const INAMICI_NOCTIS_INITIALI = [
     harta: "noctis",
     tip: "noctis",
     culoare: inamic.tipNoctis === "arici" ? "#ff6a24" : inamic.tipNoctis === "butoi" ? "#ff352a" : "#64eff0",
-    scara: 2.15,
+    scara: inamic.tipNoctis === "puiStea" ? 1.35 : 2.15,
     hp: statistici.hp,
     scut: statistici.scut,
     hpMax: statistici.hp,
