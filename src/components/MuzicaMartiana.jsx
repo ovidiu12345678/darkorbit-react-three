@@ -22,7 +22,7 @@ const VOLUM_EXPLORARE = 0.22;
 const VOLUM_LUPTA = 0.28;
 const DURATA_TRANZITIE = 850;
 const DURATA_SCADERE_PORTAL = 180;
-const FACTOR_VOLUM_PORTAL = 0.18;
+const FACTOR_VOLUM_PORTAL = 0.08;
 const VERSIUNE_AUDIO = "original-v8-cf976d4";
 
 function caleAudio(fisier) {

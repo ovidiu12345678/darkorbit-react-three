@@ -18,11 +18,18 @@ async function redaSunetPortal(tema = "aether") {
   const acum = context.currentTime;
   const esteNoctis = tema === "noctis";
   const master = context.createGain();
+  const compresor = context.createDynamicsCompressor();
+  compresor.threshold.setValueAtTime(-15, acum);
+  compresor.knee.setValueAtTime(10, acum);
+  compresor.ratio.setValueAtTime(4.5, acum);
+  compresor.attack.setValueAtTime(0.004, acum);
+  compresor.release.setValueAtTime(0.24, acum);
   master.gain.setValueAtTime(0.0001, acum);
-  master.gain.exponentialRampToValueAtTime(0.17, acum + 0.18);
-  master.gain.exponentialRampToValueAtTime(0.24, acum + 1.72);
+  master.gain.exponentialRampToValueAtTime(0.34, acum + 0.12);
+  master.gain.exponentialRampToValueAtTime(0.56, acum + 1.82);
   master.gain.exponentialRampToValueAtTime(0.0001, acum + 2.95);
-  master.connect(context.destination);
+  master.connect(compresor);
+  compresor.connect(context.destination);
 
   const pornesteOscilator = (tip, frecvente, volum, panorama) => {
     const oscilator = context.createOscillator();
@@ -56,15 +63,28 @@ async function redaSunetPortal(tema = "aether") {
   pornesteOscilator(
     "sine",
     esteNoctis ? [52, 280, 74] : [78, 430, 108],
-    esteNoctis ? 0.48 : 0.42,
+    esteNoctis ? 0.66 : 0.59,
     -0.32
   );
   pornesteOscilator(
     "triangle",
     esteNoctis ? [165, 640, 130] : [238, 920, 190],
-    esteNoctis ? 0.2 : 0.17,
+    esteNoctis ? 0.29 : 0.25,
     0.38
   );
+
+  const impact = context.createOscillator();
+  const castigImpact = context.createGain();
+  impact.type = "sine";
+  impact.frequency.setValueAtTime(esteNoctis ? 72 : 94, acum + 1.82);
+  impact.frequency.exponentialRampToValueAtTime(esteNoctis ? 28 : 36, acum + 2.58);
+  castigImpact.gain.setValueAtTime(0.0001, acum + 1.8);
+  castigImpact.gain.exponentialRampToValueAtTime(esteNoctis ? 0.9 : 0.78, acum + 1.94);
+  castigImpact.gain.exponentialRampToValueAtTime(0.0001, acum + 2.62);
+  impact.connect(castigImpact);
+  castigImpact.connect(master);
+  impact.start(acum + 1.8);
+  impact.stop(acum + 2.7);
 
   const durataZgomot = 3;
   const buffer = context.createBuffer(2, Math.ceil(context.sampleRate * durataZgomot), context.sampleRate);
@@ -88,7 +108,7 @@ async function redaSunetPortal(tema = "aether") {
   filtru.frequency.exponentialRampToValueAtTime(esteNoctis ? 1450 : 2300, acum + 1.72);
   filtru.frequency.exponentialRampToValueAtTime(esteNoctis ? 420 : 680, acum + 2.88);
   castigZgomot.gain.setValueAtTime(0.0001, acum);
-  castigZgomot.gain.exponentialRampToValueAtTime(esteNoctis ? 0.22 : 0.18, acum + 0.32);
+  castigZgomot.gain.exponentialRampToValueAtTime(esteNoctis ? 0.34 : 0.29, acum + 0.32);
   castigZgomot.gain.exponentialRampToValueAtTime(0.0001, acum + 2.92);
   zgomot.connect(filtru);
   filtru.connect(castigZgomot);
