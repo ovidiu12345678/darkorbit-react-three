@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
+import { CORPURI_KHARON } from "../corpuriKharon.js";
 
 const POZITIE_INITIALA = { top: 16, right: 16 };
 const DIMENSIUNE_INITIALA = { latime: 300, inaltime: 220 };
@@ -26,6 +27,7 @@ export default function HartaMini({
   etichetaPortalSecundar = "Portal secundar",
   temaPortalSecundar = "noctis",
   imagineFundal = "assets/harta-spatiala-fundal-hi.jpg",
+  imagineCorpuri = null,
 }) {
   const continutRef = useRef(null);
 
@@ -198,8 +200,38 @@ export default function HartaMini({
           onClick={laClickHarta}
           style={{
             backgroundImage: `url("${import.meta.env.BASE_URL}${imagineFundal}")`,
+            backgroundSize: imagineCorpuri ? "100% 100%" : undefined,
           }}
         >
+          {imagineCorpuri && CORPURI_KHARON.map((corp) => {
+            const [centruX, centruY] = corp.centru;
+            const [decupajX, decupajY] = corp.decupaj;
+            return (
+              <span
+                key={corp.nume}
+                className="harta-mini-corp-ceresc"
+                style={{
+                  left: `${centruX * 100}%`,
+                  top: `${centruY * 100}%`,
+                  width: `${corp.mini[0]}%`,
+                  height: `${corp.mini[1]}%`,
+                }}
+              >
+                <img
+                  src={`${import.meta.env.BASE_URL}${imagineCorpuri}`}
+                  alt=""
+                  aria-hidden="true"
+                  draggable="false"
+                  style={{
+                    width: `${100 / decupajX}%`,
+                    height: `${100 / decupajY}%`,
+                    left: `${(0.5 - centruX / decupajX) * 100}%`,
+                    top: `${(0.5 - centruY / decupajY) * 100}%`,
+                  }}
+                />
+              </span>
+            );
+          })}
           <div className="harta-mini-axa harta-mini-axa-x" />
           <div className="harta-mini-axa harta-mini-axa-y" />
 

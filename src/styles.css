@@ -1243,6 +1243,20 @@ canvas {
   background-repeat: no-repeat;
 }
 
+.harta-mini-corp-ceresc {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.harta-mini-corp-ceresc img {
+  position: absolute;
+  display: block;
+  max-width: none;
+  user-select: none;
+}
+
 .buton-fullscreen {
   position: fixed;
   z-index: 60;

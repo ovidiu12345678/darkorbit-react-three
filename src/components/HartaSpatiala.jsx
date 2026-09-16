@@ -1,6 +1,7 @@
 import { useFrame, useLoader } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+import { CORPURI_KHARON } from "../corpuriKharon.js";
 
 let contextSunetPortal = null;
 
@@ -1062,6 +1063,7 @@ const fragmentShaderCorpCeresc = `
   uniform sampler2D uTextura;
   uniform vec2 uCentru;
   uniform vec2 uDecupaj;
+  uniform float uAlphaTransparent;
   varying vec2 vUv;
 
   void main() {
@@ -1079,7 +1081,9 @@ const fragmentShaderCorpCeresc = `
     float mascaDreptunghi = 1.0 - smoothstep(0.68, 1.0, distantaMargine);
     float mascaRotunda = 1.0 - smoothstep(0.72, 1.0, length((vUv - 0.5) * 2.0));
     float masca = max(mascaRotunda, mascaDreptunghi * 0.42);
-    float alphaFinal = mostra.a * masca * mascaFundal;
+    float alphaFinal = uAlphaTransparent > 0.5
+      ? mostra.a
+      : mostra.a * masca * mascaFundal;
     if (alphaFinal < 0.025) discard;
     vec3 culoareClara = mostra.rgb * 1.12 + pow(maxim, 4.0) * 0.035;
     gl_FragColor = vec4(culoareClara, alphaFinal);
@@ -1120,18 +1124,7 @@ const CORPURI_NOCTIS = [
   { centru: [0.86, 0.76], decupaj: [0.29, 0.24], marime: [16, 8] },
 ];
 
-const CORPURI_KHARON = [
-  { centru: [0.18, 0.16], decupaj: [0.34, 0.31], marime: [23, 15] },
-  { centru: [0.5, 0.15], decupaj: [0.25, 0.29], marime: [16, 14] },
-  { centru: [0.82, 0.15], decupaj: [0.31, 0.3], marime: [22, 13] },
-  { centru: [0.17, 0.46], decupaj: [0.3, 0.27], marime: [19, 9] },
-  { centru: [0.5, 0.47], decupaj: [0.28, 0.24], marime: [18, 8] },
-  { centru: [0.82, 0.46], decupaj: [0.3, 0.3], marime: [19, 12] },
-  { centru: [0.29, 0.8], decupaj: [0.34, 0.34], marime: [21, 16] },
-  { centru: [0.75, 0.8], decupaj: [0.41, 0.35], marime: [25, 15] },
-];
-
-function CorpCerescDinHarta({ textura, definitie, limitaHarta }) {
+function CorpCerescDinHarta({ textura, definitie, limitaHarta, alphaTransparent = false }) {
   const uniforme = useMemo(
     () => ({
       uTextura: { value: textura },
@@ -1139,8 +1132,9 @@ function CorpCerescDinHarta({ textura, definitie, limitaHarta }) {
         value: new THREE.Vector2(definitie.centru[0], 1 - definitie.centru[1]),
       },
       uDecupaj: { value: new THREE.Vector2(...definitie.decupaj) },
+      uAlphaTransparent: { value: alphaTransparent ? 1 : 0 },
     }),
-    [textura, definitie]
+    [textura, definitie, alphaTransparent]
   );
   const x = (definitie.centru[0] * 2 - 1) * limitaHarta;
   const z = (definitie.centru[1] * 2 - 1) * limitaHarta;
@@ -1189,6 +1183,7 @@ function CorpuriCerestiUnice({
           textura={textura}
           definitie={definitie}
           limitaHarta={limitaHarta}
+          alphaTransparent={temaKharon}
         />
       ))}
     </group>

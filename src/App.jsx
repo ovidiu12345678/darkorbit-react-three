@@ -30,7 +30,6 @@ const MARIME_HARTA = 1260;
 const FUNDAL_HARTA_STANDARD = "assets/harta-standard-v3.png";
 const FUNDAL_HARTA_AETHER = "assets/harta-nebuloasa-aether-v3.png";
 const FUNDAL_HARTA_NOCTIS = "assets/harta-ares-noctis.png";
-const FUNDAL_HARTA_KHARON = "assets/harta-kharon-vesper.png";
 const FUNDAL_JOC_STANDARD = "assets/harta-standard-nebuloasa.png";
 const FUNDAL_JOC_AETHER = "assets/harta-aether-nebuloasa.png";
 const FUNDAL_JOC_NOCTIS = "assets/fundal-ares-noctis.png";
@@ -38,11 +37,11 @@ const FUNDAL_JOC_KHARON = "assets/fundal-kharon-vesper.png";
 const CORPURI_HARTA_STANDARD = "assets/corpuri-standard-transparente.png";
 const CORPURI_HARTA_AETHER = "assets/corpuri-aether-transparente.png";
 const CORPURI_HARTA_NOCTIS = "assets/corpuri-ares-noctis-transparente.png";
-const CORPURI_HARTA_KHARON = "assets/corpuri-kharon-vesper-atlas.png";
+const CORPURI_HARTA_KHARON = "assets/corpuri-kharon-vesper-atlas-v2.png";
 const FUNDAL_MINI_STANDARD = FUNDAL_HARTA_STANDARD;
 const FUNDAL_MINI_AETHER = FUNDAL_HARTA_AETHER;
 const FUNDAL_MINI_NOCTIS = FUNDAL_HARTA_NOCTIS;
-const FUNDAL_MINI_KHARON = FUNDAL_HARTA_KHARON;
+const FUNDAL_MINI_KHARON = FUNDAL_JOC_KHARON;
 
 const LIMITA_HARTA = MARIME_HARTA / 2 - 4.5;
 const FACTOR_SCALARE_HARTA = MARIME_HARTA / 210;
@@ -1023,6 +1022,7 @@ export default function App() {
         }
         temaPortalSecundar="noctis"
         imagineFundal={fundalMini}
+        imagineCorpuri={esteKharon ? CORPURI_HARTA_KHARON : null}
       />
 
       <ButonFullscreen />
