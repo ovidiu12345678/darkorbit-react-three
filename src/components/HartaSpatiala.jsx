@@ -186,6 +186,7 @@ function PortalAether({
   imagine = "assets/portal-aether-helix.png",
   tema = "aether",
   semnalTransport = 0,
+  onPornireTransport,
 }) {
   const portal = useRef();
   const materialPortal = useRef();
@@ -343,6 +344,7 @@ function PortalAether({
     efectPornit.current = true;
     transportExecutat.current = false;
     if (efectTransport.current) efectTransport.current.visible = true;
+    onPornireTransport?.();
     void redaSunetPortal(tema);
   };
 
@@ -1167,6 +1169,7 @@ export default function HartaSpatiala({
   doarPortal = false,
   onTransportAether,
   onTransportSecundar,
+  onPornireTransport,
   semnalTransportAether = 0,
   semnalTransportSecundar = 0,
 }) {
@@ -1289,6 +1292,7 @@ export default function HartaSpatiala({
         <PortalAether
           pozitie={pozitiePortalAether}
           onTransport={onTransportAether}
+          onPornireTransport={onPornireTransport}
           semnalTransport={semnalTransportAether}
         />
       )}
@@ -1299,6 +1303,7 @@ export default function HartaSpatiala({
           onTransport={onTransportSecundar}
           imagine={imaginePortalSecundar}
           tema={temaPortalSecundar}
+          onPornireTransport={onPornireTransport}
           semnalTransport={semnalTransportSecundar}
         />
       )}

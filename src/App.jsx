@@ -282,6 +282,7 @@ export default function App() {
   const pozitiiInamici = useRef({});
   const ultimaLovituraRef = useRef(0);
   const inamiciRef = useRef(TOATE_INAMICII_INITIALI);
+  const temporizatorSunetPortalRef = useRef(0);
 
   const [selectedAmmo, setSelectedAmmo] = useState("x1");
   const [tintaJucator, setTintaJucator] = useState(null);
@@ -301,6 +302,7 @@ export default function App() {
   const [semnalTeleportare, setSemnalTeleportare] = useState(0);
   const [semnalTransportPortalAether, setSemnalTransportPortalAether] = useState(0);
   const [semnalTransportPortalSecundar, setSemnalTransportPortalSecundar] = useState(0);
+  const [sunetPortalPrioritar, setSunetPortalPrioritar] = useState(false);
   const [pozitieTeleportare, setPozitieTeleportare] = useState(POZITIE_REVENIRE_STANDARD);
   const jucatorInZonaSiguraPortal = esteInZonaSiguraPortal(hartaActiva, pozitieJucator);
 
@@ -377,6 +379,18 @@ export default function App() {
 
   const declanseazaImpulsScut = useCallback(() => {
     setImpulsScut((valoare) => valoare + 1);
+  }, []);
+
+  const prioriteazaSunetulPortalului = useCallback(() => {
+    window.clearTimeout(temporizatorSunetPortalRef.current);
+    setSunetPortalPrioritar(true);
+    temporizatorSunetPortalRef.current = window.setTimeout(() => {
+      setSunetPortalPrioritar(false);
+    }, 3050);
+  }, []);
+
+  useEffect(() => () => {
+    window.clearTimeout(temporizatorSunetPortalRef.current);
   }, []);
 
   const transportaPrinPortal = useCallback(() => {
@@ -779,6 +793,7 @@ export default function App() {
             doarPortal={!esteStandard}
             onTransportAether={transportaPrinPortal}
             onTransportSecundar={transportaPrinPortalNoctis}
+            onPornireTransport={prioriteazaSunetulPortalului}
             semnalTransportAether={semnalTransportPortalAether}
             semnalTransportSecundar={semnalTransportPortalSecundar}
           />
@@ -864,7 +879,11 @@ export default function App() {
         </Suspense>
       </Canvas>
 
-      <MuzicaMartiana hartaActiva={hartaActiva} luptaActiva={luptaMuzicalaActiva} />
+      <MuzicaMartiana
+        hartaActiva={hartaActiva}
+        luptaActiva={luptaMuzicalaActiva}
+        portalActiv={sunetPortalPrioritar}
+      />
 
       <div className="bara-munitie" onPointerDown={(event) => event.stopPropagation()}>
         {AMMO_TYPES.map((ammo, index) => {

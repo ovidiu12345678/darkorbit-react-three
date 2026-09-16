@@ -21,16 +21,23 @@ const PISTE = {
 const VOLUM_EXPLORARE = 0.22;
 const VOLUM_LUPTA = 0.28;
 const DURATA_TRANZITIE = 850;
+const DURATA_SCADERE_PORTAL = 180;
+const FACTOR_VOLUM_PORTAL = 0.18;
 const VERSIUNE_AUDIO = "original-v8-cf976d4";
 
 function caleAudio(fisier) {
   return `${import.meta.env.BASE_URL}${fisier}?v=${VERSIUNE_AUDIO}`;
 }
 
-export default function MuzicaMartiana({ hartaActiva = "standard", luptaActiva = false }) {
+export default function MuzicaMartiana({
+  hartaActiva = "standard",
+  luptaActiva = false,
+  portalActiv = false,
+}) {
   const audioRef = useRef({});
   const hartaRef = useRef(hartaActiva);
   const luptaRef = useRef(luptaActiva);
+  const portalRef = useRef(portalActiv);
   const pornitaRef = useRef(false);
   const pornireInCursRef = useRef(false);
   const opritaRef = useRef(false);
@@ -39,11 +46,15 @@ export default function MuzicaMartiana({ hartaActiva = "standard", luptaActiva =
 
   hartaRef.current = hartaActiva;
   luptaRef.current = luptaActiva;
+  portalRef.current = portalActiv;
 
-  const volumeTinta = useCallback((esteLupta) => ({
-    explorare: esteLupta ? 0.045 : VOLUM_EXPLORARE,
-    lupta: esteLupta ? VOLUM_LUPTA : 0,
-  }), []);
+  const volumeTinta = useCallback((esteLupta, estePortalActiv = false) => {
+    const factor = estePortalActiv ? FACTOR_VOLUM_PORTAL : 1;
+    return {
+      explorare: (esteLupta ? 0.045 : VOLUM_EXPLORARE) * factor,
+      lupta: (esteLupta ? VOLUM_LUPTA : 0) * factor,
+    };
+  }, []);
 
   const porneste = useCallback(async () => {
     if (pornitaRef.current || pornireInCursRef.current || opritaRef.current) return;
@@ -51,7 +62,7 @@ export default function MuzicaMartiana({ hartaActiva = "standard", luptaActiva =
     if (!pereche) return;
 
     pornireInCursRef.current = true;
-    const tinta = volumeTinta(luptaRef.current);
+    const tinta = volumeTinta(luptaRef.current, portalRef.current);
     pereche.explorare.volume = tinta.explorare;
     pereche.lupta.volume = tinta.lupta;
 
@@ -110,7 +121,7 @@ export default function MuzicaMartiana({ hartaActiva = "standard", luptaActiva =
 
     const pereche = audioRef.current[hartaActiva];
     if (!pereche || !pornitaRef.current || opritaRef.current) return;
-    const tinta = volumeTinta(luptaActiva);
+    const tinta = volumeTinta(luptaActiva, portalActiv);
     pereche.explorare.volume = tinta.explorare;
     pereche.lupta.volume = tinta.lupta;
     Promise.allSettled([pereche.explorare.play(), pereche.lupta.play()]);
@@ -125,10 +136,13 @@ export default function MuzicaMartiana({ hartaActiva = "standard", luptaActiva =
     const inceput = performance.now();
     const volumExplorareStart = pereche.explorare.volume;
     const volumLuptaStart = pereche.lupta.volume;
-    const tinta = volumeTinta(luptaActiva);
+    const tinta = volumeTinta(luptaActiva, portalActiv);
+    const durataTranzitie = portalActiv
+      ? DURATA_SCADERE_PORTAL
+      : DURATA_TRANZITIE;
 
     const tranzitie = (acum) => {
-      const progres = Math.min(1, (acum - inceput) / DURATA_TRANZITIE);
+      const progres = Math.min(1, (acum - inceput) / durataTranzitie);
       const lin = progres * progres * (3 - 2 * progres);
       pereche.explorare.volume = volumExplorareStart + (tinta.explorare - volumExplorareStart) * lin;
       pereche.lupta.volume = volumLuptaStart + (tinta.lupta - volumLuptaStart) * lin;
@@ -137,7 +151,7 @@ export default function MuzicaMartiana({ hartaActiva = "standard", luptaActiva =
 
     animatieRef.current = requestAnimationFrame(tranzitie);
     return () => cancelAnimationFrame(animatieRef.current);
-  }, [hartaActiva, luptaActiva, volumeTinta]);
+  }, [hartaActiva, luptaActiva, portalActiv, volumeTinta]);
 
   const comutaMuzica = useCallback(async (event) => {
     event.stopPropagation();
