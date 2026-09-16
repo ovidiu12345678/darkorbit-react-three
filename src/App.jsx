@@ -299,6 +299,8 @@ export default function App() {
   const [vitezaNava, setVitezaNava] = useState(1);
   const [hartaActiva, setHartaActiva] = useState("standard");
   const [semnalTeleportare, setSemnalTeleportare] = useState(0);
+  const [semnalTransportPortalAether, setSemnalTransportPortalAether] = useState(0);
+  const [semnalTransportPortalSecundar, setSemnalTransportPortalSecundar] = useState(0);
   const [pozitieTeleportare, setPozitieTeleportare] = useState(POZITIE_REVENIRE_STANDARD);
   const jucatorInZonaSiguraPortal = esteInZonaSiguraPortal(hartaActiva, pozitieJucator);
 
@@ -642,6 +644,44 @@ export default function App() {
         });
         setAmenintare("tinta blocata");
       }
+
+      if (eveniment.code === "KeyJ" && !eveniment.repeat) {
+        const elementActiv = eveniment.target;
+        const esteCampEditabil = elementActiv instanceof HTMLElement && (
+          elementActiv.isContentEditable
+          || ["INPUT", "TEXTAREA", "SELECT"].includes(elementActiv.tagName)
+        );
+        if (esteCampEditabil) return;
+
+        const pozitieCurenta = playerRef.current;
+        const portaluriDisponibile = hartaActiva === "aether"
+          ? [
+              { pozitie: POZITIE_PORTAL_AETHER, secundar: false },
+              { pozitie: POZITIE_PORTAL_NOCTIS_AETHER, secundar: true },
+            ]
+          : hartaActiva === "noctis"
+            ? [{ pozitie: POZITIE_PORTAL_NOCTIS, secundar: true }]
+            : [{ pozitie: POZITIE_PORTAL_STANDARD, secundar: false }];
+
+        const portalApropiat = portaluriDisponibile
+          .map((portal) => ({
+            ...portal,
+            distanta: Math.hypot(
+              pozitieCurenta.x - portal.pozitie[0],
+              pozitieCurenta.z - portal.pozitie[2]
+            ),
+          }))
+          .sort((primul, alDoilea) => primul.distanta - alDoilea.distanta)[0];
+
+        if (!portalApropiat || portalApropiat.distanta > RAZA_ZONA_SIGURA_PORTAL) return;
+        eveniment.preventDefault();
+        if (portalApropiat.secundar) {
+          setSemnalTransportPortalSecundar((valoare) => valoare + 1);
+        } else {
+          setSemnalTransportPortalAether((valoare) => valoare + 1);
+        }
+        setAmenintare("portal activat · J");
+      }
     }
 
     window.addEventListener("keydown", laApasareTasta);
@@ -739,6 +779,8 @@ export default function App() {
             doarPortal={!esteStandard}
             onTransportAether={transportaPrinPortal}
             onTransportSecundar={transportaPrinPortalNoctis}
+            semnalTransportAether={semnalTransportPortalAether}
+            semnalTransportSecundar={semnalTransportPortalSecundar}
           />
 
           {inamiciHartaActiva.map((inamic) => {

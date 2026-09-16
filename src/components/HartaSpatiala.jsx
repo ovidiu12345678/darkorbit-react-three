@@ -2,6 +2,101 @@ import { useFrame, useLoader } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 
+let contextSunetPortal = null;
+
+async function redaSunetPortal(tema = "aether") {
+  if (typeof window === "undefined") return;
+  const AudioContextClasa = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClasa) return;
+
+  contextSunetPortal ??= new AudioContextClasa();
+  if (contextSunetPortal.state === "suspended") {
+    await contextSunetPortal.resume();
+  }
+
+  const context = contextSunetPortal;
+  const acum = context.currentTime;
+  const esteNoctis = tema === "noctis";
+  const master = context.createGain();
+  master.gain.setValueAtTime(0.0001, acum);
+  master.gain.exponentialRampToValueAtTime(0.17, acum + 0.18);
+  master.gain.exponentialRampToValueAtTime(0.24, acum + 1.72);
+  master.gain.exponentialRampToValueAtTime(0.0001, acum + 2.95);
+  master.connect(context.destination);
+
+  const pornesteOscilator = (tip, frecvente, volum, panorama) => {
+    const oscilator = context.createOscillator();
+    const castig = context.createGain();
+    const panner = typeof context.createStereoPanner === "function"
+      ? context.createStereoPanner()
+      : null;
+
+    oscilator.type = tip;
+    oscilator.frequency.setValueAtTime(frecvente[0], acum);
+    oscilator.frequency.exponentialRampToValueAtTime(frecvente[1], acum + 1.62);
+    oscilator.frequency.exponentialRampToValueAtTime(frecvente[2], acum + 2.82);
+    castig.gain.setValueAtTime(0.0001, acum);
+    castig.gain.exponentialRampToValueAtTime(volum, acum + 0.14);
+    castig.gain.exponentialRampToValueAtTime(0.0001, acum + 2.9);
+
+    oscilator.connect(castig);
+    if (panner) {
+      panner.pan.setValueAtTime(panorama, acum);
+      panner.pan.linearRampToValueAtTime(-panorama, acum + 2.8);
+      castig.connect(panner);
+      panner.connect(master);
+    } else {
+      castig.connect(master);
+    }
+
+    oscilator.start(acum);
+    oscilator.stop(acum + 3);
+  };
+
+  pornesteOscilator(
+    "sine",
+    esteNoctis ? [52, 280, 74] : [78, 430, 108],
+    esteNoctis ? 0.48 : 0.42,
+    -0.32
+  );
+  pornesteOscilator(
+    "triangle",
+    esteNoctis ? [165, 640, 130] : [238, 920, 190],
+    esteNoctis ? 0.2 : 0.17,
+    0.38
+  );
+
+  const durataZgomot = 3;
+  const buffer = context.createBuffer(2, Math.ceil(context.sampleRate * durataZgomot), context.sampleRate);
+  for (let canal = 0; canal < buffer.numberOfChannels; canal += 1) {
+    const date = buffer.getChannelData(canal);
+    let precedent = 0;
+    for (let index = 0; index < date.length; index += 1) {
+      const alb = Math.random() * 2 - 1;
+      precedent = precedent * 0.84 + alb * 0.16;
+      date[index] = precedent;
+    }
+  }
+
+  const zgomot = context.createBufferSource();
+  const filtru = context.createBiquadFilter();
+  const castigZgomot = context.createGain();
+  zgomot.buffer = buffer;
+  filtru.type = "bandpass";
+  filtru.Q.setValueAtTime(4.2, acum);
+  filtru.frequency.setValueAtTime(esteNoctis ? 310 : 520, acum);
+  filtru.frequency.exponentialRampToValueAtTime(esteNoctis ? 1450 : 2300, acum + 1.72);
+  filtru.frequency.exponentialRampToValueAtTime(esteNoctis ? 420 : 680, acum + 2.88);
+  castigZgomot.gain.setValueAtTime(0.0001, acum);
+  castigZgomot.gain.exponentialRampToValueAtTime(esteNoctis ? 0.22 : 0.18, acum + 0.32);
+  castigZgomot.gain.exponentialRampToValueAtTime(0.0001, acum + 2.92);
+  zgomot.connect(filtru);
+  filtru.connect(castigZgomot);
+  castigZgomot.connect(master);
+  zgomot.start(acum);
+  zgomot.stop(acum + durataZgomot);
+}
+
 const vertexShaderStatie = `
   varying vec2 vUv;
 
@@ -90,6 +185,7 @@ function PortalAether({
   onTransport,
   imagine = "assets/portal-aether-helix.png",
   tema = "aether",
+  semnalTransport = 0,
 }) {
   const portal = useRef();
   const materialPortal = useRef();
@@ -105,6 +201,7 @@ function PortalAether({
   const efectPornit = useRef(false);
   const timpEfect = useRef(0);
   const transportExecutat = useRef(false);
+  const ultimulSemnalTransport = useRef(semnalTransport);
   const texturaPortal = useLoader(
     THREE.TextureLoader,
     `${import.meta.env.BASE_URL}${imagine}`
@@ -240,12 +337,24 @@ function PortalAether({
     }
   });
 
-  const pornesteTransportul = (eveniment) => {
-    eveniment.stopPropagation();
+  const activeazaTransportul = () => {
+    if (efectPornit.current) return;
     timpEfect.current = 0;
     efectPornit.current = true;
     transportExecutat.current = false;
     if (efectTransport.current) efectTransport.current.visible = true;
+    void redaSunetPortal(tema);
+  };
+
+  useEffect(() => {
+    if (semnalTransport === ultimulSemnalTransport.current) return;
+    ultimulSemnalTransport.current = semnalTransport;
+    if (semnalTransport > 0) activeazaTransportul();
+  }, [semnalTransport]);
+
+  const pornesteTransportul = (eveniment) => {
+    eveniment.stopPropagation();
+    activeazaTransportul();
   };
 
   const seteazaCursorPortal = (valoare) => {
@@ -1058,6 +1167,8 @@ export default function HartaSpatiala({
   doarPortal = false,
   onTransportAether,
   onTransportSecundar,
+  semnalTransportAether = 0,
+  semnalTransportSecundar = 0,
 }) {
   const latimeHarta = marimeHarta * (16 / 9);
   const inaltimeHarta = marimeHarta;
@@ -1175,7 +1286,11 @@ export default function HartaSpatiala({
       )}
 
       {pozitiePortalAether && (
-        <PortalAether pozitie={pozitiePortalAether} onTransport={onTransportAether} />
+        <PortalAether
+          pozitie={pozitiePortalAether}
+          onTransport={onTransportAether}
+          semnalTransport={semnalTransportAether}
+        />
       )}
 
       {pozitiePortalSecundar && (
@@ -1184,6 +1299,7 @@ export default function HartaSpatiala({
           onTransport={onTransportSecundar}
           imagine={imaginePortalSecundar}
           tema={temaPortalSecundar}
+          semnalTransport={semnalTransportSecundar}
         />
       )}
 
