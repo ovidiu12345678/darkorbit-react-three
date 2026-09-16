@@ -21,6 +21,11 @@ const PISTE = {
 const VOLUM_EXPLORARE = 0.22;
 const VOLUM_LUPTA = 0.28;
 const DURATA_TRANZITIE = 850;
+const VERSIUNE_AUDIO = "original-v8-cf976d4";
+
+function caleAudio(fisier) {
+  return `${import.meta.env.BASE_URL}${fisier}?v=${VERSIUNE_AUDIO}`;
+}
 
 export default function MuzicaMartiana({ hartaActiva = "standard", luptaActiva = false }) {
   const audioRef = useRef({});
@@ -64,8 +69,8 @@ export default function MuzicaMartiana({ hartaActiva = "standard", luptaActiva =
   useEffect(() => {
     const colectie = {};
     Object.entries(PISTE).forEach(([harta, piste]) => {
-      const explorare = new Audio(`${import.meta.env.BASE_URL}${piste.explorare}`);
-      const lupta = new Audio(`${import.meta.env.BASE_URL}${piste.lupta}`);
+      const explorare = new Audio(caleAudio(piste.explorare));
+      const lupta = new Audio(caleAudio(piste.lupta));
       explorare.loop = true;
       lupta.loop = true;
       explorare.preload = harta === hartaRef.current ? "auto" : "metadata";
