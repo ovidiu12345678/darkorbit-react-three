@@ -24,6 +24,7 @@ export default function HartaMini({
   temaPortal = "aether",
   pozitiePortalSecundar,
   etichetaPortalSecundar = "Portal secundar",
+  temaPortalSecundar = "noctis",
   imagineFundal = "assets/harta-spatiala-fundal-hi.jpg",
 }) {
   const continutRef = useRef(null);
@@ -237,7 +238,13 @@ export default function HartaMini({
 
           {pozitiePortalMini && (
             <span
-              className={`harta-mini-marker harta-mini-portal ${temaPortal === "noctis" ? "harta-mini-portal-secundar" : ""}`}
+              className={`harta-mini-marker harta-mini-portal ${
+                temaPortal === "kharon"
+                  ? "harta-mini-portal-kharon"
+                  : temaPortal === "noctis"
+                    ? "harta-mini-portal-secundar"
+                    : ""
+              }`}
               style={{ left: `${pozitiePortalMini.left}%`, top: `${pozitiePortalMini.top}%` }}
               title={etichetaPortal}
               onMouseDown={(eveniment) => eveniment.stopPropagation()}
@@ -247,7 +254,11 @@ export default function HartaMini({
 
           {pozitiePortalSecundarMini && (
             <span
-              className="harta-mini-marker harta-mini-portal harta-mini-portal-secundar"
+              className={`harta-mini-marker harta-mini-portal ${
+                temaPortalSecundar === "kharon"
+                  ? "harta-mini-portal-kharon"
+                  : "harta-mini-portal-secundar"
+              }`}
               style={{ left: `${pozitiePortalSecundarMini.left}%`, top: `${pozitiePortalSecundarMini.top}%` }}
               title={etichetaPortalSecundar}
               onMouseDown={(eveniment) => eveniment.stopPropagation()}

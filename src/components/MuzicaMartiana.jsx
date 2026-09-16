@@ -16,6 +16,11 @@ const PISTE = {
     lupta: "assets/coloana-noctis-lupta.wav",
     eticheta: "NOCT",
   },
+  kharon: {
+    explorare: "assets/coloana-kharon-explorare.wav",
+    lupta: "assets/coloana-kharon-lupta.wav",
+    eticheta: "KHAR",
+  },
 };
 
 const VOLUM_EXPLORARE = 0.22;

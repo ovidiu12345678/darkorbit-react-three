@@ -30,15 +30,19 @@ const MARIME_HARTA = 1260;
 const FUNDAL_HARTA_STANDARD = "assets/harta-standard-v3.png";
 const FUNDAL_HARTA_AETHER = "assets/harta-nebuloasa-aether-v3.png";
 const FUNDAL_HARTA_NOCTIS = "assets/harta-ares-noctis.png";
+const FUNDAL_HARTA_KHARON = "assets/harta-kharon-vesper.png";
 const FUNDAL_JOC_STANDARD = "assets/harta-standard-nebuloasa.png";
 const FUNDAL_JOC_AETHER = "assets/harta-aether-nebuloasa.png";
 const FUNDAL_JOC_NOCTIS = "assets/fundal-ares-noctis.png";
+const FUNDAL_JOC_KHARON = "assets/fundal-kharon-vesper.png";
 const CORPURI_HARTA_STANDARD = "assets/corpuri-standard-transparente.png";
 const CORPURI_HARTA_AETHER = "assets/corpuri-aether-transparente.png";
 const CORPURI_HARTA_NOCTIS = "assets/corpuri-ares-noctis-transparente.png";
+const CORPURI_HARTA_KHARON = "assets/corpuri-kharon-vesper-atlas.png";
 const FUNDAL_MINI_STANDARD = FUNDAL_HARTA_STANDARD;
 const FUNDAL_MINI_AETHER = FUNDAL_HARTA_AETHER;
 const FUNDAL_MINI_NOCTIS = FUNDAL_HARTA_NOCTIS;
+const FUNDAL_MINI_KHARON = FUNDAL_HARTA_KHARON;
 
 const LIMITA_HARTA = MARIME_HARTA / 2 - 4.5;
 const FACTOR_SCALARE_HARTA = MARIME_HARTA / 210;
@@ -52,14 +56,18 @@ const POZITIE_PORTAL_STANDARD = [COORDONATA_PORTAL_AETHER, 0, COORDONATA_PORTAL_
 const POZITIE_PORTAL_AETHER = [-COORDONATA_PORTAL_AETHER, 0, -COORDONATA_PORTAL_AETHER];
 const POZITIE_PORTAL_NOCTIS_AETHER = [COORDONATA_PORTAL_AETHER, 0, -COORDONATA_PORTAL_AETHER];
 const POZITIE_PORTAL_NOCTIS = [COORDONATA_PORTAL_AETHER, 0, -COORDONATA_PORTAL_AETHER];
+const POZITIE_PORTAL_KHARON_NOCTIS = [-COORDONATA_PORTAL_AETHER, 0, COORDONATA_PORTAL_AETHER];
+const POZITIE_PORTAL_KHARON = [COORDONATA_PORTAL_AETHER, 0, -COORDONATA_PORTAL_AETHER];
 const RAZA_ZONA_SIGURA_PORTAL = 58;
 
 function esteInZonaSiguraPortal(harta, pozitie) {
   const portaluri = harta === "aether"
     ? [POZITIE_PORTAL_AETHER, POZITIE_PORTAL_NOCTIS_AETHER]
     : harta === "noctis"
-      ? [POZITIE_PORTAL_NOCTIS]
-      : [POZITIE_PORTAL_STANDARD];
+      ? [POZITIE_PORTAL_NOCTIS, POZITIE_PORTAL_KHARON_NOCTIS]
+      : harta === "kharon"
+        ? [POZITIE_PORTAL_KHARON]
+        : [POZITIE_PORTAL_STANDARD];
 
   return portaluri.some((portal) =>
     Math.hypot(pozitie[0] - portal[0], pozitie[2] - portal[2]) <= RAZA_ZONA_SIGURA_PORTAL
@@ -275,6 +283,16 @@ const POZITIE_REVENIRE_AETHER_DIN_NOCTIS = [
   COORDONATA_PORTAL_AETHER - DISTANTA_REAPARITIE_PORTAL,
   3.2,
   -COORDONATA_PORTAL_AETHER + DISTANTA_REAPARITIE_PORTAL,
+];
+const POZITIE_INTRARE_KHARON = [
+  COORDONATA_PORTAL_AETHER - DISTANTA_REAPARITIE_PORTAL,
+  3.2,
+  -COORDONATA_PORTAL_AETHER + DISTANTA_REAPARITIE_PORTAL,
+];
+const POZITIE_REVENIRE_NOCTIS_DIN_KHARON = [
+  -COORDONATA_PORTAL_AETHER + DISTANTA_REAPARITIE_PORTAL,
+  3.2,
+  COORDONATA_PORTAL_AETHER - DISTANTA_REAPARITIE_PORTAL,
 ];
 
 export default function App() {
@@ -674,8 +692,13 @@ export default function App() {
               { pozitie: POZITIE_PORTAL_NOCTIS_AETHER, secundar: true },
             ]
           : hartaActiva === "noctis"
-            ? [{ pozitie: POZITIE_PORTAL_NOCTIS, secundar: true }]
-            : [{ pozitie: POZITIE_PORTAL_STANDARD, secundar: false }];
+            ? [
+                { pozitie: POZITIE_PORTAL_KHARON_NOCTIS, secundar: false },
+                { pozitie: POZITIE_PORTAL_NOCTIS, secundar: true },
+              ]
+            : hartaActiva === "kharon"
+              ? [{ pozitie: POZITIE_PORTAL_KHARON, secundar: false }]
+              : [{ pozitie: POZITIE_PORTAL_STANDARD, secundar: false }];
 
         const portalApropiat = portaluriDisponibile
           .map((portal) => ({
@@ -734,6 +757,21 @@ export default function App() {
     setSemnalTeleportare((valoare) => valoare + 1);
   }, [hartaActiva]);
 
+  const transportaPrinPortalKharon = useCallback(() => {
+    const intraInKharon = hartaActiva !== "kharon";
+
+    setPozitieTeleportare(
+      intraInKharon ? POZITIE_INTRARE_KHARON : POZITIE_REVENIRE_NOCTIS_DIN_KHARON
+    );
+    setHartaActiva(intraInKharon ? "kharon" : "noctis");
+    setTintaJucator(null);
+    setTintaLive(false);
+    setTintaSelectata(null);
+    setAtaca(false);
+    setAmenintare(intraInKharon ? "sector Kharon Vesper" : "sector Ares Noctis");
+    setSemnalTeleportare((valoare) => valoare + 1);
+  }, [hartaActiva]);
+
   const scutProcent = scutMaxNava > 0 ? (scut / scutMaxNava) * 100 : 0;
   const statistici = { viata, scut: scutProcent, scutMax: scutMaxNava, atacuri, amenintare };
   const inamiciHartaActiva = inamici.filter(
@@ -743,19 +781,26 @@ export default function App() {
     (inamic) => inamic.activ && inamic.provocat
   );
   const esteNoctis = hartaActiva === "noctis";
+  const esteKharon = hartaActiva === "kharon";
   const esteAether = hartaActiva === "aether";
   const esteStandard = hartaActiva === "standard";
-  const fundalJoc = esteNoctis
+  const fundalJoc = esteKharon
+    ? FUNDAL_JOC_KHARON
+    : esteNoctis
     ? FUNDAL_JOC_NOCTIS
     : esteAether
       ? FUNDAL_JOC_AETHER
       : FUNDAL_JOC_STANDARD;
-  const corpuriHarta = esteNoctis
+  const corpuriHarta = esteKharon
+    ? CORPURI_HARTA_KHARON
+    : esteNoctis
     ? CORPURI_HARTA_NOCTIS
     : esteAether
       ? CORPURI_HARTA_AETHER
       : CORPURI_HARTA_STANDARD;
-  const fundalMini = esteNoctis
+  const fundalMini = esteKharon
+    ? FUNDAL_MINI_KHARON
+    : esteNoctis
     ? FUNDAL_MINI_NOCTIS
     : esteAether
       ? FUNDAL_MINI_AETHER
@@ -783,15 +828,31 @@ export default function App() {
             playerRef={playerRef}
             pozitieStatie={POZITIE_STATIE}
             pozitieHangar={POZITIE_HANGAR}
-            pozitiePortalAether={esteNoctis ? null : esteAether ? POZITIE_PORTAL_AETHER : POZITIE_PORTAL_STANDARD}
+            pozitiePortalAether={
+              esteKharon
+                ? POZITIE_PORTAL_KHARON
+                : esteNoctis
+                  ? POZITIE_PORTAL_KHARON_NOCTIS
+                  : esteAether
+                    ? POZITIE_PORTAL_AETHER
+                    : POZITIE_PORTAL_STANDARD
+            }
+            imaginePortalAether={
+              esteKharon || esteNoctis ? "assets/portal-hemofier.png" : undefined
+            }
+            temaPortalAether={esteKharon || esteNoctis ? "kharon" : "aether"}
             pozitiePortalSecundar={
               esteNoctis ? POZITIE_PORTAL_NOCTIS : esteAether ? POZITIE_PORTAL_NOCTIS_AETHER : null
             }
             imaginePortalSecundar="assets/portal-ares-noctis.png"
             temaPortalSecundar="noctis"
-            temaHarta={esteNoctis ? "noctis" : esteAether ? "aether" : "standard"}
+            temaHarta={
+              esteKharon ? "kharon" : esteNoctis ? "noctis" : esteAether ? "aether" : "standard"
+            }
             doarPortal={!esteStandard}
-            onTransportAether={transportaPrinPortal}
+            onTransportAether={
+              esteKharon || esteNoctis ? transportaPrinPortalKharon : transportaPrinPortal
+            }
             onTransportSecundar={transportaPrinPortalNoctis}
             onPornireTransport={prioriteazaSunetulPortalului}
             semnalTransportAether={semnalTransportPortalAether}
@@ -923,7 +984,9 @@ export default function App() {
 
       <HartaMini
         marimeHarta={MARIME_HARTA}
-        numeHarta={esteNoctis ? "Ares Noctis" : esteAether ? "Aether" : "Sector standard"}
+        numeHarta={
+          esteKharon ? "Kharon Vesper" : esteNoctis ? "Ares Noctis" : esteAether ? "Aether" : "Sector standard"
+        }
         pozitieJucator={pozitieJucator}
         tintaJucator={tintaJucator}
         inamici={inamiciHartaActiva}
@@ -934,12 +997,31 @@ export default function App() {
           esteStandard ? [PLATFORME_HANGAR[2].x, 0, PLATFORME_HANGAR[2].z] : null
         }
         pozitiePortal={
-          esteNoctis ? POZITIE_PORTAL_NOCTIS : esteAether ? POZITIE_PORTAL_AETHER : POZITIE_PORTAL_STANDARD
+          esteKharon
+            ? POZITIE_PORTAL_KHARON
+            : esteNoctis
+              ? POZITIE_PORTAL_KHARON_NOCTIS
+              : esteAether
+                ? POZITIE_PORTAL_AETHER
+                : POZITIE_PORTAL_STANDARD
         }
-        etichetaPortal={esteNoctis ? "Portal spre Aether" : esteAether ? "Portal spre sectorul standard" : "Portal spre Aether"}
-        temaPortal={esteNoctis ? "noctis" : "aether"}
-        pozitiePortalSecundar={esteAether ? POZITIE_PORTAL_NOCTIS_AETHER : null}
-        etichetaPortalSecundar="Portal spre Ares Noctis"
+        etichetaPortal={
+          esteKharon
+            ? "Poarta Hemofier spre Ares Noctis"
+            : esteNoctis
+              ? "Poarta Hemofier spre Kharon Vesper"
+              : esteAether
+                ? "Portal spre sectorul standard"
+                : "Portal spre Aether"
+        }
+        temaPortal={esteKharon || esteNoctis ? "kharon" : "aether"}
+        pozitiePortalSecundar={
+          esteNoctis ? POZITIE_PORTAL_NOCTIS : esteAether ? POZITIE_PORTAL_NOCTIS_AETHER : null
+        }
+        etichetaPortalSecundar={
+          esteNoctis ? "Portal spre Aether" : "Portal spre Ares Noctis"
+        }
+        temaPortalSecundar="noctis"
         imagineFundal={fundalMini}
       />
 

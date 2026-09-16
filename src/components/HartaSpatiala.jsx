@@ -17,6 +17,7 @@ async function redaSunetPortal(tema = "aether") {
   const context = contextSunetPortal;
   const acum = context.currentTime;
   const esteNoctis = tema === "noctis";
+  const esteKharon = tema === "kharon";
   const master = context.createGain();
   const compresor = context.createDynamicsCompressor();
   compresor.threshold.setValueAtTime(-15, acum);
@@ -62,24 +63,24 @@ async function redaSunetPortal(tema = "aether") {
 
   pornesteOscilator(
     "sine",
-    esteNoctis ? [52, 280, 74] : [78, 430, 108],
-    esteNoctis ? 0.66 : 0.59,
+    esteKharon ? [38, 220, 48] : esteNoctis ? [52, 280, 74] : [78, 430, 108],
+    esteKharon ? 0.74 : esteNoctis ? 0.66 : 0.59,
     -0.32
   );
   pornesteOscilator(
     "triangle",
-    esteNoctis ? [165, 640, 130] : [238, 920, 190],
-    esteNoctis ? 0.29 : 0.25,
+    esteKharon ? [118, 510, 92] : esteNoctis ? [165, 640, 130] : [238, 920, 190],
+    esteKharon ? 0.34 : esteNoctis ? 0.29 : 0.25,
     0.38
   );
 
   const impact = context.createOscillator();
   const castigImpact = context.createGain();
   impact.type = "sine";
-  impact.frequency.setValueAtTime(esteNoctis ? 72 : 94, acum + 1.82);
-  impact.frequency.exponentialRampToValueAtTime(esteNoctis ? 28 : 36, acum + 2.58);
+  impact.frequency.setValueAtTime(esteKharon ? 56 : esteNoctis ? 72 : 94, acum + 1.82);
+  impact.frequency.exponentialRampToValueAtTime(esteKharon ? 22 : esteNoctis ? 28 : 36, acum + 2.58);
   castigImpact.gain.setValueAtTime(0.0001, acum + 1.8);
-  castigImpact.gain.exponentialRampToValueAtTime(esteNoctis ? 0.9 : 0.78, acum + 1.94);
+  castigImpact.gain.exponentialRampToValueAtTime(esteKharon ? 1.0 : esteNoctis ? 0.9 : 0.78, acum + 1.94);
   castigImpact.gain.exponentialRampToValueAtTime(0.0001, acum + 2.62);
   impact.connect(castigImpact);
   castigImpact.connect(master);
@@ -104,11 +105,11 @@ async function redaSunetPortal(tema = "aether") {
   zgomot.buffer = buffer;
   filtru.type = "bandpass";
   filtru.Q.setValueAtTime(4.2, acum);
-  filtru.frequency.setValueAtTime(esteNoctis ? 310 : 520, acum);
-  filtru.frequency.exponentialRampToValueAtTime(esteNoctis ? 1450 : 2300, acum + 1.72);
-  filtru.frequency.exponentialRampToValueAtTime(esteNoctis ? 420 : 680, acum + 2.88);
+  filtru.frequency.setValueAtTime(esteKharon ? 220 : esteNoctis ? 310 : 520, acum);
+  filtru.frequency.exponentialRampToValueAtTime(esteKharon ? 1080 : esteNoctis ? 1450 : 2300, acum + 1.72);
+  filtru.frequency.exponentialRampToValueAtTime(esteKharon ? 290 : esteNoctis ? 420 : 680, acum + 2.88);
   castigZgomot.gain.setValueAtTime(0.0001, acum);
-  castigZgomot.gain.exponentialRampToValueAtTime(esteNoctis ? 0.34 : 0.29, acum + 0.32);
+  castigZgomot.gain.exponentialRampToValueAtTime(esteKharon ? 0.4 : esteNoctis ? 0.34 : 0.29, acum + 0.32);
   castigZgomot.gain.exponentialRampToValueAtTime(0.0001, acum + 2.92);
   zgomot.connect(filtru);
   filtru.connect(castigZgomot);
@@ -228,9 +229,10 @@ function PortalAether({
     `${import.meta.env.BASE_URL}${imagine}`
   );
   const esteNoctis = tema === "noctis";
-  const culoareEnergie = esteNoctis ? "#ff5b1f" : "#52dcff";
-  const culoareAccent = esteNoctis ? "#ffc04a" : "#a66cff";
-  const culoareRece = esteNoctis ? "#56e9ef" : "#71efff";
+  const esteKharon = tema === "kharon";
+  const culoareEnergie = esteKharon ? "#ff1818" : esteNoctis ? "#ff5b1f" : "#52dcff";
+  const culoareAccent = esteKharon ? "#7c0010" : esteNoctis ? "#ffc04a" : "#a66cff";
+  const culoareRece = esteKharon ? "#ff5a28" : esteNoctis ? "#56e9ef" : "#71efff";
 
   const dateParticule = useMemo(
     () =>
@@ -400,7 +402,7 @@ function PortalAether({
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.12, 0]}>
         <ringGeometry args={[13.5, 15.2, 72]} />
-        <meshBasicMaterial color={esteNoctis ? "#ff5b1f" : "#6d5cff"} transparent opacity={0.34} side={THREE.DoubleSide} />
+        <meshBasicMaterial color={esteKharon ? "#b80012" : esteNoctis ? "#ff5b1f" : "#6d5cff"} transparent opacity={0.34} side={THREE.DoubleSide} />
       </mesh>
 
       <group ref={insigna} position={[0, 37, 0]} renderOrder={8}>
@@ -425,7 +427,7 @@ function PortalAether({
         <mesh ref={inelInsigna} position={[0, 0, -0.05]}>
           <ringGeometry args={[6.05, 6.72, 64]} />
           <meshBasicMaterial
-            color={esteNoctis ? "#ffbf4b" : "#79edff"}
+            color={esteKharon ? "#ff2b1c" : esteNoctis ? "#ffbf4b" : "#79edff"}
             transparent
             opacity={0.88}
             depthWrite={false}
@@ -476,7 +478,7 @@ function PortalAether({
         <mesh ref={flashCentral} position={[0, 13, 0]}>
           <circleGeometry args={[11, 64]} />
           <meshBasicMaterial
-            color={esteNoctis ? "#fff0ba" : "#c9fbff"}
+            color={esteKharon ? "#ffcab0" : esteNoctis ? "#fff0ba" : "#c9fbff"}
             transparent
             opacity={0}
             depthWrite={false}
@@ -921,10 +923,10 @@ function creeazaGeometrie(pozitii, culori) {
   return geometrie;
 }
 
-function DecorSpatialUnic({ marimeHarta, temaAether, temaNoctis = false }) {
+function DecorSpatialUnic({ marimeHarta, temaAether, temaNoctis = false, temaKharon = false }) {
   const decor = useMemo(() => {
     const aleator = generatorDeterminist(
-      temaNoctis ? 0x4e0c715a : temaAether ? 0xa37ae771 : 0x51c0b17d
+      temaKharon ? 0x7a13d04f : temaNoctis ? 0x4e0c715a : temaAether ? 0xa37ae771 : 0x51c0b17d
     );
     const latimeHarta = marimeHarta * (16 / 9);
     const coloane = 18;
@@ -935,7 +937,9 @@ function DecorSpatialUnic({ marimeHarta, temaAether, temaNoctis = false }) {
     const pozitiiLinii = [];
     const pozitiiGalaxii = [];
     const culoriGalaxii = [];
-    const paleta = temaNoctis
+    const paleta = temaKharon
+      ? [new THREE.Color("#ff2b1c"), new THREE.Color("#7b0011"), new THREE.Color("#55304f")]
+      : temaNoctis
       ? [new THREE.Color("#ffb24a"), new THREE.Color("#e7542c"), new THREE.Color("#51d9df")]
       : temaAether
       ? [new THREE.Color("#f2b4ff"), new THREE.Color("#9a63ff"), new THREE.Color("#65ddff")]
@@ -1005,7 +1009,7 @@ function DecorSpatialUnic({ marimeHarta, temaAether, temaNoctis = false }) {
       linii: creeazaGeometrie(pozitiiLinii),
       galaxii: creeazaGeometrie(pozitiiGalaxii, culoriGalaxii),
     };
-  }, [marimeHarta, temaAether, temaNoctis]);
+  }, [marimeHarta, temaAether, temaNoctis, temaKharon]);
 
   useEffect(
     () => () => {
@@ -1020,7 +1024,7 @@ function DecorSpatialUnic({ marimeHarta, temaAether, temaNoctis = false }) {
     <group>
       <points geometry={decor.stele} renderOrder={2}>
         <pointsMaterial
-          color={temaNoctis ? "#ffd19a" : temaAether ? "#f1c4ff" : "#d8f6ff"}
+          color={temaKharon ? "#ff7a66" : temaNoctis ? "#ffd19a" : temaAether ? "#f1c4ff" : "#d8f6ff"}
           size={0.82}
           transparent
           opacity={0.9}
@@ -1116,6 +1120,17 @@ const CORPURI_NOCTIS = [
   { centru: [0.86, 0.76], decupaj: [0.29, 0.24], marime: [16, 8] },
 ];
 
+const CORPURI_KHARON = [
+  { centru: [0.18, 0.16], decupaj: [0.34, 0.31], marime: [23, 15] },
+  { centru: [0.5, 0.15], decupaj: [0.25, 0.29], marime: [16, 14] },
+  { centru: [0.82, 0.15], decupaj: [0.31, 0.3], marime: [22, 13] },
+  { centru: [0.17, 0.46], decupaj: [0.3, 0.27], marime: [19, 9] },
+  { centru: [0.5, 0.47], decupaj: [0.28, 0.24], marime: [18, 8] },
+  { centru: [0.82, 0.46], decupaj: [0.3, 0.3], marime: [19, 12] },
+  { centru: [0.29, 0.8], decupaj: [0.34, 0.34], marime: [21, 16] },
+  { centru: [0.75, 0.8], decupaj: [0.41, 0.35], marime: [25, 15] },
+];
+
 function CorpCerescDinHarta({ textura, definitie, limitaHarta }) {
   const uniforme = useMemo(
     () => ({
@@ -1149,10 +1164,22 @@ function CorpCerescDinHarta({ textura, definitie, limitaHarta }) {
   );
 }
 
-function CorpuriCerestiUnice({ textura, marimeHarta, temaAether, temaNoctis = false }) {
+function CorpuriCerestiUnice({
+  textura,
+  marimeHarta,
+  temaAether,
+  temaNoctis = false,
+  temaKharon = false,
+}) {
   const limitaHarta = marimeHarta / 2 - 4.5;
-  const corpuri = temaNoctis ? CORPURI_NOCTIS : temaAether ? CORPURI_AETHER : CORPURI_STANDARD;
-  const cheieTema = temaNoctis ? "noctis" : temaAether ? "aether" : "standard";
+  const corpuri = temaKharon
+    ? CORPURI_KHARON
+    : temaNoctis
+      ? CORPURI_NOCTIS
+      : temaAether
+        ? CORPURI_AETHER
+        : CORPURI_STANDARD;
+  const cheieTema = temaKharon ? "kharon" : temaNoctis ? "noctis" : temaAether ? "aether" : "standard";
 
   return (
     <group>
@@ -1182,6 +1209,8 @@ export default function HartaSpatiala({
   pozitieStatie = POZITIE_STATIE_INITIALA,
   pozitieHangar = POZITIE_HANGAR_INITIALA,
   pozitiePortalAether,
+  imaginePortalAether,
+  temaPortalAether = "aether",
   pozitiePortalSecundar,
   imaginePortalSecundar,
   temaPortalSecundar = "aether",
@@ -1266,12 +1295,14 @@ export default function HartaSpatiala({
         marimeHarta={marimeHarta}
         temaAether={doarPortal}
         temaNoctis={temaHarta === "noctis"}
+        temaKharon={temaHarta === "kharon"}
       />
       <CorpuriCerestiUnice
         textura={texturaCorpuri}
         marimeHarta={marimeHarta}
         temaAether={doarPortal}
         temaNoctis={temaHarta === "noctis"}
+        temaKharon={temaHarta === "kharon"}
       />
 
       <mesh
@@ -1312,6 +1343,8 @@ export default function HartaSpatiala({
         <PortalAether
           pozitie={pozitiePortalAether}
           onTransport={onTransportAether}
+          imagine={imaginePortalAether}
+          tema={temaPortalAether}
           onPornireTransport={onPornireTransport}
           semnalTransport={semnalTransportAether}
         />

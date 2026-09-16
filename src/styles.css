@@ -1719,6 +1719,12 @@ canvas {
   box-shadow: 0 0 5px #56e9ef, 0 0 11px #ff5b1f;
 }
 
+.harta-mini-portal-kharon {
+  background: radial-gradient(circle, #050000 0 18%, #7a0008 26% 49%, #ff2517 54% 62%, #170203 68%);
+  border-color: #ff4030;
+  box-shadow: 0 0 6px #ff2018, 0 0 13px #8b0010;
+}
+
 .harta-mini-redimensionare {
   position: absolute;
   right: 0;
