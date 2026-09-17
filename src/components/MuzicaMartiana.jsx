@@ -21,6 +21,11 @@ const PISTE = {
     lupta: "assets/coloana-kharon-lupta.wav",
     eticheta: "KHAR",
   },
+  flota: {
+    explorare: "assets/coloana-flota-explorare.wav",
+    lupta: "assets/coloana-flota-lupta.wav",
+    eticheta: "FLOT",
+  },
 };
 
 const VOLUM_EXPLORARE = 0.22;
@@ -28,7 +33,7 @@ const VOLUM_LUPTA = 0.28;
 const DURATA_TRANZITIE = 850;
 const DURATA_SCADERE_PORTAL = 100;
 const FACTOR_VOLUM_PORTAL = 0.025;
-const VERSIUNE_AUDIO = "original-v8-cf976d4";
+const VERSIUNE_AUDIO = "flota-carmizie-v1";
 
 function caleAudio(fisier) {
   return `${import.meta.env.BASE_URL}${fisier}?v=${VERSIUNE_AUDIO}`;

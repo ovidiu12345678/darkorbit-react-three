@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { CORPURI_KHARON } from "../corpuriKharon.js";
 
 const POZITIE_INITIALA = { top: 16, right: 16 };
 const DIMENSIUNE_INITIALA = { latime: 300, inaltime: 220 };
@@ -28,6 +27,7 @@ export default function HartaMini({
   temaPortalSecundar = "noctis",
   imagineFundal = "assets/harta-spatiala-fundal-hi.jpg",
   imagineCorpuri = null,
+  corpuriCeresti = [],
 }) {
   const continutRef = useRef(null);
 
@@ -203,7 +203,7 @@ export default function HartaMini({
             backgroundSize: imagineCorpuri ? "100% 100%" : undefined,
           }}
         >
-          {imagineCorpuri && CORPURI_KHARON.map((corp) => {
+          {imagineCorpuri && corpuriCeresti.map((corp) => {
             const [centruX, centruY] = corp.centru;
             const [decupajX, decupajY] = corp.decupaj;
             return (
@@ -273,6 +273,8 @@ export default function HartaMini({
               className={`harta-mini-marker harta-mini-portal ${
                 temaPortal === "kharon"
                   ? "harta-mini-portal-kharon"
+                  : temaPortal === "flota"
+                    ? "harta-mini-portal-flota"
                   : temaPortal === "noctis"
                     ? "harta-mini-portal-secundar"
                     : ""
@@ -289,6 +291,8 @@ export default function HartaMini({
               className={`harta-mini-marker harta-mini-portal ${
                 temaPortalSecundar === "kharon"
                   ? "harta-mini-portal-kharon"
+                  : temaPortalSecundar === "flota"
+                    ? "harta-mini-portal-flota"
                   : "harta-mini-portal-secundar"
               }`}
               style={{ left: `${pozitiePortalSecundarMini.left}%`, top: `${pozitiePortalSecundarMini.top}%` }}

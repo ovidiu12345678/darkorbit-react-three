@@ -16,6 +16,8 @@ import PanouMagazin from "./components/PanouMagazin.jsx";
 import PanouHangar from "./components/PanouHangar.jsx";
 import NotificareRecompensa from "./components/NotificareRecompensa.jsx";
 import MuzicaMartiana from "./components/MuzicaMartiana.jsx";
+import { CORPURI_KHARON } from "./corpuriKharon.js";
+import { CORPURI_FLOTA } from "./corpuriFlota.js";
 import {
   TUNURI_BY_ID,
   GENERATOARE_BY_ID,
@@ -34,14 +36,17 @@ const FUNDAL_JOC_STANDARD = "assets/harta-standard-nebuloasa.png";
 const FUNDAL_JOC_AETHER = "assets/harta-aether-nebuloasa.png";
 const FUNDAL_JOC_NOCTIS = "assets/fundal-ares-noctis.png";
 const FUNDAL_JOC_KHARON = "assets/fundal-kharon-vesper.png";
+const FUNDAL_JOC_FLOTA = "assets/fundal-flota-carmizie.png";
 const CORPURI_HARTA_STANDARD = "assets/corpuri-standard-transparente.png";
 const CORPURI_HARTA_AETHER = "assets/corpuri-aether-transparente.png";
 const CORPURI_HARTA_NOCTIS = "assets/corpuri-ares-noctis-transparente.png";
 const CORPURI_HARTA_KHARON = "assets/corpuri-kharon-vesper-atlas-v2.png";
+const CORPURI_HARTA_FLOTA = "assets/corpuri-flota-carmizie-atlas.png";
 const FUNDAL_MINI_STANDARD = FUNDAL_HARTA_STANDARD;
 const FUNDAL_MINI_AETHER = FUNDAL_HARTA_AETHER;
 const FUNDAL_MINI_NOCTIS = FUNDAL_HARTA_NOCTIS;
 const FUNDAL_MINI_KHARON = FUNDAL_JOC_KHARON;
+const FUNDAL_MINI_FLOTA = FUNDAL_JOC_FLOTA;
 
 const LIMITA_HARTA = MARIME_HARTA / 2 - 4.5;
 const FACTOR_SCALARE_HARTA = MARIME_HARTA / 210;
@@ -57,6 +62,8 @@ const POZITIE_PORTAL_NOCTIS_AETHER = [COORDONATA_PORTAL_AETHER, 0, -COORDONATA_P
 const POZITIE_PORTAL_NOCTIS = [COORDONATA_PORTAL_AETHER, 0, -COORDONATA_PORTAL_AETHER];
 const POZITIE_PORTAL_KHARON_NOCTIS = [-COORDONATA_PORTAL_AETHER, 0, COORDONATA_PORTAL_AETHER];
 const POZITIE_PORTAL_KHARON = [COORDONATA_PORTAL_AETHER, 0, -COORDONATA_PORTAL_AETHER];
+const POZITIE_PORTAL_FLOTA_KHARON = [-COORDONATA_PORTAL_AETHER, 0, -COORDONATA_PORTAL_AETHER];
+const POZITIE_PORTAL_FLOTA = [-COORDONATA_PORTAL_AETHER, 0, -COORDONATA_PORTAL_AETHER];
 const RAZA_ZONA_SIGURA_PORTAL = 58;
 
 function esteInZonaSiguraPortal(harta, pozitie) {
@@ -65,7 +72,9 @@ function esteInZonaSiguraPortal(harta, pozitie) {
     : harta === "noctis"
       ? [POZITIE_PORTAL_NOCTIS, POZITIE_PORTAL_KHARON_NOCTIS]
       : harta === "kharon"
-        ? [POZITIE_PORTAL_KHARON]
+        ? [POZITIE_PORTAL_KHARON, POZITIE_PORTAL_FLOTA_KHARON]
+        : harta === "flota"
+          ? [POZITIE_PORTAL_FLOTA]
         : [POZITIE_PORTAL_STANDARD];
 
   return portaluri.some((portal) =>
@@ -293,6 +302,12 @@ const POZITIE_REVENIRE_NOCTIS_DIN_KHARON = [
   3.2,
   COORDONATA_PORTAL_AETHER - DISTANTA_REAPARITIE_PORTAL,
 ];
+const POZITIE_INTRARE_FLOTA = [
+  -COORDONATA_PORTAL_AETHER + DISTANTA_REAPARITIE_PORTAL,
+  3.2,
+  -COORDONATA_PORTAL_AETHER + DISTANTA_REAPARITIE_PORTAL,
+];
+const POZITIE_REVENIRE_KHARON_DIN_FLOTA = [...POZITIE_INTRARE_FLOTA];
 
 export default function App() {
   const playerRef = useRef(new THREE.Vector3(-532.4, 3.2, -16.1));
@@ -696,7 +711,12 @@ export default function App() {
                 { pozitie: POZITIE_PORTAL_NOCTIS, secundar: true },
               ]
             : hartaActiva === "kharon"
-              ? [{ pozitie: POZITIE_PORTAL_KHARON, secundar: false }]
+              ? [
+                  { pozitie: POZITIE_PORTAL_KHARON, secundar: false },
+                  { pozitie: POZITIE_PORTAL_FLOTA_KHARON, secundar: true },
+                ]
+              : hartaActiva === "flota"
+                ? [{ pozitie: POZITIE_PORTAL_FLOTA, secundar: false }]
               : [{ pozitie: POZITIE_PORTAL_STANDARD, secundar: false }];
 
         const portalApropiat = portaluriDisponibile
@@ -771,6 +791,20 @@ export default function App() {
     setSemnalTeleportare((valoare) => valoare + 1);
   }, [hartaActiva]);
 
+  const transportaPrinPortalFlota = useCallback(() => {
+    const intraInFlota = hartaActiva !== "flota";
+    setPozitieTeleportare(
+      intraInFlota ? POZITIE_INTRARE_FLOTA : POZITIE_REVENIRE_KHARON_DIN_FLOTA
+    );
+    setHartaActiva(intraInFlota ? "flota" : "kharon");
+    setTintaJucator(null);
+    setTintaLive(false);
+    setTintaSelectata(null);
+    setAtaca(false);
+    setAmenintare(intraInFlota ? "sector Flota Cărămizie" : "sector Kharon Vesper");
+    setSemnalTeleportare((valoare) => valoare + 1);
+  }, [hartaActiva]);
+
   const scutProcent = scutMaxNava > 0 ? (scut / scutMaxNava) * 100 : 0;
   const statistici = { viata, scut: scutProcent, scutMax: scutMaxNava, atacuri, amenintare };
   const inamiciHartaActiva = inamici.filter(
@@ -781,23 +815,30 @@ export default function App() {
   );
   const esteNoctis = hartaActiva === "noctis";
   const esteKharon = hartaActiva === "kharon";
+  const esteFlota = hartaActiva === "flota";
   const esteAether = hartaActiva === "aether";
   const esteStandard = hartaActiva === "standard";
-  const fundalJoc = esteKharon
+  const fundalJoc = esteFlota
+    ? FUNDAL_JOC_FLOTA
+    : esteKharon
     ? FUNDAL_JOC_KHARON
     : esteNoctis
     ? FUNDAL_JOC_NOCTIS
     : esteAether
       ? FUNDAL_JOC_AETHER
       : FUNDAL_JOC_STANDARD;
-  const corpuriHarta = esteKharon
+  const corpuriHarta = esteFlota
+    ? CORPURI_HARTA_FLOTA
+    : esteKharon
     ? CORPURI_HARTA_KHARON
     : esteNoctis
     ? CORPURI_HARTA_NOCTIS
     : esteAether
       ? CORPURI_HARTA_AETHER
       : CORPURI_HARTA_STANDARD;
-  const fundalMini = esteKharon
+  const fundalMini = esteFlota
+    ? FUNDAL_MINI_FLOTA
+    : esteKharon
     ? FUNDAL_MINI_KHARON
     : esteNoctis
     ? FUNDAL_MINI_NOCTIS
@@ -828,7 +869,9 @@ export default function App() {
             pozitieStatie={POZITIE_STATIE}
             pozitieHangar={POZITIE_HANGAR}
             pozitiePortalAether={
-              esteKharon
+              esteFlota
+                ? POZITIE_PORTAL_FLOTA
+                : esteKharon
                 ? POZITIE_PORTAL_KHARON
                 : esteNoctis
                   ? POZITIE_PORTAL_KHARON_NOCTIS
@@ -837,22 +880,24 @@ export default function App() {
                     : POZITIE_PORTAL_STANDARD
             }
             imaginePortalAether={
-              esteKharon || esteNoctis ? "assets/portal-hemofier.png" : undefined
+              esteFlota
+                ? "assets/portal-ruptura-stacojie.png"
+                : esteKharon || esteNoctis ? "assets/portal-hemofier.png" : undefined
             }
-            temaPortalAether={esteKharon || esteNoctis ? "kharon" : "aether"}
+            temaPortalAether={esteFlota ? "flota" : esteKharon || esteNoctis ? "kharon" : "aether"}
             pozitiePortalSecundar={
-              esteNoctis ? POZITIE_PORTAL_NOCTIS : esteAether ? POZITIE_PORTAL_NOCTIS_AETHER : null
+              esteKharon ? POZITIE_PORTAL_FLOTA_KHARON : esteNoctis ? POZITIE_PORTAL_NOCTIS : esteAether ? POZITIE_PORTAL_NOCTIS_AETHER : null
             }
-            imaginePortalSecundar="assets/portal-ares-noctis.png"
-            temaPortalSecundar="noctis"
+            imaginePortalSecundar={esteKharon ? "assets/portal-ruptura-stacojie.png" : "assets/portal-ares-noctis.png"}
+            temaPortalSecundar={esteKharon ? "flota" : "noctis"}
             temaHarta={
-              esteKharon ? "kharon" : esteNoctis ? "noctis" : esteAether ? "aether" : "standard"
+              esteFlota ? "flota" : esteKharon ? "kharon" : esteNoctis ? "noctis" : esteAether ? "aether" : "standard"
             }
             doarPortal={!esteStandard}
             onTransportAether={
-              esteKharon || esteNoctis ? transportaPrinPortalKharon : transportaPrinPortal
+              esteFlota ? transportaPrinPortalFlota : esteKharon || esteNoctis ? transportaPrinPortalKharon : transportaPrinPortal
             }
-            onTransportSecundar={transportaPrinPortalNoctis}
+            onTransportSecundar={esteKharon ? transportaPrinPortalFlota : transportaPrinPortalNoctis}
             onPornireTransport={prioriteazaSunetulPortalului}
             semnalTransportAether={semnalTransportPortalAether}
             semnalTransportSecundar={semnalTransportPortalSecundar}
@@ -984,7 +1029,7 @@ export default function App() {
       <HartaMini
         marimeHarta={MARIME_HARTA}
         numeHarta={
-          esteKharon ? "Kharon Vesper" : esteNoctis ? "Ares Noctis" : esteAether ? "Aether" : "Sector standard"
+          esteFlota ? "Flota Cărămizie" : esteKharon ? "Kharon Vesper" : esteNoctis ? "Ares Noctis" : esteAether ? "Aether" : "Sector standard"
         }
         pozitieJucator={pozitieJucator}
         tintaJucator={tintaJucator}
@@ -996,7 +1041,9 @@ export default function App() {
           esteStandard ? [PLATFORME_HANGAR[2].x, 0, PLATFORME_HANGAR[2].z] : null
         }
         pozitiePortal={
-          esteKharon
+          esteFlota
+            ? POZITIE_PORTAL_FLOTA
+            : esteKharon
             ? POZITIE_PORTAL_KHARON
             : esteNoctis
               ? POZITIE_PORTAL_KHARON_NOCTIS
@@ -1005,7 +1052,9 @@ export default function App() {
                 : POZITIE_PORTAL_STANDARD
         }
         etichetaPortal={
-          esteKharon
+          esteFlota
+            ? "Ruptura Stacojie spre Kharon Vesper"
+            : esteKharon
             ? "Poarta Hemofier spre Ares Noctis"
             : esteNoctis
               ? "Poarta Hemofier spre Kharon Vesper"
@@ -1013,16 +1062,17 @@ export default function App() {
                 ? "Portal spre sectorul standard"
                 : "Portal spre Aether"
         }
-        temaPortal={esteKharon || esteNoctis ? "kharon" : "aether"}
+        temaPortal={esteFlota ? "flota" : esteKharon || esteNoctis ? "kharon" : "aether"}
         pozitiePortalSecundar={
-          esteNoctis ? POZITIE_PORTAL_NOCTIS : esteAether ? POZITIE_PORTAL_NOCTIS_AETHER : null
+          esteKharon ? POZITIE_PORTAL_FLOTA_KHARON : esteNoctis ? POZITIE_PORTAL_NOCTIS : esteAether ? POZITIE_PORTAL_NOCTIS_AETHER : null
         }
         etichetaPortalSecundar={
-          esteNoctis ? "Portal spre Aether" : "Portal spre Ares Noctis"
+          esteKharon ? "Ruptura Stacojie spre Flota Cărămizie" : esteNoctis ? "Portal spre Aether" : "Portal spre Ares Noctis"
         }
-        temaPortalSecundar="noctis"
+        temaPortalSecundar={esteKharon ? "flota" : "noctis"}
         imagineFundal={fundalMini}
-        imagineCorpuri={esteKharon ? CORPURI_HARTA_KHARON : null}
+        imagineCorpuri={esteFlota ? CORPURI_HARTA_FLOTA : esteKharon ? CORPURI_HARTA_KHARON : null}
+        corpuriCeresti={esteFlota ? CORPURI_FLOTA : esteKharon ? CORPURI_KHARON : []}
       />
 
       <ButonFullscreen />

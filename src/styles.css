@@ -1739,6 +1739,12 @@ canvas {
   box-shadow: 0 0 6px #ff2018, 0 0 13px #8b0010;
 }
 
+.harta-mini-portal-flota {
+  background: radial-gradient(circle, #120203 0 17%, #ff3a1e 28% 45%, #430409 53% 62%, #ff9b49 67%);
+  border-color: #ffa05a;
+  box-shadow: 0 0 7px #ff5634, 0 0 15px #a91420;
+}
+
 .harta-mini-redimensionare {
   position: absolute;
   right: 0;

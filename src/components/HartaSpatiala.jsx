@@ -2,6 +2,7 @@ import { useFrame, useLoader } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { CORPURI_KHARON } from "../corpuriKharon.js";
+import { CORPURI_FLOTA } from "../corpuriFlota.js";
 
 let contextSunetPortal = null;
 let volumPortalAnterior = null;
@@ -19,7 +20,7 @@ async function redaSunetPortal(tema = "aether") {
   const context = contextSunetPortal;
   const acum = context.currentTime;
   const esteNoctis = tema === "noctis";
-  const esteKharon = tema === "kharon";
+  const esteKharon = tema === "kharon" || tema === "flota";
   const frecventaRezonantei = esteKharon ? 86 : esteNoctis ? 118 : 154;
 
   if (volumPortalAnterior) {
@@ -307,9 +308,10 @@ function PortalAether({
   );
   const esteNoctis = tema === "noctis";
   const esteKharon = tema === "kharon";
-  const culoareEnergie = esteKharon ? "#ff1818" : esteNoctis ? "#ff5b1f" : "#52dcff";
-  const culoareAccent = esteKharon ? "#7c0010" : esteNoctis ? "#ffc04a" : "#a66cff";
-  const culoareRece = esteKharon ? "#ff5a28" : esteNoctis ? "#56e9ef" : "#71efff";
+  const esteFlota = tema === "flota";
+  const culoareEnergie = esteFlota ? "#ff4828" : esteKharon ? "#ff1818" : esteNoctis ? "#ff5b1f" : "#52dcff";
+  const culoareAccent = esteFlota ? "#ffad58" : esteKharon ? "#7c0010" : esteNoctis ? "#ffc04a" : "#a66cff";
+  const culoareRece = esteFlota ? "#a41520" : esteKharon ? "#ff5a28" : esteNoctis ? "#56e9ef" : "#71efff";
 
   const dateParticule = useMemo(
     () =>
@@ -479,7 +481,7 @@ function PortalAether({
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.12, 0]}>
         <ringGeometry args={[13.5, 15.2, 72]} />
-        <meshBasicMaterial color={esteKharon ? "#b80012" : esteNoctis ? "#ff5b1f" : "#6d5cff"} transparent opacity={0.34} side={THREE.DoubleSide} />
+        <meshBasicMaterial color={esteFlota ? "#ff5a32" : esteKharon ? "#b80012" : esteNoctis ? "#ff5b1f" : "#6d5cff"} transparent opacity={0.34} side={THREE.DoubleSide} />
       </mesh>
 
       <group ref={insigna} position={[0, 37, 0]} renderOrder={8}>
@@ -504,7 +506,7 @@ function PortalAether({
         <mesh ref={inelInsigna} position={[0, 0, -0.05]}>
           <ringGeometry args={[6.05, 6.72, 64]} />
           <meshBasicMaterial
-            color={esteKharon ? "#ff2b1c" : esteNoctis ? "#ffbf4b" : "#79edff"}
+            color={esteFlota ? "#ffb96a" : esteKharon ? "#ff2b1c" : esteNoctis ? "#ffbf4b" : "#79edff"}
             transparent
             opacity={0.88}
             depthWrite={false}
@@ -555,7 +557,7 @@ function PortalAether({
         <mesh ref={flashCentral} position={[0, 13, 0]}>
           <circleGeometry args={[11, 64]} />
           <meshBasicMaterial
-            color={esteKharon ? "#ffcab0" : esteNoctis ? "#fff0ba" : "#c9fbff"}
+            color={esteFlota ? "#ffe2bb" : esteKharon ? "#ffcab0" : esteNoctis ? "#fff0ba" : "#c9fbff"}
             transparent
             opacity={0}
             depthWrite={false}
@@ -1000,10 +1002,10 @@ function creeazaGeometrie(pozitii, culori) {
   return geometrie;
 }
 
-function DecorSpatialUnic({ marimeHarta, temaAether, temaNoctis = false, temaKharon = false }) {
+function DecorSpatialUnic({ marimeHarta, temaAether, temaNoctis = false, temaKharon = false, temaFlota = false }) {
   const decor = useMemo(() => {
     const aleator = generatorDeterminist(
-      temaKharon ? 0x7a13d04f : temaNoctis ? 0x4e0c715a : temaAether ? 0xa37ae771 : 0x51c0b17d
+      temaFlota ? 0x3c175a9e : temaKharon ? 0x7a13d04f : temaNoctis ? 0x4e0c715a : temaAether ? 0xa37ae771 : 0x51c0b17d
     );
     const latimeHarta = marimeHarta * (16 / 9);
     const coloane = 18;
@@ -1014,7 +1016,9 @@ function DecorSpatialUnic({ marimeHarta, temaAether, temaNoctis = false, temaKha
     const pozitiiLinii = [];
     const pozitiiGalaxii = [];
     const culoriGalaxii = [];
-    const paleta = temaKharon
+    const paleta = temaFlota
+      ? [new THREE.Color("#ff6744"), new THREE.Color("#8f1c23"), new THREE.Color("#d6694a")]
+      : temaKharon
       ? [new THREE.Color("#ff2b1c"), new THREE.Color("#7b0011"), new THREE.Color("#55304f")]
       : temaNoctis
       ? [new THREE.Color("#ffb24a"), new THREE.Color("#e7542c"), new THREE.Color("#51d9df")]
@@ -1086,7 +1090,7 @@ function DecorSpatialUnic({ marimeHarta, temaAether, temaNoctis = false, temaKha
       linii: creeazaGeometrie(pozitiiLinii),
       galaxii: creeazaGeometrie(pozitiiGalaxii, culoriGalaxii),
     };
-  }, [marimeHarta, temaAether, temaNoctis, temaKharon]);
+  }, [marimeHarta, temaAether, temaNoctis, temaKharon, temaFlota]);
 
   useEffect(
     () => () => {
@@ -1101,7 +1105,7 @@ function DecorSpatialUnic({ marimeHarta, temaAether, temaNoctis = false, temaKha
     <group>
       <points geometry={decor.stele} renderOrder={2}>
         <pointsMaterial
-          color={temaKharon ? "#ff7a66" : temaNoctis ? "#ffd19a" : temaAether ? "#f1c4ff" : "#d8f6ff"}
+          color={temaFlota ? "#ffb091" : temaKharon ? "#ff7a66" : temaNoctis ? "#ffd19a" : temaAether ? "#f1c4ff" : "#d8f6ff"}
           size={0.82}
           transparent
           opacity={0.9}
@@ -1240,16 +1244,19 @@ function CorpuriCerestiUnice({
   temaAether,
   temaNoctis = false,
   temaKharon = false,
+  temaFlota = false,
 }) {
   const limitaHarta = marimeHarta / 2 - 4.5;
-  const corpuri = temaKharon
+  const corpuri = temaFlota
+    ? CORPURI_FLOTA
+    : temaKharon
     ? CORPURI_KHARON
     : temaNoctis
       ? CORPURI_NOCTIS
       : temaAether
         ? CORPURI_AETHER
         : CORPURI_STANDARD;
-  const cheieTema = temaKharon ? "kharon" : temaNoctis ? "noctis" : temaAether ? "aether" : "standard";
+  const cheieTema = temaFlota ? "flota" : temaKharon ? "kharon" : temaNoctis ? "noctis" : temaAether ? "aether" : "standard";
 
   return (
     <group>
@@ -1259,7 +1266,7 @@ function CorpuriCerestiUnice({
           textura={textura}
           definitie={definitie}
           limitaHarta={limitaHarta}
-          alphaTransparent={temaKharon}
+          alphaTransparent={temaKharon || temaFlota}
         />
       ))}
     </group>
@@ -1367,6 +1374,7 @@ export default function HartaSpatiala({
         temaAether={doarPortal}
         temaNoctis={temaHarta === "noctis"}
         temaKharon={temaHarta === "kharon"}
+        temaFlota={temaHarta === "flota"}
       />
       <CorpuriCerestiUnice
         textura={texturaCorpuri}
@@ -1374,6 +1382,7 @@ export default function HartaSpatiala({
         temaAether={doarPortal}
         temaNoctis={temaHarta === "noctis"}
         temaKharon={temaHarta === "kharon"}
+        temaFlota={temaHarta === "flota"}
       />
 
       <mesh
