@@ -403,7 +403,7 @@ export default function App() {
     setSunetPortalPrioritar(true);
     temporizatorSunetPortalRef.current = window.setTimeout(() => {
       setSunetPortalPrioritar(false);
-    }, 3050);
+    }, 4550);
   }, []);
 
   useEffect(() => () => {

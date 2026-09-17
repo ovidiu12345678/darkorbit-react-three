@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { CORPURI_KHARON } from "../corpuriKharon.js";
 
 let contextSunetPortal = null;
+let volumPortalAnterior = null;
 
 async function redaSunetPortal(tema = "aether") {
   if (typeof window === "undefined") return;
@@ -19,19 +20,41 @@ async function redaSunetPortal(tema = "aether") {
   const acum = context.currentTime;
   const esteNoctis = tema === "noctis";
   const esteKharon = tema === "kharon";
+  const frecventaRezonantei = esteKharon ? 86 : esteNoctis ? 118 : 154;
+
+  if (volumPortalAnterior) {
+    volumPortalAnterior.gain.cancelScheduledValues(acum);
+    volumPortalAnterior.gain.setTargetAtTime(0.0001, acum, 0.045);
+  }
+
   const master = context.createGain();
+  volumPortalAnterior = master;
   const compresor = context.createDynamicsCompressor();
-  compresor.threshold.setValueAtTime(-15, acum);
-  compresor.knee.setValueAtTime(10, acum);
-  compresor.ratio.setValueAtTime(4.5, acum);
-  compresor.attack.setValueAtTime(0.004, acum);
-  compresor.release.setValueAtTime(0.24, acum);
+  const limitator = context.createWaveShaper();
+  const iesire = context.createGain();
+  const curbaLimitator = new Float32Array(1024);
+  for (let index = 0; index < curbaLimitator.length; index += 1) {
+    const valoare = (index / (curbaLimitator.length - 1)) * 2 - 1;
+    curbaLimitator[index] = Math.tanh(valoare * 1.7) / Math.tanh(1.7);
+  }
+  limitator.curve = curbaLimitator;
+  limitator.oversample = "2x";
+  compresor.threshold.setValueAtTime(-21, acum);
+  compresor.knee.setValueAtTime(7, acum);
+  compresor.ratio.setValueAtTime(9, acum);
+  compresor.attack.setValueAtTime(0.003, acum);
+  compresor.release.setValueAtTime(0.27, acum);
+  iesire.gain.setValueAtTime(0.92, acum);
   master.gain.setValueAtTime(0.0001, acum);
-  master.gain.exponentialRampToValueAtTime(0.34, acum + 0.12);
-  master.gain.exponentialRampToValueAtTime(0.56, acum + 1.82);
-  master.gain.exponentialRampToValueAtTime(0.0001, acum + 2.95);
+  master.gain.exponentialRampToValueAtTime(0.48, acum + 0.12);
+  master.gain.exponentialRampToValueAtTime(0.72, acum + 1.78);
+  master.gain.exponentialRampToValueAtTime(1, acum + 2.04);
+  master.gain.exponentialRampToValueAtTime(0.64, acum + 2.75);
+  master.gain.exponentialRampToValueAtTime(0.0001, acum + 4.35);
   master.connect(compresor);
-  compresor.connect(context.destination);
+  compresor.connect(limitator);
+  limitator.connect(iesire);
+  iesire.connect(context.destination);
 
   const pornesteOscilator = (tip, frecvente, volum, panorama) => {
     const oscilator = context.createOscillator();
@@ -42,16 +65,17 @@ async function redaSunetPortal(tema = "aether") {
 
     oscilator.type = tip;
     oscilator.frequency.setValueAtTime(frecvente[0], acum);
-    oscilator.frequency.exponentialRampToValueAtTime(frecvente[1], acum + 1.62);
-    oscilator.frequency.exponentialRampToValueAtTime(frecvente[2], acum + 2.82);
+    oscilator.frequency.exponentialRampToValueAtTime(frecvente[1], acum + 1.92);
+    oscilator.frequency.exponentialRampToValueAtTime(frecvente[2], acum + 4.14);
     castig.gain.setValueAtTime(0.0001, acum);
     castig.gain.exponentialRampToValueAtTime(volum, acum + 0.14);
-    castig.gain.exponentialRampToValueAtTime(0.0001, acum + 2.9);
+    castig.gain.exponentialRampToValueAtTime(volum * 0.74, acum + 2.25);
+    castig.gain.exponentialRampToValueAtTime(0.0001, acum + 4.2);
 
     oscilator.connect(castig);
     if (panner) {
       panner.pan.setValueAtTime(panorama, acum);
-      panner.pan.linearRampToValueAtTime(-panorama, acum + 2.8);
+      panner.pan.linearRampToValueAtTime(-panorama, acum + 4.1);
       castig.connect(panner);
       panner.connect(master);
     } else {
@@ -59,43 +83,87 @@ async function redaSunetPortal(tema = "aether") {
     }
 
     oscilator.start(acum);
-    oscilator.stop(acum + 3);
+    oscilator.stop(acum + 4.25);
   };
 
   pornesteOscilator(
     "sine",
     esteKharon ? [38, 220, 48] : esteNoctis ? [52, 280, 74] : [78, 430, 108],
-    esteKharon ? 0.74 : esteNoctis ? 0.66 : 0.59,
+    esteKharon ? 0.82 : esteNoctis ? 0.76 : 0.71,
     -0.32
   );
   pornesteOscilator(
     "triangle",
     esteKharon ? [118, 510, 92] : esteNoctis ? [165, 640, 130] : [238, 920, 190],
-    esteKharon ? 0.34 : esteNoctis ? 0.29 : 0.25,
+    esteKharon ? 0.43 : esteNoctis ? 0.38 : 0.34,
     0.38
   );
 
   const impact = context.createOscillator();
   const castigImpact = context.createGain();
   impact.type = "sine";
-  impact.frequency.setValueAtTime(esteKharon ? 56 : esteNoctis ? 72 : 94, acum + 1.82);
-  impact.frequency.exponentialRampToValueAtTime(esteKharon ? 22 : esteNoctis ? 28 : 36, acum + 2.58);
-  castigImpact.gain.setValueAtTime(0.0001, acum + 1.8);
-  castigImpact.gain.exponentialRampToValueAtTime(esteKharon ? 1.0 : esteNoctis ? 0.9 : 0.78, acum + 1.94);
-  castigImpact.gain.exponentialRampToValueAtTime(0.0001, acum + 2.62);
+  impact.frequency.setValueAtTime(esteKharon ? 70 : esteNoctis ? 88 : 112, acum + 1.9);
+  impact.frequency.exponentialRampToValueAtTime(esteKharon ? 25 : esteNoctis ? 32 : 42, acum + 3.05);
+  castigImpact.gain.setValueAtTime(0.0001, acum + 1.89);
+  castigImpact.gain.exponentialRampToValueAtTime(esteKharon ? 1.2 : esteNoctis ? 1.08 : 0.98, acum + 2.04);
+  castigImpact.gain.exponentialRampToValueAtTime(0.0001, acum + 3.2);
   impact.connect(castigImpact);
   castigImpact.connect(master);
-  impact.start(acum + 1.8);
-  impact.stop(acum + 2.7);
+  impact.start(acum + 1.89);
+  impact.stop(acum + 3.25);
 
-  const durataZgomot = 3;
+  const rezonanta = context.createGain();
+  rezonanta.gain.setValueAtTime(0.82, acum);
+  rezonanta.connect(master);
+  [[0.16, 0.34], [0.39, 0.2], [0.68, 0.11]].forEach(([decalaj, nivel]) => {
+    const ecou = context.createDelay(0.8);
+    const volumEcou = context.createGain();
+    ecou.delayTime.setValueAtTime(decalaj, acum);
+    volumEcou.gain.setValueAtTime(nivel, acum);
+    rezonanta.connect(ecou);
+    ecou.connect(volumEcou);
+    volumEcou.connect(master);
+  });
+
+  [
+    [1, 0.48, -0.55],
+    [1.5, 0.25, 0.42],
+    [2.01, 0.18, -0.22],
+    [3.02, 0.1, 0.58],
+  ].forEach(([armonica, volum, panorama], index) => {
+    const oscilator = context.createOscillator();
+    const castig = context.createGain();
+    const panner = typeof context.createStereoPanner === "function"
+      ? context.createStereoPanner()
+      : null;
+    oscilator.type = index === 2 ? "triangle" : "sine";
+    oscilator.frequency.setValueAtTime(frecventaRezonantei * armonica * 1.055, acum + 1.86);
+    oscilator.frequency.exponentialRampToValueAtTime(frecventaRezonantei * armonica * 0.92, acum + 4.3);
+    castig.gain.setValueAtTime(0.0001, acum + 1.86);
+    castig.gain.exponentialRampToValueAtTime(volum, acum + 2.04);
+    castig.gain.exponentialRampToValueAtTime(volum * 0.38, acum + 2.75);
+    castig.gain.exponentialRampToValueAtTime(0.0001, acum + 4.3);
+    oscilator.connect(castig);
+    if (panner) {
+      panner.pan.setValueAtTime(panorama, acum + 1.86);
+      panner.pan.linearRampToValueAtTime(-panorama, acum + 4.2);
+      castig.connect(panner);
+      panner.connect(rezonanta);
+    } else {
+      castig.connect(rezonanta);
+    }
+    oscilator.start(acum + 1.86);
+    oscilator.stop(acum + 4.35);
+  });
+
+  const durataZgomot = 1.7;
   const buffer = context.createBuffer(2, Math.ceil(context.sampleRate * durataZgomot), context.sampleRate);
   for (let canal = 0; canal < buffer.numberOfChannels; canal += 1) {
     const date = buffer.getChannelData(canal);
     let precedent = 0;
     for (let index = 0; index < date.length; index += 1) {
       const alb = Math.random() * 2 - 1;
-      precedent = precedent * 0.84 + alb * 0.16;
+      precedent = precedent * 0.75 + alb * 0.25;
       date[index] = precedent;
     }
   }
@@ -105,18 +173,26 @@ async function redaSunetPortal(tema = "aether") {
   const castigZgomot = context.createGain();
   zgomot.buffer = buffer;
   filtru.type = "bandpass";
-  filtru.Q.setValueAtTime(4.2, acum);
-  filtru.frequency.setValueAtTime(esteKharon ? 220 : esteNoctis ? 310 : 520, acum);
-  filtru.frequency.exponentialRampToValueAtTime(esteKharon ? 1080 : esteNoctis ? 1450 : 2300, acum + 1.72);
-  filtru.frequency.exponentialRampToValueAtTime(esteKharon ? 290 : esteNoctis ? 420 : 680, acum + 2.88);
-  castigZgomot.gain.setValueAtTime(0.0001, acum);
-  castigZgomot.gain.exponentialRampToValueAtTime(esteKharon ? 0.4 : esteNoctis ? 0.34 : 0.29, acum + 0.32);
-  castigZgomot.gain.exponentialRampToValueAtTime(0.0001, acum + 2.92);
+  filtru.Q.setValueAtTime(1.15, acum + 1.75);
+  filtru.frequency.setValueAtTime(esteKharon ? 280 : esteNoctis ? 390 : 540, acum + 1.75);
+  filtru.frequency.exponentialRampToValueAtTime(esteKharon ? 2200 : esteNoctis ? 2800 : 3400, acum + 2.04);
+  filtru.frequency.exponentialRampToValueAtTime(esteKharon ? 420 : esteNoctis ? 560 : 720, acum + 3.34);
+  castigZgomot.gain.setValueAtTime(0.0001, acum + 1.74);
+  castigZgomot.gain.exponentialRampToValueAtTime(esteKharon ? 0.72 : esteNoctis ? 0.66 : 0.6, acum + 2.04);
+  castigZgomot.gain.exponentialRampToValueAtTime(0.0001, acum + 3.36);
   zgomot.connect(filtru);
   filtru.connect(castigZgomot);
   castigZgomot.connect(master);
-  zgomot.start(acum);
-  zgomot.stop(acum + durataZgomot);
+  zgomot.start(acum + 1.74);
+  zgomot.stop(acum + 3.4);
+
+  window.setTimeout(() => {
+    if (volumPortalAnterior === master) volumPortalAnterior = null;
+    master.disconnect();
+    compresor.disconnect();
+    limitator.disconnect();
+    iesire.disconnect();
+  }, 5600);
 }
 
 const vertexShaderStatie = `
