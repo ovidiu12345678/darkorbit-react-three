@@ -21,11 +21,6 @@ const PISTE = {
     lupta: "assets/coloana-kharon-lupta.wav",
     eticheta: "KHAR",
   },
-  flota: {
-    explorare: "assets/coloana-flota-explorare.wav",
-    lupta: "assets/coloana-flota-lupta.wav",
-    eticheta: "FLOT",
-  },
 };
 
 const VOLUM_EXPLORARE = 0.22;
@@ -33,7 +28,7 @@ const VOLUM_LUPTA = 0.28;
 const DURATA_TRANZITIE = 850;
 const DURATA_SCADERE_PORTAL = 100;
 const FACTOR_VOLUM_PORTAL = 0.025;
-const VERSIUNE_AUDIO = "flota-carmizie-v1";
+const VERSIUNE_AUDIO = "original-v8-cf976d4";
 
 function caleAudio(fisier) {
   return `${import.meta.env.BASE_URL}${fisier}?v=${VERSIUNE_AUDIO}`;
@@ -44,8 +39,9 @@ export default function MuzicaMartiana({
   luptaActiva = false,
   portalActiv = false,
 }) {
+  const hartaMuzicala = hartaActiva === "flota" ? "standard" : hartaActiva;
   const audioRef = useRef({});
-  const hartaRef = useRef(hartaActiva);
+  const hartaRef = useRef(hartaMuzicala);
   const luptaRef = useRef(luptaActiva);
   const portalRef = useRef(portalActiv);
   const pornitaRef = useRef(false);
@@ -54,7 +50,7 @@ export default function MuzicaMartiana({
   const animatieRef = useRef(0);
   const [oprita, setOprita] = useState(false);
 
-  hartaRef.current = hartaActiva;
+  hartaRef.current = hartaMuzicala;
   luptaRef.current = luptaActiva;
   portalRef.current = portalActiv;
 
@@ -122,24 +118,24 @@ export default function MuzicaMartiana({
   useEffect(() => {
     cancelAnimationFrame(animatieRef.current);
     Object.entries(audioRef.current).forEach(([harta, pereche]) => {
-      if (harta === hartaActiva) return;
+      if (harta === hartaMuzicala) return;
       pereche.explorare.pause();
       pereche.lupta.pause();
       pereche.explorare.volume = 0;
       pereche.lupta.volume = 0;
     });
 
-    const pereche = audioRef.current[hartaActiva];
+    const pereche = audioRef.current[hartaMuzicala];
     if (!pereche || !pornitaRef.current || opritaRef.current) return;
     const tinta = volumeTinta(luptaActiva, portalActiv);
     pereche.explorare.volume = tinta.explorare;
     pereche.lupta.volume = tinta.lupta;
     Promise.allSettled([pereche.explorare.play(), pereche.lupta.play()]);
-  }, [hartaActiva, volumeTinta]);
+  }, [hartaMuzicala, volumeTinta]);
 
   useEffect(() => {
     if (!pornitaRef.current || opritaRef.current) return;
-    const pereche = audioRef.current[hartaActiva];
+    const pereche = audioRef.current[hartaMuzicala];
     if (!pereche) return;
 
     cancelAnimationFrame(animatieRef.current);
@@ -161,7 +157,7 @@ export default function MuzicaMartiana({
 
     animatieRef.current = requestAnimationFrame(tranzitie);
     return () => cancelAnimationFrame(animatieRef.current);
-  }, [hartaActiva, luptaActiva, portalActiv, volumeTinta]);
+  }, [hartaMuzicala, luptaActiva, portalActiv, volumeTinta]);
 
   const comutaMuzica = useCallback(async (event) => {
     event.stopPropagation();
@@ -182,7 +178,7 @@ export default function MuzicaMartiana({
     await porneste();
   }, [porneste]);
 
-  const numeHarta = PISTE[hartaActiva]?.eticheta ?? "OST";
+  const numeHarta = PISTE[hartaMuzicala]?.eticheta ?? "OST";
 
   return (
     <button
