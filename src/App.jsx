@@ -18,6 +18,7 @@ import NotificareRecompensa from "./components/NotificareRecompensa.jsx";
 import MuzicaMartiana from "./components/MuzicaMartiana.jsx";
 import { CORPURI_KHARON } from "./corpuriKharon.js";
 import { CORPURI_FLOTA } from "./corpuriFlota.js";
+import { CORPURI_VERDANT } from "./corpuriVerdant.js";
 import {
   TUNURI_BY_ID,
   GENERATOARE_BY_ID,
@@ -37,16 +38,19 @@ const FUNDAL_JOC_AETHER = "assets/harta-aether-nebuloasa.png";
 const FUNDAL_JOC_NOCTIS = "assets/fundal-ares-noctis.png";
 const FUNDAL_JOC_KHARON = "assets/fundal-kharon-vesper.png";
 const FUNDAL_JOC_FLOTA = "assets/fundal-flota-carmizie.png";
+const FUNDAL_JOC_VERDANT = "assets/fundal-verdant-rubra.png";
 const CORPURI_HARTA_STANDARD = "assets/corpuri-standard-transparente.png";
 const CORPURI_HARTA_AETHER = "assets/corpuri-aether-transparente.png";
 const CORPURI_HARTA_NOCTIS = "assets/corpuri-ares-noctis-transparente.png";
 const CORPURI_HARTA_KHARON = "assets/corpuri-kharon-vesper-atlas-v2.png";
 const CORPURI_HARTA_FLOTA = "assets/corpuri-flota-carmizie-atlas.png";
+const CORPURI_HARTA_VERDANT = "assets/corpuri-verdant-rubra-atlas.png";
 const FUNDAL_MINI_STANDARD = FUNDAL_HARTA_STANDARD;
 const FUNDAL_MINI_AETHER = FUNDAL_HARTA_AETHER;
 const FUNDAL_MINI_NOCTIS = FUNDAL_HARTA_NOCTIS;
 const FUNDAL_MINI_KHARON = FUNDAL_JOC_KHARON;
 const FUNDAL_MINI_FLOTA = FUNDAL_JOC_FLOTA;
+const FUNDAL_MINI_VERDANT = FUNDAL_JOC_VERDANT;
 
 const LIMITA_HARTA = MARIME_HARTA / 2 - 4.5;
 const FACTOR_SCALARE_HARTA = MARIME_HARTA / 210;
@@ -64,6 +68,8 @@ const POZITIE_PORTAL_KHARON_NOCTIS = [-COORDONATA_PORTAL_AETHER, 0, COORDONATA_P
 const POZITIE_PORTAL_KHARON = [COORDONATA_PORTAL_AETHER, 0, -COORDONATA_PORTAL_AETHER];
 const POZITIE_PORTAL_FLOTA_KHARON = [-COORDONATA_PORTAL_AETHER, 0, -COORDONATA_PORTAL_AETHER];
 const POZITIE_PORTAL_FLOTA = [-COORDONATA_PORTAL_AETHER, 0, -COORDONATA_PORTAL_AETHER];
+const POZITIE_PORTAL_FLOTA_VERDANT = [COORDONATA_PORTAL_AETHER, 0, COORDONATA_PORTAL_AETHER];
+const POZITIE_PORTAL_VERDANT = [-COORDONATA_PORTAL_AETHER, 0, -COORDONATA_PORTAL_AETHER];
 const RAZA_ZONA_SIGURA_PORTAL = 58;
 
 function esteInZonaSiguraPortal(harta, pozitie) {
@@ -74,7 +80,9 @@ function esteInZonaSiguraPortal(harta, pozitie) {
       : harta === "kharon"
         ? [POZITIE_PORTAL_KHARON, POZITIE_PORTAL_FLOTA_KHARON]
         : harta === "flota"
-          ? [POZITIE_PORTAL_FLOTA]
+          ? [POZITIE_PORTAL_FLOTA, POZITIE_PORTAL_FLOTA_VERDANT]
+        : harta === "verdant"
+          ? [POZITIE_PORTAL_VERDANT]
         : [POZITIE_PORTAL_STANDARD];
 
   return portaluri.some((portal) =>
@@ -308,6 +316,12 @@ const POZITIE_INTRARE_FLOTA = [
   -COORDONATA_PORTAL_AETHER + DISTANTA_REAPARITIE_PORTAL,
 ];
 const POZITIE_REVENIRE_KHARON_DIN_FLOTA = [...POZITIE_INTRARE_FLOTA];
+const POZITIE_INTRARE_VERDANT = [...POZITIE_INTRARE_FLOTA];
+const POZITIE_REVENIRE_FLOTA_DIN_VERDANT = [
+  COORDONATA_PORTAL_AETHER - DISTANTA_REAPARITIE_PORTAL,
+  3.2,
+  COORDONATA_PORTAL_AETHER - DISTANTA_REAPARITIE_PORTAL,
+];
 
 export default function App() {
   const playerRef = useRef(new THREE.Vector3(-532.4, 3.2, -16.1));
@@ -716,7 +730,12 @@ export default function App() {
                   { pozitie: POZITIE_PORTAL_FLOTA_KHARON, secundar: true },
                 ]
               : hartaActiva === "flota"
-                ? [{ pozitie: POZITIE_PORTAL_FLOTA, secundar: false }]
+                ? [
+                    { pozitie: POZITIE_PORTAL_FLOTA, secundar: false },
+                    { pozitie: POZITIE_PORTAL_FLOTA_VERDANT, secundar: true },
+                  ]
+                : hartaActiva === "verdant"
+                  ? [{ pozitie: POZITIE_PORTAL_VERDANT, secundar: false }]
               : [{ pozitie: POZITIE_PORTAL_STANDARD, secundar: false }];
 
         const portalApropiat = portaluriDisponibile
@@ -805,6 +824,20 @@ export default function App() {
     setSemnalTeleportare((valoare) => valoare + 1);
   }, [hartaActiva]);
 
+  const transportaPrinPortalVerdant = useCallback(() => {
+    const intraInVerdant = hartaActiva !== "verdant";
+    setPozitieTeleportare(
+      intraInVerdant ? POZITIE_INTRARE_VERDANT : POZITIE_REVENIRE_FLOTA_DIN_VERDANT
+    );
+    setHartaActiva(intraInVerdant ? "verdant" : "flota");
+    setTintaJucator(null);
+    setTintaLive(false);
+    setTintaSelectata(null);
+    setAtaca(false);
+    setAmenintare(intraInVerdant ? "sector Verdant Rubra" : "sector Flota Cărămizie");
+    setSemnalTeleportare((valoare) => valoare + 1);
+  }, [hartaActiva]);
+
   const scutProcent = scutMaxNava > 0 ? (scut / scutMaxNava) * 100 : 0;
   const statistici = { viata, scut: scutProcent, scutMax: scutMaxNava, atacuri, amenintare };
   const inamiciHartaActiva = inamici.filter(
@@ -816,9 +849,12 @@ export default function App() {
   const esteNoctis = hartaActiva === "noctis";
   const esteKharon = hartaActiva === "kharon";
   const esteFlota = hartaActiva === "flota";
+  const esteVerdant = hartaActiva === "verdant";
   const esteAether = hartaActiva === "aether";
   const esteStandard = hartaActiva === "standard";
-  const fundalJoc = esteFlota
+  const fundalJoc = esteVerdant
+    ? FUNDAL_JOC_VERDANT
+    : esteFlota
     ? FUNDAL_JOC_FLOTA
     : esteKharon
     ? FUNDAL_JOC_KHARON
@@ -827,7 +863,9 @@ export default function App() {
     : esteAether
       ? FUNDAL_JOC_AETHER
       : FUNDAL_JOC_STANDARD;
-  const corpuriHarta = esteFlota
+  const corpuriHarta = esteVerdant
+    ? CORPURI_HARTA_VERDANT
+    : esteFlota
     ? CORPURI_HARTA_FLOTA
     : esteKharon
     ? CORPURI_HARTA_KHARON
@@ -836,7 +874,9 @@ export default function App() {
     : esteAether
       ? CORPURI_HARTA_AETHER
       : CORPURI_HARTA_STANDARD;
-  const fundalMini = esteFlota
+  const fundalMini = esteVerdant
+    ? FUNDAL_MINI_VERDANT
+    : esteFlota
     ? FUNDAL_MINI_FLOTA
     : esteKharon
     ? FUNDAL_MINI_KHARON
@@ -869,7 +909,9 @@ export default function App() {
             pozitieStatie={POZITIE_STATIE}
             pozitieHangar={POZITIE_HANGAR}
             pozitiePortalAether={
-              esteFlota
+              esteVerdant
+                ? POZITIE_PORTAL_VERDANT
+                : esteFlota
                 ? POZITIE_PORTAL_FLOTA
                 : esteKharon
                 ? POZITIE_PORTAL_KHARON
@@ -880,24 +922,26 @@ export default function App() {
                     : POZITIE_PORTAL_STANDARD
             }
             imaginePortalAether={
-              esteFlota
+              esteVerdant
+                ? "assets/portal-falia-clorofier.png"
+                : esteFlota
                 ? "assets/portal-ruptura-stacojie.png"
                 : esteKharon || esteNoctis ? "assets/portal-hemofier.png" : undefined
             }
-            temaPortalAether={esteFlota ? "flota" : esteKharon || esteNoctis ? "kharon" : "aether"}
+            temaPortalAether={esteVerdant ? "verdant" : esteFlota ? "flota" : esteKharon || esteNoctis ? "kharon" : "aether"}
             pozitiePortalSecundar={
-              esteKharon ? POZITIE_PORTAL_FLOTA_KHARON : esteNoctis ? POZITIE_PORTAL_NOCTIS : esteAether ? POZITIE_PORTAL_NOCTIS_AETHER : null
+              esteFlota ? POZITIE_PORTAL_FLOTA_VERDANT : esteKharon ? POZITIE_PORTAL_FLOTA_KHARON : esteNoctis ? POZITIE_PORTAL_NOCTIS : esteAether ? POZITIE_PORTAL_NOCTIS_AETHER : null
             }
-            imaginePortalSecundar={esteKharon ? "assets/portal-ruptura-stacojie.png" : "assets/portal-ares-noctis.png"}
-            temaPortalSecundar={esteKharon ? "flota" : "noctis"}
+            imaginePortalSecundar={esteFlota ? "assets/portal-falia-clorofier.png" : esteKharon ? "assets/portal-ruptura-stacojie.png" : "assets/portal-ares-noctis.png"}
+            temaPortalSecundar={esteFlota ? "verdant" : esteKharon ? "flota" : "noctis"}
             temaHarta={
-              esteFlota ? "flota" : esteKharon ? "kharon" : esteNoctis ? "noctis" : esteAether ? "aether" : "standard"
+              esteVerdant ? "verdant" : esteFlota ? "flota" : esteKharon ? "kharon" : esteNoctis ? "noctis" : esteAether ? "aether" : "standard"
             }
             doarPortal={!esteStandard}
             onTransportAether={
-              esteFlota ? transportaPrinPortalFlota : esteKharon || esteNoctis ? transportaPrinPortalKharon : transportaPrinPortal
+              esteVerdant ? transportaPrinPortalVerdant : esteFlota ? transportaPrinPortalFlota : esteKharon || esteNoctis ? transportaPrinPortalKharon : transportaPrinPortal
             }
-            onTransportSecundar={esteKharon ? transportaPrinPortalFlota : transportaPrinPortalNoctis}
+            onTransportSecundar={esteFlota ? transportaPrinPortalVerdant : esteKharon ? transportaPrinPortalFlota : transportaPrinPortalNoctis}
             onPornireTransport={prioriteazaSunetulPortalului}
             semnalTransportAether={semnalTransportPortalAether}
             semnalTransportSecundar={semnalTransportPortalSecundar}
@@ -1029,7 +1073,7 @@ export default function App() {
       <HartaMini
         marimeHarta={MARIME_HARTA}
         numeHarta={
-          esteFlota ? "Flota Cărămizie" : esteKharon ? "Kharon Vesper" : esteNoctis ? "Ares Noctis" : esteAether ? "Aether" : "Sector standard"
+          esteVerdant ? "Verdant Rubra" : esteFlota ? "Flota Cărămizie" : esteKharon ? "Kharon Vesper" : esteNoctis ? "Ares Noctis" : esteAether ? "Aether" : "Sector standard"
         }
         pozitieJucator={pozitieJucator}
         tintaJucator={tintaJucator}
@@ -1041,7 +1085,9 @@ export default function App() {
           esteStandard ? [PLATFORME_HANGAR[2].x, 0, PLATFORME_HANGAR[2].z] : null
         }
         pozitiePortal={
-          esteFlota
+          esteVerdant
+            ? POZITIE_PORTAL_VERDANT
+            : esteFlota
             ? POZITIE_PORTAL_FLOTA
             : esteKharon
             ? POZITIE_PORTAL_KHARON
@@ -1052,7 +1098,9 @@ export default function App() {
                 : POZITIE_PORTAL_STANDARD
         }
         etichetaPortal={
-          esteFlota
+          esteVerdant
+            ? "Falia Clorofier spre Flota Cărămizie"
+            : esteFlota
             ? "Ruptura Stacojie spre Kharon Vesper"
             : esteKharon
             ? "Poarta Hemofier spre Ares Noctis"
@@ -1062,17 +1110,17 @@ export default function App() {
                 ? "Portal spre sectorul standard"
                 : "Portal spre Aether"
         }
-        temaPortal={esteFlota ? "flota" : esteKharon || esteNoctis ? "kharon" : "aether"}
+        temaPortal={esteVerdant ? "verdant" : esteFlota ? "flota" : esteKharon || esteNoctis ? "kharon" : "aether"}
         pozitiePortalSecundar={
-          esteKharon ? POZITIE_PORTAL_FLOTA_KHARON : esteNoctis ? POZITIE_PORTAL_NOCTIS : esteAether ? POZITIE_PORTAL_NOCTIS_AETHER : null
+          esteFlota ? POZITIE_PORTAL_FLOTA_VERDANT : esteKharon ? POZITIE_PORTAL_FLOTA_KHARON : esteNoctis ? POZITIE_PORTAL_NOCTIS : esteAether ? POZITIE_PORTAL_NOCTIS_AETHER : null
         }
         etichetaPortalSecundar={
-          esteKharon ? "Ruptura Stacojie spre Flota Cărămizie" : esteNoctis ? "Portal spre Aether" : "Portal spre Ares Noctis"
+          esteFlota ? "Falia Clorofier spre Verdant Rubra" : esteKharon ? "Ruptura Stacojie spre Flota Cărămizie" : esteNoctis ? "Portal spre Aether" : "Portal spre Ares Noctis"
         }
-        temaPortalSecundar={esteKharon ? "flota" : "noctis"}
+        temaPortalSecundar={esteFlota ? "verdant" : esteKharon ? "flota" : "noctis"}
         imagineFundal={fundalMini}
-        imagineCorpuri={esteFlota ? CORPURI_HARTA_FLOTA : esteKharon ? CORPURI_HARTA_KHARON : null}
-        corpuriCeresti={esteFlota ? CORPURI_FLOTA : esteKharon ? CORPURI_KHARON : []}
+        imagineCorpuri={esteVerdant ? CORPURI_HARTA_VERDANT : esteFlota ? CORPURI_HARTA_FLOTA : esteKharon ? CORPURI_HARTA_KHARON : null}
+        corpuriCeresti={esteVerdant ? CORPURI_VERDANT : esteFlota ? CORPURI_FLOTA : esteKharon ? CORPURI_KHARON : []}
       />
 
       <ButonFullscreen />

@@ -1745,6 +1745,12 @@ canvas {
   box-shadow: 0 0 7px #ff5634, 0 0 15px #a91420;
 }
 
+.harta-mini-portal-verdant {
+  background: radial-gradient(circle, #250308 0 20%, #f63728 25% 42%, #153c2a 52% 60%, #6cff9d 64%);
+  border-color: #75ffab;
+  box-shadow: 0 0 7px #6cff9d, 0 0 15px #dc3429;
+}
+
 .harta-mini-redimensionare {
   position: absolute;
   right: 0;
