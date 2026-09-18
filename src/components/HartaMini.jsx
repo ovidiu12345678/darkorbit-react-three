@@ -279,6 +279,8 @@ export default function HartaMini({
               className={`harta-mini-marker harta-mini-portal ${
                 temaPortal === "kharon"
                   ? "harta-mini-portal-kharon"
+                  : temaPortal?.startsWith("sector")
+                    ? "harta-mini-portal-sector"
                   : temaPortal === "frontiera18"
                     ? "harta-mini-portal-frontiera18"
                   : temaPortal === "frontiera17"
@@ -309,6 +311,8 @@ export default function HartaMini({
               className={`harta-mini-marker harta-mini-portal ${
                 temaPortalSecundar === "kharon"
                   ? "harta-mini-portal-kharon"
+                  : temaPortalSecundar?.startsWith("sector")
+                    ? "harta-mini-portal-sector"
                   : temaPortalSecundar === "frontiera18"
                     ? "harta-mini-portal-frontiera18"
                   : temaPortalSecundar === "frontiera17"
