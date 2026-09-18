@@ -25,6 +25,9 @@ export default function HartaMini({
   pozitiePortalSecundar,
   etichetaPortalSecundar = "Portal secundar",
   temaPortalSecundar = "noctis",
+  pozitiePortalTertiar,
+  etichetaPortalTertiar = "Portal terțiar",
+  temaPortalTertiar = "frontiera15",
   imagineFundal = "assets/harta-spatiala-fundal-hi.jpg",
   imagineCorpuri = null,
   corpuriCeresti = [],
@@ -157,6 +160,9 @@ export default function HartaMini({
   const pozitiePortalSecundarMini = pozitiePortalSecundar
     ? lumeLaProcent(pozitiePortalSecundar[0], pozitiePortalSecundar[2])
     : null;
+  const pozitiePortalTertiarMini = pozitiePortalTertiar
+    ? lumeLaProcent(pozitiePortalTertiar[0], pozitiePortalTertiar[2])
+    : null;
 
   const laClickRepere = useCallback(
     (eveniment, pozitie) => {
@@ -273,6 +279,8 @@ export default function HartaMini({
               className={`harta-mini-marker harta-mini-portal ${
                 temaPortal === "kharon"
                   ? "harta-mini-portal-kharon"
+                  : temaPortal === "frontiera15"
+                    ? "harta-mini-portal-frontiera15"
                   : temaPortal === "neridia"
                     ? "harta-mini-portal-neridia"
                   : temaPortal === "verdant"
@@ -307,6 +315,16 @@ export default function HartaMini({
               title={etichetaPortalSecundar}
               onMouseDown={(eveniment) => eveniment.stopPropagation()}
               onClick={(eveniment) => laClickRepere(eveniment, pozitiePortalSecundar)}
+            />
+          )}
+
+          {pozitiePortalTertiarMini && (
+            <span
+              className={`harta-mini-marker harta-mini-portal ${temaPortalTertiar === "frontiera15" ? "harta-mini-portal-frontiera15" : ""}`}
+              style={{ left: `${pozitiePortalTertiarMini.left}%`, top: `${pozitiePortalTertiarMini.top}%` }}
+              title={etichetaPortalTertiar}
+              onMouseDown={(eveniment) => eveniment.stopPropagation()}
+              onClick={(eveniment) => laClickRepere(eveniment, pozitiePortalTertiar)}
             />
           )}
 
