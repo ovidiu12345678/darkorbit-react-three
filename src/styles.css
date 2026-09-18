@@ -1751,6 +1751,12 @@ canvas {
   box-shadow: 0 0 7px #6cff9d, 0 0 15px #dc3429;
 }
 
+.harta-mini-portal-neridia {
+  background: radial-gradient(circle, #012b25 0 20%, #19b780 25% 43%, #075445 51% 61%, #abffd0 68%);
+  border-color: #a8ffd2;
+  box-shadow: 0 0 8px #55efaa, 0 0 16px #098d72;
+}
+
 .harta-mini-redimensionare {
   position: absolute;
   right: 0;

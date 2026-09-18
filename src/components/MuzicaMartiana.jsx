@@ -39,7 +39,7 @@ export default function MuzicaMartiana({
   luptaActiva = false,
   portalActiv = false,
 }) {
-  const hartaMuzicala = hartaActiva === "flota" || hartaActiva === "verdant"
+  const hartaMuzicala = ["flota", "verdant", "neridia"].includes(hartaActiva)
     ? "standard"
     : hartaActiva;
   const audioRef = useRef({});
