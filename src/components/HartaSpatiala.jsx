@@ -7,6 +7,8 @@ import { CORPURI_VERDANT } from "../corpuriVerdant.js";
 import { CORPURI_NERIDIA } from "../corpuriNeridia.js";
 import { CORPURI_FRONTIERA_15 } from "../corpuriFrontiera15.js";
 import { CORPURI_FRONTIERA_16 } from "../corpuriFrontiera16.js";
+import { CORPURI_FRONTIERA_17 } from "../corpuriFrontiera17.js";
+import { CORPURI_FRONTIERA_18 } from "../corpuriFrontiera18.js";
 
 let contextSunetPortal = null;
 let volumPortalAnterior = null;
@@ -24,7 +26,7 @@ async function redaSunetPortal(tema = "aether") {
   const context = contextSunetPortal;
   const acum = context.currentTime;
   const esteNoctis = tema === "noctis";
-  const esteKharon = tema === "kharon" || tema === "flota" || tema === "verdant" || tema === "neridia" || tema === "frontiera15" || tema === "frontiera16";
+  const esteKharon = tema === "kharon" || tema === "flota" || tema === "verdant" || tema === "neridia" || tema === "frontiera15" || tema === "frontiera16" || tema === "frontiera17" || tema === "frontiera18";
   const frecventaRezonantei = esteKharon ? 86 : esteNoctis ? 118 : 154;
 
   if (volumPortalAnterior) {
@@ -317,9 +319,11 @@ function PortalAether({
   const esteNeridia = tema === "neridia";
   const esteFrontiera15 = tema === "frontiera15";
   const esteFrontiera16 = tema === "frontiera16";
-  const culoareEnergie = esteFrontiera16 ? "#ff462e" : esteFrontiera15 ? "#527eff" : esteNeridia ? "#54f88c" : esteVerdant ? "#ff3c25" : esteFlota ? "#ff4828" : esteKharon ? "#ff1818" : esteNoctis ? "#ff5b1f" : "#52dcff";
-  const culoareAccent = esteFrontiera16 ? "#e3a26b" : esteFrontiera15 ? "#d49365" : esteNeridia ? "#b5ffd2" : esteVerdant ? "#50ff8b" : esteFlota ? "#ffad58" : esteKharon ? "#7c0010" : esteNoctis ? "#ffc04a" : "#a66cff";
-  const culoareRece = esteFrontiera16 ? "#a42454" : esteFrontiera15 ? "#9b6fff" : esteNeridia ? "#008d77" : esteVerdant ? "#0d875a" : esteFlota ? "#a41520" : esteKharon ? "#ff5a28" : esteNoctis ? "#56e9ef" : "#71efff";
+  const esteFrontiera17 = tema === "frontiera17";
+  const esteFrontiera18 = tema === "frontiera18";
+  const culoareEnergie = esteFrontiera18 ? "#ff285a" : esteFrontiera17 ? "#ffc24f" : esteFrontiera16 ? "#ff462e" : esteFrontiera15 ? "#527eff" : esteNeridia ? "#54f88c" : esteVerdant ? "#ff3c25" : esteFlota ? "#ff4828" : esteKharon ? "#ff1818" : esteNoctis ? "#ff5b1f" : "#52dcff";
+  const culoareAccent = esteFrontiera18 ? "#f8c685" : esteFrontiera17 ? "#d9956d" : esteFrontiera16 ? "#e3a26b" : esteFrontiera15 ? "#d49365" : esteNeridia ? "#b5ffd2" : esteVerdant ? "#50ff8b" : esteFlota ? "#ffad58" : esteKharon ? "#7c0010" : esteNoctis ? "#ffc04a" : "#a66cff";
+  const culoareRece = esteFrontiera18 ? "#7751b7" : esteFrontiera17 ? "#7366a0" : esteFrontiera16 ? "#a42454" : esteFrontiera15 ? "#9b6fff" : esteNeridia ? "#008d77" : esteVerdant ? "#0d875a" : esteFlota ? "#a41520" : esteKharon ? "#ff5a28" : esteNoctis ? "#56e9ef" : "#71efff";
 
   const dateParticule = useMemo(
     () =>
@@ -1010,10 +1014,10 @@ function creeazaGeometrie(pozitii, culori) {
   return geometrie;
 }
 
-function DecorSpatialUnic({ marimeHarta, temaAether, temaNoctis = false, temaKharon = false, temaFlota = false, temaVerdant = false, temaNeridia = false, temaFrontiera15 = false, temaFrontiera16 = false }) {
+function DecorSpatialUnic({ marimeHarta, temaAether, temaNoctis = false, temaKharon = false, temaFlota = false, temaVerdant = false, temaNeridia = false, temaFrontiera15 = false, temaFrontiera16 = false, temaFrontiera17 = false, temaFrontiera18 = false }) {
   const decor = useMemo(() => {
     const aleator = generatorDeterminist(
-      temaFrontiera16 ? 0x16f4a803 : temaFrontiera15 ? 0x15f3a709 : temaNeridia ? 0x2b7a5e31 : temaVerdant ? 0x6a3e90bf : temaFlota ? 0x3c175a9e : temaKharon ? 0x7a13d04f : temaNoctis ? 0x4e0c715a : temaAether ? 0xa37ae771 : 0x51c0b17d
+      temaFrontiera18 ? 0x18f4a823 : temaFrontiera17 ? 0x17f4a813 : temaFrontiera16 ? 0x16f4a803 : temaFrontiera15 ? 0x15f3a709 : temaNeridia ? 0x2b7a5e31 : temaVerdant ? 0x6a3e90bf : temaFlota ? 0x3c175a9e : temaKharon ? 0x7a13d04f : temaNoctis ? 0x4e0c715a : temaAether ? 0xa37ae771 : 0x51c0b17d
     );
     const latimeHarta = marimeHarta * (16 / 9);
     const coloane = 18;
@@ -1024,7 +1028,11 @@ function DecorSpatialUnic({ marimeHarta, temaAether, temaNoctis = false, temaKha
     const pozitiiLinii = [];
     const pozitiiGalaxii = [];
     const culoriGalaxii = [];
-    const paleta = temaFrontiera16
+    const paleta = temaFrontiera18
+      ? [new THREE.Color("#ff5073"), new THREE.Color("#7144a8"), new THREE.Color("#e5a779")]
+      : temaFrontiera17
+      ? [new THREE.Color("#d29a6b"), new THREE.Color("#70526d"), new THREE.Color("#ffd59c")]
+      : temaFrontiera16
       ? [new THREE.Color("#ff7d4d"), new THREE.Color("#a63840"), new THREE.Color("#d9a06f")]
       : temaFrontiera15
       ? [new THREE.Color("#7898dc"), new THREE.Color("#7a536d"), new THREE.Color("#bd8570")]
@@ -1106,7 +1114,7 @@ function DecorSpatialUnic({ marimeHarta, temaAether, temaNoctis = false, temaKha
       linii: creeazaGeometrie(pozitiiLinii),
       galaxii: creeazaGeometrie(pozitiiGalaxii, culoriGalaxii),
     };
-  }, [marimeHarta, temaAether, temaNoctis, temaKharon, temaFlota, temaVerdant, temaNeridia, temaFrontiera15, temaFrontiera16]);
+  }, [marimeHarta, temaAether, temaNoctis, temaKharon, temaFlota, temaVerdant, temaNeridia, temaFrontiera15, temaFrontiera16, temaFrontiera17, temaFrontiera18]);
 
   useEffect(
     () => () => {
@@ -1121,7 +1129,7 @@ function DecorSpatialUnic({ marimeHarta, temaAether, temaNoctis = false, temaKha
     <group>
       <points geometry={decor.stele} renderOrder={2}>
         <pointsMaterial
-          color={temaFrontiera16 ? "#ffd4bd" : temaFrontiera15 ? "#c9d8ff" : temaNeridia ? "#c0ffe0" : temaVerdant ? "#b7ffd4" : temaFlota ? "#ffb091" : temaKharon ? "#ff7a66" : temaNoctis ? "#ffd19a" : temaAether ? "#f1c4ff" : "#d8f6ff"}
+          color={temaFrontiera18 ? "#ffd3de" : temaFrontiera17 ? "#ffe0bc" : temaFrontiera16 ? "#ffd4bd" : temaFrontiera15 ? "#c9d8ff" : temaNeridia ? "#c0ffe0" : temaVerdant ? "#b7ffd4" : temaFlota ? "#ffb091" : temaKharon ? "#ff7a66" : temaNoctis ? "#ffd19a" : temaAether ? "#f1c4ff" : "#d8f6ff"}
           size={0.82}
           transparent
           opacity={0.9}
@@ -1265,9 +1273,15 @@ function CorpuriCerestiUnice({
   temaNeridia = false,
   temaFrontiera15 = false,
   temaFrontiera16 = false,
+  temaFrontiera17 = false,
+  temaFrontiera18 = false,
 }) {
   const limitaHarta = marimeHarta / 2 - 4.5;
-  const corpuri = temaFrontiera16
+  const corpuri = temaFrontiera18
+    ? CORPURI_FRONTIERA_18
+    : temaFrontiera17
+    ? CORPURI_FRONTIERA_17
+    : temaFrontiera16
     ? CORPURI_FRONTIERA_16
     : temaFrontiera15
     ? CORPURI_FRONTIERA_15
@@ -1284,7 +1298,7 @@ function CorpuriCerestiUnice({
       : temaAether
         ? CORPURI_AETHER
         : CORPURI_STANDARD;
-  const cheieTema = temaFrontiera16 ? "frontiera16" : temaFrontiera15 ? "frontiera15" : temaNeridia ? "neridia" : temaVerdant ? "verdant" : temaFlota ? "flota" : temaKharon ? "kharon" : temaNoctis ? "noctis" : temaAether ? "aether" : "standard";
+  const cheieTema = temaFrontiera18 ? "frontiera18" : temaFrontiera17 ? "frontiera17" : temaFrontiera16 ? "frontiera16" : temaFrontiera15 ? "frontiera15" : temaNeridia ? "neridia" : temaVerdant ? "verdant" : temaFlota ? "flota" : temaKharon ? "kharon" : temaNoctis ? "noctis" : temaAether ? "aether" : "standard";
 
   return (
     <group>
@@ -1294,7 +1308,7 @@ function CorpuriCerestiUnice({
           textura={textura}
           definitie={definitie}
           limitaHarta={limitaHarta}
-          alphaTransparent={temaKharon || temaFlota || temaVerdant || temaNeridia || temaFrontiera15 || temaFrontiera16}
+          alphaTransparent={temaKharon || temaFlota || temaVerdant || temaNeridia || temaFrontiera15 || temaFrontiera16 || temaFrontiera17 || temaFrontiera18}
         />
       ))}
     </group>
@@ -1412,6 +1426,8 @@ export default function HartaSpatiala({
         temaNeridia={temaHarta === "neridia"}
         temaFrontiera15={temaHarta === "frontiera15"}
         temaFrontiera16={temaHarta === "frontiera16"}
+        temaFrontiera17={temaHarta === "frontiera17"}
+        temaFrontiera18={temaHarta === "frontiera18"}
       />
       <CorpuriCerestiUnice
         textura={texturaCorpuri}
@@ -1424,6 +1440,8 @@ export default function HartaSpatiala({
         temaNeridia={temaHarta === "neridia"}
         temaFrontiera15={temaHarta === "frontiera15"}
         temaFrontiera16={temaHarta === "frontiera16"}
+        temaFrontiera17={temaHarta === "frontiera17"}
+        temaFrontiera18={temaHarta === "frontiera18"}
       />
 
       <mesh

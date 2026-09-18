@@ -1769,6 +1769,18 @@ canvas {
   box-shadow: 0 0 8px #ff5c3b, 0 0 15px #a82443;
 }
 
+.harta-mini-portal-frontiera17 {
+  background: radial-gradient(circle, #28100b 0 17%, #ffca6d 26% 45%, #59402b 53% 61%, #bd6653 68%);
+  border-color: #ffd68d;
+  box-shadow: 0 0 8px #ffbc55, 0 0 15px #aa6741;
+}
+
+.harta-mini-portal-frontiera18 {
+  background: radial-gradient(circle, #080717 0 17%, #ed3865 26% 43%, #35213f 52% 62%, #ffc890 68%);
+  border-color: #ffc39b;
+  box-shadow: 0 0 8px #ee3d70, 0 0 15px #9a4ba3;
+}
+
 .harta-mini-redimensionare {
   position: absolute;
   right: 0;
