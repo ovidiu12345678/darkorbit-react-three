@@ -1787,6 +1787,79 @@ canvas {
   box-shadow: 0 0 8px #9be1d7, 0 0 15px #a45486;
 }
 
+.harta-mini-zid-pirat {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(169, 233, 220, 0.6);
+  border-radius: 4px;
+  background: linear-gradient(110deg, rgba(16, 29, 42, 0.92), rgba(67, 101, 113, 0.75), rgba(13, 18, 33, 0.92));
+  box-shadow: 0 0 8px rgba(86, 222, 208, 0.36);
+  pointer-events: none;
+}
+
+.harta-mini-paladiu {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  transform: translate(-50%, -50%);
+  clip-path: polygon(50% 0, 63% 36%, 100% 50%, 63% 64%, 50% 100%, 37% 64%, 0 50%, 37% 36%);
+  background: #a6fff1;
+  box-shadow: 0 0 5px #7effe3;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.harta-mini-schimb-paladiu {
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  transform: translate(-50%, -50%);
+  border: 2px solid #c1a3f9;
+  border-radius: 50%;
+  background: radial-gradient(circle, #a6ffec 0 20%, #251a44 50%, #8e67cf 80%);
+  box-shadow: 0 0 8px #8feddc;
+  cursor: pointer;
+  z-index: 3;
+}
+
+.panou-paladiu {
+  position: fixed;
+  top: 250px;
+  right: 16px;
+  z-index: 48;
+  width: 260px;
+  max-width: calc(100vw - 32px);
+  padding: 10px 12px;
+  border: 1px solid rgba(142, 238, 217, 0.72);
+  border-radius: 9px;
+  color: #ddfff6;
+  background: linear-gradient(145deg, rgba(9, 23, 31, 0.96), rgba(25, 15, 39, 0.94));
+  box-shadow: 0 0 18px rgba(77, 227, 208, 0.2);
+  font-size: 12px;
+}
+
+.panou-paladiu-titlu { font-weight: 800; letter-spacing: 0.02em; margin-bottom: 7px; }
+.panou-paladiu-contori { display: flex; gap: 14px; flex-wrap: wrap; color: #a7e9de; }
+.panou-paladiu-contori strong { color: #fff; }
+.panou-paladiu-indiciu { display: block; margin-top: 7px; color: #cebfe3; }
+.panou-paladiu-schimb {
+  width: 100%;
+  margin-top: 9px;
+  padding: 7px 8px;
+  border: 1px solid #9deedd;
+  border-radius: 5px;
+  background: linear-gradient(120deg, #467c79, #7056a0);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.panou-paladiu-schimb:hover { filter: brightness(1.18); }
+
+@media (max-width: 720px) {
+  .panou-paladiu { top: 244px; right: 8px; width: 208px; padding: 8px; font-size: 11px; }
+}
+
 .harta-mini-redimensionare {
   position: absolute;
   right: 0;

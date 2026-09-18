@@ -25,6 +25,7 @@ import { CORPURI_FRONTIERA_16 } from "./corpuriFrontiera16.js";
 import { CORPURI_FRONTIERA_17 } from "./corpuriFrontiera17.js";
 import { CORPURI_FRONTIERA_18 } from "./corpuriFrontiera18.js";
 import { SECTOARE_NOI } from "./sectoareNoi.js";
+import { LABIRINT_PIRAT, PUNCTE_PALADIU } from "./utils/labirintPirate.js";
 import {
   TUNURI_BY_ID,
   GENERATOARE_BY_ID,
@@ -105,6 +106,12 @@ const POZITIE_PORTAL_FRONTIERA_18_SECTOR_45 = [-COORDONATA_PORTAL_AETHER, 0, -CO
 const POZITIE_PORTAL_SECTOR_INAPOI = [COORDONATA_PORTAL_AETHER, 0, COORDONATA_PORTAL_AETHER];
 const POZITIE_PORTAL_SECTOR_INAINTE = [-COORDONATA_PORTAL_AETHER, 0, -COORDONATA_PORTAL_AETHER];
 const RAZA_ZONA_SIGURA_PORTAL = 58;
+const PALADIU_PENTRU_ENERGIE = 15;
+
+function citesteResursaSalvata(cheie) {
+  try { return Math.max(0, Number.parseInt(window.localStorage.getItem(cheie), 10) || 0); }
+  catch { return 0; }
+}
 
 function esteInZonaSiguraPortal(harta, pozitie) {
   const portaluri = harta === "aether"
@@ -437,6 +444,10 @@ export default function App() {
   const [efecteAtmosferice, setEfecteAtmosferice] = useState({ gaz: 0, radiatie: 0 });
   const [vitezaNava, setVitezaNava] = useState(1);
   const [hartaActiva, setHartaActiva] = useState("standard");
+  const [paladiu, setPaladiu] = useState(() => citesteResursaSalvata("darkorbit-paladiu-v1"));
+  const [energieGalactica, setEnergieGalactica] = useState(() => citesteResursaSalvata("darkorbit-energie-galactica-v1"));
+  const [paladiuColectat, setPaladiuColectat] = useState(() => new Set());
+  const colectateRef = useRef(new Set());
   const [semnalTeleportare, setSemnalTeleportare] = useState(0);
   const [semnalTransportPortalAether, setSemnalTransportPortalAether] = useState(0);
   const [semnalTransportPortalSecundar, setSemnalTransportPortalSecundar] = useState(0);
@@ -444,6 +455,25 @@ export default function App() {
   const [sunetPortalPrioritar, setSunetPortalPrioritar] = useState(false);
   const [pozitieTeleportare, setPozitieTeleportare] = useState(POZITIE_REVENIRE_STANDARD);
   const jucatorInZonaSiguraPortal = esteInZonaSiguraPortal(hartaActiva, pozitieJucator);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem("darkorbit-paladiu-v1", String(paladiu));
+      window.localStorage.setItem("darkorbit-energie-galactica-v1", String(energieGalactica));
+    } catch { /* jocul rămâne utilizabil fără stocare locală */ }
+  }, [paladiu, energieGalactica]);
+
+  useEffect(() => {
+    if (!LABIRINT_PIRAT[hartaActiva]) return;
+    const apropiate = PUNCTE_PALADIU[hartaActiva].filter((p) =>
+      !colectateRef.current.has(p.id) && Math.hypot(pozitieJucator[0] - p.x, pozitieJucator[2] - p.z) <= 9
+    );
+    if (!apropiate.length) return;
+    apropiate.forEach((p) => colectateRef.current.add(p.id));
+    setPaladiuColectat(new Set(colectateRef.current));
+    setPaladiu((valoare) => valoare + apropiate.length);
+    setAmenintare(`+${apropiate.length} paladiu`);
+  }, [hartaActiva, pozitieJucator]);
 
   const [credite, setCredite] = useState(10000000);
   const [uridium, setUridium] = useState(0);
@@ -1051,6 +1081,22 @@ export default function App() {
     setSemnalTeleportare((valoare) => valoare + 1);
   }, [hartaActiva]);
 
+  const schimbaPaladiu = useCallback(() => {
+    if (hartaActiva !== "sector53") return;
+    if (Math.hypot(pozitieJucator[0], pozitieJucator[2]) > 36) {
+      alegeTinta({ x: 0, z: 0 });
+      setAmenintare("deplasare spre schimbul de paladiu");
+      return;
+    }
+    if (paladiu < PALADIU_PENTRU_ENERGIE) {
+      setAmenintare("paladiu insuficient");
+      return;
+    }
+    setPaladiu((valoare) => valoare - PALADIU_PENTRU_ENERGIE);
+    setEnergieGalactica((valoare) => valoare + 1);
+    setAmenintare("+1 energie pentru porți");
+  }, [hartaActiva, pozitieJucator, paladiu, alegeTinta]);
+
   const scutProcent = scutMaxNava > 0 ? (scut / scutMaxNava) * 100 : 0;
   const statistici = { viata, scut: scutProcent, scutMax: scutMaxNava, atacuri, amenintare };
   const inamiciHartaActiva = inamici.filter(
@@ -1069,6 +1115,9 @@ export default function App() {
   const esteFrontiera17 = hartaActiva === "frontiera17";
   const esteFrontiera18 = hartaActiva === "frontiera18";
   const sectorNou = SECTOARE_NOI[hartaActiva] ?? null;
+  const labirintPirata = LABIRINT_PIRAT[hartaActiva] ?? null;
+  const paladiuVizibil = (PUNCTE_PALADIU[hartaActiva] ?? []).filter((p) => !paladiuColectat.has(p.id));
+  const langaSchimb = hartaActiva === "sector53" && Math.hypot(pozitieJucator[0], pozitieJucator[2]) <= 36;
   const esteAether = hartaActiva === "aether";
   const esteStandard = hartaActiva === "standard";
   const fundalJoc = sectorNou
@@ -1219,6 +1268,7 @@ export default function App() {
             temaHarta={
               sectorNou ? hartaActiva : esteFrontiera18 ? "frontiera18" : esteFrontiera17 ? "frontiera17" : esteFrontiera16 ? "frontiera16" : esteFrontiera15 ? "frontiera15" : esteNeridia ? "neridia" : esteVerdant ? "verdant" : esteFlota ? "flota" : esteKharon ? "kharon" : esteNoctis ? "noctis" : esteAether ? "aether" : "standard"
             }
+            paladiuColectat={paladiuColectat}
             doarPortal={!esteStandard}
             onTransportAether={
               sectorNou ? () => transportaSectorNou(false) : esteFrontiera18 ? transportaPrinPortalFrontiera18 : esteFrontiera17 ? transportaPrinPortalFrontiera17 : esteFrontiera16 ? transportaPrinPortalFrontiera16 : esteFrontiera15 ? transportaPrinPortalFrontiera15 : esteNeridia ? transportaPrinPortalNeridia : esteVerdant ? transportaPrinPortalVerdant : esteFlota ? transportaPrinPortalFlota : esteKharon || esteNoctis ? transportaPrinPortalKharon : transportaPrinPortal
@@ -1284,6 +1334,7 @@ export default function App() {
             scut={scut}
             pozitieTeleportare={pozitieTeleportare}
             semnalTeleportare={semnalTeleportare}
+            obstacole={labirintPirata?.ziduri ?? null}
           />
 
           <GestionarLupta
@@ -1432,7 +1483,27 @@ export default function App() {
         imagineFundal={fundalMini}
         imagineCorpuri={sectorNou ? sectorNou.atlas : esteFrontiera18 ? CORPURI_HARTA_FRONTIERA_18 : esteFrontiera17 ? CORPURI_HARTA_FRONTIERA_17 : esteFrontiera16 ? CORPURI_HARTA_FRONTIERA_16 : esteFrontiera15 ? CORPURI_HARTA_FRONTIERA_15 : esteNeridia ? CORPURI_HARTA_NERIDIA : esteVerdant ? CORPURI_HARTA_VERDANT : esteFlota ? CORPURI_HARTA_FLOTA : esteKharon ? CORPURI_HARTA_KHARON : null}
         corpuriCeresti={sectorNou ? sectorNou.corpuri : esteFrontiera18 ? CORPURI_FRONTIERA_18 : esteFrontiera17 ? CORPURI_FRONTIERA_17 : esteFrontiera16 ? CORPURI_FRONTIERA_16 : esteFrontiera15 ? CORPURI_FRONTIERA_15 : esteNeridia ? CORPURI_NERIDIA : esteVerdant ? CORPURI_VERDANT : esteFlota ? CORPURI_FLOTA : esteKharon ? CORPURI_KHARON : []}
+        labirint={labirintPirata}
+        paladiuVizibil={paladiuVizibil}
+        pozitieSchimbPaladiu={labirintPirata?.schimb ?? null}
       />
+
+      {labirintPirata && (
+        <div className="panou-paladiu">
+          <div className="panou-paladiu-titlu">✦ Câmp de paladiu · {sectorNou?.nume}</div>
+          <div className="panou-paladiu-contori">
+            <span>✦ Paladiu: <strong>{paladiu}</strong></span>
+            <span>◇ Energie: <strong>{energieGalactica}</strong></span>
+          </div>
+          {hartaActiva === "sector53" ? (
+            <button type="button" className="panou-paladiu-schimb" onClick={schimbaPaladiu}>
+              {langaSchimb ? `Schimbă ${PALADIU_PENTRU_ENERGIE} paladiu → 1 energie` : "Mergi la schimbul de paladiu"}
+            </button>
+          ) : (
+            <span className="panou-paladiu-indiciu">Schimbul se află în 5-3.</span>
+          )}
+        </div>
+      )}
 
       <ButonFullscreen />
 

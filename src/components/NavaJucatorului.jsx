@@ -9,6 +9,7 @@ import {
 import * as THREE from "three";
 import folosesteTastatura from "../hooks/useTastatura.jsx";
 import { densitateGazLaPunct } from "../utils/fundalSpatial.js";
+import { punctBlocat, rutaPrinLabirint } from "../utils/labirintPirate.js";
 
 const STORAGE_KEY_TUNING_NAVA = "darkorbit-nava-manual-axes-bank-v2";
 const PAROLA_TUNING = "ovidiuDark.1998";
@@ -1395,6 +1396,7 @@ export default function NavaJucatorului({
   scut,
   pozitieTeleportare,
   semnalTeleportare = 0,
+  obstacole = null,
 }) {
   const [tuning, setTuning] = useState(incarcaTuningInitial);
   const [axesActive, setAxesActive] = useState(false);
@@ -1456,6 +1458,8 @@ export default function NavaJucatorului({
     unghi: 0,
     durata: 0,
     timpStart: 0,
+    puncte: [],
+    indexPunct: 0,
   });
 
   const ultimaTintaId = useRef(null);
@@ -1483,6 +1487,7 @@ export default function NavaJucatorului({
       pozitie.set(teleportX, teleportY, teleportZ);
       nava.current.userData.unghiVizual = 0;
       calatorie.current.activa = false;
+      calatorie.current.puncte = [];
       ultimaTintaId.current = null;
       seteazaTintaJucator(null);
       seteazaPozitieJucator([teleportX, teleportY, teleportZ]);
@@ -1512,10 +1517,13 @@ export default function NavaJucatorului({
     }
 
     let seMisca = false;
+    const xAnterior = pozitie.x;
+    const zAnterior = pozitie.z;
 
     if (tuningBlocheazaMiscarea || draggingAxes) {
       if (tintaJucator) seteazaTintaJucator(null);
       calatorie.current.activa = false;
+      calatorie.current.puncte = [];
       ultimaTintaId.current = null;
     } else {
       let miscareX = 0;
@@ -1546,6 +1554,7 @@ export default function NavaJucatorului({
         }
 
         calatorie.current.activa = false;
+        calatorie.current.puncte = [];
         ultimaTintaId.current = null;
 
         const lungime = Math.hypot(miscareX, miscareZ);
@@ -1578,6 +1587,7 @@ export default function NavaJucatorului({
         if (tintaLive) {
           ultimaTintaId.current = null;
           calatorie.current.activa = false;
+          calatorie.current.puncte = [];
 
           const dx = tintaX - pozitie.x;
           const dz = tintaZ - pozitie.z;
@@ -1607,14 +1617,21 @@ export default function NavaJucatorului({
             const dz = tintaZ - pozitie.z;
             const distanta = Math.hypot(dx, dz);
 
-            calatorie.current.startX = pozitie.x;
-            calatorie.current.startZ = pozitie.z;
-            calatorie.current.tintaX = tintaX;
-            calatorie.current.tintaZ = tintaZ;
-            calatorie.current.unghi = Math.atan2(dx, dz);
-            calatorie.current.durata = distanta / viteza;
-            calatorie.current.timpStart = stare.clock.elapsedTime;
-            calatorie.current.activa = distanta > distantaOprire;
+            if (obstacole?.length) {
+              calatorie.current.puncte = rutaPrinLabirint([pozitie.x, pozitie.z], [tintaX, tintaZ], obstacole);
+              calatorie.current.indexPunct = 0;
+              calatorie.current.activa = distanta > distantaOprire && calatorie.current.puncte.length > 0;
+            } else {
+              calatorie.current.puncte = [];
+              calatorie.current.startX = pozitie.x;
+              calatorie.current.startZ = pozitie.z;
+              calatorie.current.tintaX = tintaX;
+              calatorie.current.tintaZ = tintaZ;
+              calatorie.current.unghi = Math.atan2(dx, dz);
+              calatorie.current.durata = distanta / viteza;
+              calatorie.current.timpStart = stare.clock.elapsedTime;
+              calatorie.current.activa = distanta > distantaOprire;
+            }
 
             if (!calatorie.current.activa) {
               seteazaTintaJucator(null);
@@ -1622,6 +1639,33 @@ export default function NavaJucatorului({
           }
 
           if (calatorie.current.activa) {
+            if (calatorie.current.puncte.length) {
+              let pasRamas = viteza * timpDelta;
+              while (pasRamas > 0 && calatorie.current.activa) {
+                const punct = calatorie.current.puncte[calatorie.current.indexPunct];
+                const dx = punct[0] - pozitie.x;
+                const dz = punct[1] - pozitie.z;
+                const distanta = Math.hypot(dx, dz);
+                if (distanta <= Math.max(distantaOprire, 0.3)) {
+                  calatorie.current.indexPunct += 1;
+                  if (calatorie.current.indexPunct >= calatorie.current.puncte.length) {
+                    calatorie.current.activa = false;
+                    calatorie.current.puncte = [];
+                    ultimaTintaId.current = null;
+                    seteazaTintaJucator(null);
+                  }
+                  continue;
+                }
+                nava.current.userData.unghiVizual = rotesteSpre(
+                  unghiCurent, Math.atan2(dx, dz), vitezaRotatie * timpDelta
+                );
+                const pas = Math.min(pasRamas, distanta);
+                pozitie.x += (dx / distanta) * pas;
+                pozitie.z += (dz / distanta) * pas;
+                pasRamas -= pas;
+                seMisca = true;
+              }
+            } else {
             const {
               startX,
               startZ,
@@ -1653,8 +1697,22 @@ export default function NavaJucatorului({
               pozitie.z = THREE.MathUtils.lerp(startZ, tintaZCalatorie, progres);
               seMisca = true;
             }
+            }
           }
         }
+      }
+    }
+
+    if (obstacole?.length && punctBlocat(pozitie.x, pozitie.z, obstacole)) {
+      const xNou = pozitie.x;
+      const zNou = pozitie.z;
+      if (!punctBlocat(xNou, zAnterior, obstacole)) pozitie.z = zAnterior;
+      else if (!punctBlocat(xAnterior, zNou, obstacole)) pozitie.x = xAnterior;
+      else { pozitie.x = xAnterior; pozitie.z = zAnterior; }
+      if (calatorie.current.puncte.length) {
+        calatorie.current.activa = false;
+        calatorie.current.puncte = [];
+        ultimaTintaId.current = null;
       }
     }
 

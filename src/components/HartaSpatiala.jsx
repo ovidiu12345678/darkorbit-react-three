@@ -10,6 +10,7 @@ import { CORPURI_FRONTIERA_16 } from "../corpuriFrontiera16.js";
 import { CORPURI_FRONTIERA_17 } from "../corpuriFrontiera17.js";
 import { CORPURI_FRONTIERA_18 } from "../corpuriFrontiera18.js";
 import { SECTOARE_NOI } from "../sectoareNoi.js";
+import ZonaPirata from "./ZonaPirata.jsx";
 
 let contextSunetPortal = null;
 let volumPortalAnterior = null;
@@ -1346,6 +1347,7 @@ export default function HartaSpatiala({
   temaPortalTertiar = "aether",
   temaHarta = "standard",
   doarPortal = false,
+  paladiuColectat = new Set(),
   onTransportAether,
   onTransportSecundar,
   onTransportTertiar,
@@ -1452,6 +1454,9 @@ export default function HartaSpatiala({
         temaFrontiera18={temaHarta === "frontiera18"}
         temaSectorNou={SECTOARE_NOI[temaHarta] ? temaHarta : null}
       />
+      {(temaHarta === "sector52" || temaHarta === "sector53") && (
+        <ZonaPirata tema={temaHarta} colectate={paladiuColectat} onAlegeTinta={onAlegeTinta} />
+      )}
 
       <mesh
         geometry={geometrie}

@@ -31,6 +31,9 @@ export default function HartaMini({
   imagineFundal = "assets/harta-spatiala-fundal-hi.jpg",
   imagineCorpuri = null,
   corpuriCeresti = [],
+  labirint = null,
+  paladiuVizibil = [],
+  pozitieSchimbPaladiu = null,
 }) {
   const continutRef = useRef(null);
 
@@ -238,6 +241,28 @@ export default function HartaMini({
               </span>
             );
           })}
+          {labirint?.ziduri.map((zid, index) => {
+            const pozitie = lumeLaProcent(zid.x, zid.z);
+            return (
+              <span key={`zid-${index}`} className="harta-mini-zid-pirat" style={{
+                left: `${pozitie.left}%`, top: `${pozitie.top}%`,
+                width: `${(zid.w / (limitaHarta * 2)) * 100}%`,
+                height: `${(zid.h / (limitaHarta * 2)) * 100}%`,
+              }} />
+            );
+          })}
+          {paladiuVizibil.map((p) => {
+            const pozitie = lumeLaProcent(p.x, p.z);
+            return <span key={p.id} className="harta-mini-paladiu" style={{ left: `${pozitie.left}%`, top: `${pozitie.top}%` }} title="Paladiu" />;
+          })}
+          {pozitieSchimbPaladiu && (
+            <span className="harta-mini-schimb-paladiu" style={{
+              left: `${lumeLaProcent(pozitieSchimbPaladiu[0], pozitieSchimbPaladiu[2]).left}%`,
+              top: `${lumeLaProcent(pozitieSchimbPaladiu[0], pozitieSchimbPaladiu[2]).top}%`,
+            }} title="Schimb paladiu — apasă pentru deplasare"
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => laClickRepere(e, pozitieSchimbPaladiu)} />
+          )}
           <div className="harta-mini-axa harta-mini-axa-x" />
           <div className="harta-mini-axa harta-mini-axa-y" />
 
