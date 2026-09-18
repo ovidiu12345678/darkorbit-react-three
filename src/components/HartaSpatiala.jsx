@@ -6,6 +6,7 @@ import { CORPURI_FLOTA } from "../corpuriFlota.js";
 import { CORPURI_VERDANT } from "../corpuriVerdant.js";
 import { CORPURI_NERIDIA } from "../corpuriNeridia.js";
 import { CORPURI_FRONTIERA_15 } from "../corpuriFrontiera15.js";
+import { CORPURI_FRONTIERA_16 } from "../corpuriFrontiera16.js";
 
 let contextSunetPortal = null;
 let volumPortalAnterior = null;
@@ -23,7 +24,7 @@ async function redaSunetPortal(tema = "aether") {
   const context = contextSunetPortal;
   const acum = context.currentTime;
   const esteNoctis = tema === "noctis";
-  const esteKharon = tema === "kharon" || tema === "flota" || tema === "verdant" || tema === "neridia" || tema === "frontiera15";
+  const esteKharon = tema === "kharon" || tema === "flota" || tema === "verdant" || tema === "neridia" || tema === "frontiera15" || tema === "frontiera16";
   const frecventaRezonantei = esteKharon ? 86 : esteNoctis ? 118 : 154;
 
   if (volumPortalAnterior) {
@@ -315,9 +316,10 @@ function PortalAether({
   const esteVerdant = tema === "verdant";
   const esteNeridia = tema === "neridia";
   const esteFrontiera15 = tema === "frontiera15";
-  const culoareEnergie = esteFrontiera15 ? "#527eff" : esteNeridia ? "#54f88c" : esteVerdant ? "#ff3c25" : esteFlota ? "#ff4828" : esteKharon ? "#ff1818" : esteNoctis ? "#ff5b1f" : "#52dcff";
-  const culoareAccent = esteFrontiera15 ? "#d49365" : esteNeridia ? "#b5ffd2" : esteVerdant ? "#50ff8b" : esteFlota ? "#ffad58" : esteKharon ? "#7c0010" : esteNoctis ? "#ffc04a" : "#a66cff";
-  const culoareRece = esteFrontiera15 ? "#9b6fff" : esteNeridia ? "#008d77" : esteVerdant ? "#0d875a" : esteFlota ? "#a41520" : esteKharon ? "#ff5a28" : esteNoctis ? "#56e9ef" : "#71efff";
+  const esteFrontiera16 = tema === "frontiera16";
+  const culoareEnergie = esteFrontiera16 ? "#ff462e" : esteFrontiera15 ? "#527eff" : esteNeridia ? "#54f88c" : esteVerdant ? "#ff3c25" : esteFlota ? "#ff4828" : esteKharon ? "#ff1818" : esteNoctis ? "#ff5b1f" : "#52dcff";
+  const culoareAccent = esteFrontiera16 ? "#e3a26b" : esteFrontiera15 ? "#d49365" : esteNeridia ? "#b5ffd2" : esteVerdant ? "#50ff8b" : esteFlota ? "#ffad58" : esteKharon ? "#7c0010" : esteNoctis ? "#ffc04a" : "#a66cff";
+  const culoareRece = esteFrontiera16 ? "#a42454" : esteFrontiera15 ? "#9b6fff" : esteNeridia ? "#008d77" : esteVerdant ? "#0d875a" : esteFlota ? "#a41520" : esteKharon ? "#ff5a28" : esteNoctis ? "#56e9ef" : "#71efff";
 
   const dateParticule = useMemo(
     () =>
@@ -1008,10 +1010,10 @@ function creeazaGeometrie(pozitii, culori) {
   return geometrie;
 }
 
-function DecorSpatialUnic({ marimeHarta, temaAether, temaNoctis = false, temaKharon = false, temaFlota = false, temaVerdant = false, temaNeridia = false, temaFrontiera15 = false }) {
+function DecorSpatialUnic({ marimeHarta, temaAether, temaNoctis = false, temaKharon = false, temaFlota = false, temaVerdant = false, temaNeridia = false, temaFrontiera15 = false, temaFrontiera16 = false }) {
   const decor = useMemo(() => {
     const aleator = generatorDeterminist(
-      temaFrontiera15 ? 0x15f3a709 : temaNeridia ? 0x2b7a5e31 : temaVerdant ? 0x6a3e90bf : temaFlota ? 0x3c175a9e : temaKharon ? 0x7a13d04f : temaNoctis ? 0x4e0c715a : temaAether ? 0xa37ae771 : 0x51c0b17d
+      temaFrontiera16 ? 0x16f4a803 : temaFrontiera15 ? 0x15f3a709 : temaNeridia ? 0x2b7a5e31 : temaVerdant ? 0x6a3e90bf : temaFlota ? 0x3c175a9e : temaKharon ? 0x7a13d04f : temaNoctis ? 0x4e0c715a : temaAether ? 0xa37ae771 : 0x51c0b17d
     );
     const latimeHarta = marimeHarta * (16 / 9);
     const coloane = 18;
@@ -1022,7 +1024,9 @@ function DecorSpatialUnic({ marimeHarta, temaAether, temaNoctis = false, temaKha
     const pozitiiLinii = [];
     const pozitiiGalaxii = [];
     const culoriGalaxii = [];
-    const paleta = temaFrontiera15
+    const paleta = temaFrontiera16
+      ? [new THREE.Color("#ff7d4d"), new THREE.Color("#a63840"), new THREE.Color("#d9a06f")]
+      : temaFrontiera15
       ? [new THREE.Color("#7898dc"), new THREE.Color("#7a536d"), new THREE.Color("#bd8570")]
       : temaNeridia
       ? [new THREE.Color("#61eab2"), new THREE.Color("#188873"), new THREE.Color("#a5ffcb")]
@@ -1102,7 +1106,7 @@ function DecorSpatialUnic({ marimeHarta, temaAether, temaNoctis = false, temaKha
       linii: creeazaGeometrie(pozitiiLinii),
       galaxii: creeazaGeometrie(pozitiiGalaxii, culoriGalaxii),
     };
-  }, [marimeHarta, temaAether, temaNoctis, temaKharon, temaFlota, temaVerdant, temaNeridia, temaFrontiera15]);
+  }, [marimeHarta, temaAether, temaNoctis, temaKharon, temaFlota, temaVerdant, temaNeridia, temaFrontiera15, temaFrontiera16]);
 
   useEffect(
     () => () => {
@@ -1117,7 +1121,7 @@ function DecorSpatialUnic({ marimeHarta, temaAether, temaNoctis = false, temaKha
     <group>
       <points geometry={decor.stele} renderOrder={2}>
         <pointsMaterial
-          color={temaFrontiera15 ? "#c9d8ff" : temaNeridia ? "#c0ffe0" : temaVerdant ? "#b7ffd4" : temaFlota ? "#ffb091" : temaKharon ? "#ff7a66" : temaNoctis ? "#ffd19a" : temaAether ? "#f1c4ff" : "#d8f6ff"}
+          color={temaFrontiera16 ? "#ffd4bd" : temaFrontiera15 ? "#c9d8ff" : temaNeridia ? "#c0ffe0" : temaVerdant ? "#b7ffd4" : temaFlota ? "#ffb091" : temaKharon ? "#ff7a66" : temaNoctis ? "#ffd19a" : temaAether ? "#f1c4ff" : "#d8f6ff"}
           size={0.82}
           transparent
           opacity={0.9}
@@ -1260,9 +1264,12 @@ function CorpuriCerestiUnice({
   temaVerdant = false,
   temaNeridia = false,
   temaFrontiera15 = false,
+  temaFrontiera16 = false,
 }) {
   const limitaHarta = marimeHarta / 2 - 4.5;
-  const corpuri = temaFrontiera15
+  const corpuri = temaFrontiera16
+    ? CORPURI_FRONTIERA_16
+    : temaFrontiera15
     ? CORPURI_FRONTIERA_15
     : temaNeridia
     ? CORPURI_NERIDIA
@@ -1277,7 +1284,7 @@ function CorpuriCerestiUnice({
       : temaAether
         ? CORPURI_AETHER
         : CORPURI_STANDARD;
-  const cheieTema = temaFrontiera15 ? "frontiera15" : temaNeridia ? "neridia" : temaVerdant ? "verdant" : temaFlota ? "flota" : temaKharon ? "kharon" : temaNoctis ? "noctis" : temaAether ? "aether" : "standard";
+  const cheieTema = temaFrontiera16 ? "frontiera16" : temaFrontiera15 ? "frontiera15" : temaNeridia ? "neridia" : temaVerdant ? "verdant" : temaFlota ? "flota" : temaKharon ? "kharon" : temaNoctis ? "noctis" : temaAether ? "aether" : "standard";
 
   return (
     <group>
@@ -1287,7 +1294,7 @@ function CorpuriCerestiUnice({
           textura={textura}
           definitie={definitie}
           limitaHarta={limitaHarta}
-          alphaTransparent={temaKharon || temaFlota || temaVerdant || temaNeridia || temaFrontiera15}
+          alphaTransparent={temaKharon || temaFlota || temaVerdant || temaNeridia || temaFrontiera15 || temaFrontiera16}
         />
       ))}
     </group>
@@ -1404,6 +1411,7 @@ export default function HartaSpatiala({
         temaVerdant={temaHarta === "verdant"}
         temaNeridia={temaHarta === "neridia"}
         temaFrontiera15={temaHarta === "frontiera15"}
+        temaFrontiera16={temaHarta === "frontiera16"}
       />
       <CorpuriCerestiUnice
         textura={texturaCorpuri}
@@ -1415,6 +1423,7 @@ export default function HartaSpatiala({
         temaVerdant={temaHarta === "verdant"}
         temaNeridia={temaHarta === "neridia"}
         temaFrontiera15={temaHarta === "frontiera15"}
+        temaFrontiera16={temaHarta === "frontiera16"}
       />
 
       <mesh

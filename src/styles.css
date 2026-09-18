@@ -1763,6 +1763,12 @@ canvas {
   box-shadow: 0 0 8px #607cff, 0 0 15px #ae6238;
 }
 
+.harta-mini-portal-frontiera16 {
+  background: radial-gradient(circle, #230316 0 17%, #a52437 25% 44%, #3b111d 51% 61%, #ed8b52 68%);
+  border-color: #ffa86a;
+  box-shadow: 0 0 8px #ff5c3b, 0 0 15px #a82443;
+}
+
 .harta-mini-redimensionare {
   position: absolute;
   right: 0;
