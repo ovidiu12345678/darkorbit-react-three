@@ -1,21 +1,53 @@
-// Labirinturi originale: treceri largi pentru navă, portalurile rămân libere.
+// Pereți de asteroizi fragmentați; culoarele, baza centrală și portalurile rămân libere.
 const ZIDURI_52 = [
-  { x: -370, z: -190, w: 30, h: 620 },
-  { x: -120, z: 190, w: 30, h: 620 },
-  { x: 130, z: -190, w: 30, h: 620 },
-  { x: 380, z: 190, w: 30, h: 620 },
+  { x: -402, z: -316, w: 42, h: 286 },
+  { x: -402, z: 111, w: 48, h: 452 },
+  { x: -256, z: -407, w: 238, h: 43 },
+  { x: -213, z: -142, w: 42, h: 310 },
+  { x: -213, z: 345, w: 46, h: 252 },
+  { x: -61, z: 392, w: 214, h: 42 },
+  { x: -35, z: -338, w: 220, h: 45 },
+  { x: 177, z: -315, w: 47, h: 354 },
+  { x: 177, z: 250, w: 43, h: 300 },
+  { x: 338, z: -418, w: 238, h: 41 },
+  { x: 398, z: -110, w: 45, h: 342 },
+  { x: 398, z: 369, w: 43, h: 181 },
+  { x: 312, z: 145, w: 191, h: 42 },
 ];
 
 const ZIDURI_53 = [
-  { x: -200, z: -380, w: 600, h: 30 },
-  { x: 200, z: -130, w: 600, h: 30 },
-  { x: -200, z: 120, w: 600, h: 30 },
-  { x: 200, z: 370, w: 600, h: 30 },
+  { x: -327, z: -405, w: 301, h: 44 },
+  { x: 161, z: -405, w: 358, h: 40 },
+  { x: -439, z: -247, w: 42, h: 278 },
+  { x: -116, z: -254, w: 411, h: 43 },
+  { x: 336, z: -259, w: 42, h: 246 },
+  { x: 404, z: -106, w: 168, h: 45 },
+  { x: -343, z: -37, w: 287, h: 47 },
+  { x: -127, z: 54, w: 42, h: 218 },
+  { x: 176, z: 60, w: 389, h: 44 },
+  { x: 418, z: 235, w: 44, h: 252 },
+  { x: -347, z: 224, w: 44, h: 252 },
+  { x: -137, z: 281, w: 405, h: 46 },
+  { x: 227, z: 398, w: 349, h: 41 },
 ];
 
 export const LABIRINT_PIRAT = {
-  sector52: { ziduri: ZIDURI_52, culoare: "#63aab1", ceata: "#46ad9b", schimb: null },
-  sector53: { ziduri: ZIDURI_53, culoare: "#9058a0", ceata: "#a95a9d", schimb: [0, 0, 0] },
+  sector52: {
+    ziduri: ZIDURI_52, culoare: "#6e9f9b", ceata: "#83aaa9", schimb: [0, 0, 0],
+    nori: [
+      { x: -320, z: -82, w: 258, h: 280 }, { x: -36, z: -395, w: 330, h: 170 },
+      { x: 334, z: -200, w: 253, h: 292 }, { x: 355, z: 305, w: 280, h: 204 },
+      { x: -267, z: 351, w: 290, h: 187 },
+    ],
+  },
+  sector53: {
+    ziduri: ZIDURI_53, culoare: "#827c98", ceata: "#9b9aa9", schimb: null,
+    nori: [
+      { x: -329, z: -333, w: 331, h: 204 }, { x: 233, z: -269, w: 325, h: 251 },
+      { x: -237, z: 86, w: 337, h: 251 }, { x: 324, z: 219, w: 294, h: 253 },
+      { x: -104, z: 350, w: 350, h: 189 },
+    ],
+  },
 };
 
 export function punctBlocat(x, z, ziduri, marja = 8) {

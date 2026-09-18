@@ -248,6 +248,7 @@ export default function HartaMini({
                 left: `${pozitie.left}%`, top: `${pozitie.top}%`,
                 width: `${(zid.w / (limitaHarta * 2)) * 100}%`,
                 height: `${(zid.h / (limitaHarta * 2)) * 100}%`,
+                "--zid-culoare": labirint.culoare,
               }} />
             );
           })}

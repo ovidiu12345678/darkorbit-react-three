@@ -1,5 +1,5 @@
 import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { LABIRINT_PIRAT, PUNCTE_PALADIU } from "../utils/labirintPirate.js";
 
@@ -22,27 +22,43 @@ const vertexCeata = `
 const fragmentCeata = `
   uniform float uTimp;
   uniform vec3 uCuloare;
+  uniform float uDensitate;
   varying vec2 vUv;
+  float zgomot(vec2 p) {
+    vec2 i = floor(p), f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    float a = fract(sin(dot(i, vec2(127.1, 311.7))) * 43758.5453);
+    float b = fract(sin(dot(i + vec2(1.0, 0.0), vec2(127.1, 311.7))) * 43758.5453);
+    float c = fract(sin(dot(i + vec2(0.0, 1.0), vec2(127.1, 311.7))) * 43758.5453);
+    float d = fract(sin(dot(i + vec2(1.0, 1.0), vec2(127.1, 311.7))) * 43758.5453);
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+  }
   void main() {
-    float margini = smoothstep(0.0, 0.19, vUv.x) * smoothstep(0.0, 0.19, 1.0 - vUv.x);
-    margini *= smoothstep(0.0, 0.1, vUv.y) * smoothstep(0.0, 0.1, 1.0 - vUv.y);
-    float val = 0.66 + 0.18 * sin(vUv.y * 27.0 + uTimp * 0.9)
-      + 0.12 * sin(vUv.y * 57.0 - uTimp * 0.5 + vUv.x * 9.0);
-    gl_FragColor = vec4(uCuloare, margini * val * 0.31);
+    vec2 uv = vUv;
+    float margini = smoothstep(0.0, 0.24, uv.x) * smoothstep(0.0, 0.24, 1.0 - uv.x);
+    margini *= smoothstep(0.0, 0.19, uv.y) * smoothstep(0.0, 0.19, 1.0 - uv.y);
+    vec2 curgere = uv * vec2(7.0, 5.0) + vec2(uTimp * 0.035, -uTimp * 0.025);
+    float nor = 0.57 * zgomot(curgere)
+      + 0.29 * zgomot(curgere * 2.05 + 7.3)
+      + 0.14 * zgomot(curgere * 4.1 - uTimp * 0.045);
+    float vapori = smoothstep(0.29, 0.68, nor);
+    vec3 culoare = mix(uCuloare * 0.52, uCuloare * 1.18, vapori);
+    gl_FragColor = vec4(culoare, margini * vapori * uDensitate * 0.62);
     #include <colorspace_fragment>
   }
 `;
 
-function CeataPirata({ zid, culoare, index }) {
+function CeataPirata({ zid, culoare, index, densitate = 1 }) {
   const material = useRef();
   const uniforme = useMemo(() => ({
     uTimp: { value: index * 1.9 },
     uCuloare: { value: new THREE.Color(culoare) },
-  }), [culoare, index]);
-  useFrame(({ clock }) => { if (material.current) material.current.uniforms.uTimp.value = clock.elapsedTime; });
+    uDensitate: { value: densitate },
+  }), [culoare, densitate, index]);
+  useFrame(({ clock }) => { if (material.current) material.current.uniforms.uTimp.value = clock.elapsedTime + index * 1.9; });
   return (
-    <mesh position={[zid.x, 0.7, zid.z]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={6} raycast={() => null}>
-      <planeGeometry args={[zid.w + 128, zid.h + 35]} />
+    <mesh position={[zid.x, 0.8, zid.z]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={6} raycast={() => null}>
+      <planeGeometry args={[zid.w + 116, zid.h + 116]} />
       <shaderMaterial ref={material} uniforms={uniforme} vertexShader={vertexCeata} fragmentShader={fragmentCeata}
         transparent depthWrite={false} side={THREE.DoubleSide} />
     </mesh>
@@ -50,38 +66,76 @@ function CeataPirata({ zid, culoare, index }) {
 }
 
 function PereteMineral({ zid, culoare, index }) {
-  const fragmente = useMemo(() => {
+  const rociRef = useRef();
+  const { fragmente, contur } = useMemo(() => {
+    const orizontal = zid.w > zid.h;
     const lungime = Math.max(zid.w, zid.h);
-    const nr = Math.ceil(lungime / 33);
-    return Array.from({ length: nr }, (_, i) => {
+    const grosime = Math.min(zid.w, zid.h);
+    const nr = Math.ceil(lungime / 23);
+    const fragmente = Array.from({ length: nr }, (_, i) => {
       const fractie = (i + 0.5) / nr - 0.5;
-      const abatere = Math.sin((i + 1) * (index + 3) * 2.17) * 5;
+      const abatere = Math.sin((i + 1) * (index + 3) * 2.17) * grosime * 0.15;
+      const lungimePiatra = 12 + ((i * 7 + index * 13) % 8);
+      const latimePiatra = grosime * (0.31 + ((i * 3 + index) % 5) * 0.075);
       return {
-        x: zid.w > zid.h ? fractie * zid.w : abatere,
-        z: zid.h > zid.w ? fractie * zid.h : abatere,
-        raza: 5.5 + ((i * 7 + index * 13) % 6),
+        x: orizontal ? fractie * lungime : abatere,
+        z: orizontal ? abatere : fractie * lungime,
+        sx: orizontal ? lungimePiatra : latimePiatra,
+        sz: orizontal ? latimePiatra : lungimePiatra,
         unghi: (i * 0.92 + index) % Math.PI,
       };
     });
+    const contur = new THREE.Shape();
+    const puncte = Math.ceil(lungime / 20);
+    const coordonate = (lung, lateral) => {
+      const x = orizontal ? lung : lateral;
+      const z = orizontal ? lateral : lung;
+      return [x, -z];
+    };
+    for (let margine = 0; margine < 2; margine += 1) {
+      for (let i = 0; i <= puncte; i += 1) {
+        const indice = margine ? puncte - i : i;
+        const lung = -lungime / 2 + (indice / puncte) * lungime;
+        const val = Math.sin(indice * 2.29 + index * 1.71 + margine * 3.4);
+        const lateral = (margine ? -1 : 1) * grosime * (0.40 + val * 0.105);
+        const [x, y] = coordonate(lung, lateral);
+        if (!margine && !i) contur.moveTo(x, y);
+        else contur.lineTo(x, y);
+      }
+    }
+    contur.closePath();
+    return { fragmente, contur };
   }, [zid, index]);
+  useLayoutEffect(() => {
+    if (!rociRef.current) return;
+    const obiect = new THREE.Object3D();
+    const baza = new THREE.Color("#20252d");
+    const accent = new THREE.Color(culoare);
+    fragmente.forEach((piatra, i) => {
+      obiect.position.set(piatra.x, 0.25 + (i % 4) * 0.05, piatra.z);
+      obiect.rotation.set(0.14 * Math.sin(i * 4.1), piatra.unghi, 0.12 * Math.cos(i * 3.3));
+      obiect.scale.set(piatra.sx, 0.75 + (i % 4) * 0.16, piatra.sz);
+      obiect.updateMatrix();
+      rociRef.current.setMatrixAt(i, obiect.matrix);
+      rociRef.current.setColorAt(i, baza.clone().lerp(accent, 0.16 + (i % 7) * 0.055));
+    });
+    rociRef.current.instanceMatrix.needsUpdate = true;
+    if (rociRef.current.instanceColor) rociRef.current.instanceColor.needsUpdate = true;
+  }, [fragmente, culoare]);
   return (
     <group position={[zid.x, 0, zid.z]}>
-      <mesh position={[0, -0.65, 0]} rotation={[-Math.PI / 2, 0, 0]} raycast={() => null}>
-        <planeGeometry args={[zid.w + 7, zid.h + 7]} />
-        <meshBasicMaterial color={culoare} transparent opacity={0.16} depthWrite={false} />
+      <mesh position={[0, -0.68, 0]} rotation={[-Math.PI / 2, 0, 0]} scale={[1.11, 1.11, 1]} raycast={() => null}>
+        <shapeGeometry args={[contur]} />
+        <meshBasicMaterial color={culoare} transparent opacity={0.26} depthWrite={false} side={THREE.DoubleSide} />
       </mesh>
       <mesh position={[0, -0.5, 0]} rotation={[-Math.PI / 2, 0, 0]} raycast={() => null}>
-        <planeGeometry args={[zid.w, zid.h]} />
-        <meshBasicMaterial color="#0a111a" transparent opacity={0.88} />
+        <shapeGeometry args={[contur]} />
+        <meshBasicMaterial color="#0b1018" side={THREE.DoubleSide} />
       </mesh>
-      {fragmente.map((piatra, i) => (
-        <mesh key={i} position={[piatra.x, 0.3, piatra.z]} rotation={[0, piatra.unghi, 0]}
-          scale={[piatra.raza, 0.4 + (i % 3) * 0.12, piatra.raza * (0.65 + (i % 4) * 0.1)]}
-          raycast={() => null}>
-          <icosahedronGeometry args={[1, 0]} />
-          <meshStandardMaterial color={i % 4 ? "#263039" : culoare} metalness={0.38} roughness={0.86} />
-        </mesh>
-      ))}
+      <instancedMesh ref={rociRef} args={[null, null, fragmente.length]} raycast={() => null}>
+        <icosahedronGeometry args={[1, 0]} />
+        <meshStandardMaterial color="#ffffff" metalness={0.18} roughness={0.95} flatShading />
+      </instancedMesh>
     </group>
   );
 }
@@ -119,14 +173,29 @@ function RafinariaPaladiu({ onAlegeTinta }) {
   return (
     <group position={[0, 1.2, 0]} onPointerDown={(e) => { e.stopPropagation(); onAlegeTinta?.({ x: 0, z: 0 }); }}>
       <mesh rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[12, 17, 48]} />
-        <meshBasicMaterial color="#b5a0f2" transparent opacity={0.86} side={THREE.DoubleSide} />
+        <circleGeometry args={[19, 8]} />
+        <meshStandardMaterial color="#151d24" metalness={0.72} roughness={0.53} side={THREE.DoubleSide} />
       </mesh>
-      <mesh ref={nucleu} position={[0, 3.8, 0]} scale={[3.8, 6, 3.8]}>
+      <mesh position={[0, 0.22, 0]} rotation={[-Math.PI / 2, 0, Math.PI / 8]}>
+        <ringGeometry args={[12.5, 16.5, 8]} />
+        <meshStandardMaterial color="#6b6251" metalness={0.8} roughness={0.42} side={THREE.DoubleSide} />
+      </mesh>
+      <mesh position={[0, 0.34, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[16.7, 18, 8]} />
+        <meshBasicMaterial color="#d99d5b" transparent opacity={0.8} side={THREE.DoubleSide} />
+      </mesh>
+      {Array.from({ length: 8 }, (_, i) => {
+        const unghi = (i / 8) * Math.PI * 2;
+        return <mesh key={i} position={[Math.cos(unghi) * 15, 1.25, Math.sin(unghi) * 15]} rotation={[0, -unghi, 0]}>
+          <boxGeometry args={[4.2, 2.6, 5.8]} />
+          <meshStandardMaterial color={i % 2 ? "#42545a" : "#675b4d"} metalness={0.79} roughness={0.43} />
+        </mesh>;
+      })}
+      <mesh ref={nucleu} position={[0, 3.8, 0]} scale={[3.8, 5.4, 3.8]}>
         <octahedronGeometry args={[1, 0]} />
-        <meshStandardMaterial color="#72eadb" emissive="#37a69c" emissiveIntensity={1.9} metalness={0.5} roughness={0.25} />
+        <meshStandardMaterial color="#e3bc72" emissive="#b87828" emissiveIntensity={1.7} metalness={0.55} roughness={0.3} />
       </mesh>
-      <pointLight color="#82f5dd" intensity={7} distance={38} />
+      <pointLight color="#f1ba76" intensity={7} distance={42} />
     </group>
   );
 }
@@ -141,6 +210,9 @@ export default function ZonaPirata({ tema, colectate = new Set(), onAlegeTinta }
           <PereteMineral zid={zid} culoare={zona.culoare} index={index} />
           <CeataPirata zid={zid} culoare={zona.ceata} index={index} />
         </group>
+      ))}
+      {zona.nori.map((nor, index) => (
+        <CeataPirata key={`nor-${tema}-${index}`} zid={nor} culoare={zona.ceata} index={zona.ziduri.length + index} densitate={0.74} />
       ))}
       <Steluțe tema={tema} colectate={colectate} onAlegeTinta={onAlegeTinta} />
       {zona.schimb && <RafinariaPaladiu onAlegeTinta={onAlegeTinta} />}

@@ -1790,10 +1790,10 @@ canvas {
 .harta-mini-zid-pirat {
   position: absolute;
   transform: translate(-50%, -50%);
-  border: 1px solid rgba(169, 233, 220, 0.6);
-  border-radius: 4px;
-  background: linear-gradient(110deg, rgba(16, 29, 42, 0.92), rgba(67, 101, 113, 0.75), rgba(13, 18, 33, 0.92));
-  box-shadow: 0 0 8px rgba(86, 222, 208, 0.36);
+  border: 1px solid var(--zid-culoare, #78a5a3);
+  clip-path: polygon(3% 10%, 18% 0, 40% 7%, 60% 0, 78% 8%, 98% 3%, 100% 78%, 85% 100%, 60% 92%, 39% 100%, 16% 91%, 0 98%);
+  background: linear-gradient(115deg, #11161f, #34404c 48%, #0b0f18);
+  box-shadow: 0 0 7px var(--zid-culoare, #78a5a3);
   pointer-events: none;
 }
 

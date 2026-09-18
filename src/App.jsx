@@ -1082,7 +1082,7 @@ export default function App() {
   }, [hartaActiva]);
 
   const schimbaPaladiu = useCallback(() => {
-    if (hartaActiva !== "sector53") return;
+    if (hartaActiva !== "sector52") return;
     if (Math.hypot(pozitieJucator[0], pozitieJucator[2]) > 36) {
       alegeTinta({ x: 0, z: 0 });
       setAmenintare("deplasare spre schimbul de paladiu");
@@ -1117,7 +1117,7 @@ export default function App() {
   const sectorNou = SECTOARE_NOI[hartaActiva] ?? null;
   const labirintPirata = LABIRINT_PIRAT[hartaActiva] ?? null;
   const paladiuVizibil = (PUNCTE_PALADIU[hartaActiva] ?? []).filter((p) => !paladiuColectat.has(p.id));
-  const langaSchimb = hartaActiva === "sector53" && Math.hypot(pozitieJucator[0], pozitieJucator[2]) <= 36;
+  const langaSchimb = hartaActiva === "sector52" && Math.hypot(pozitieJucator[0], pozitieJucator[2]) <= 36;
   const esteAether = hartaActiva === "aether";
   const esteStandard = hartaActiva === "standard";
   const fundalJoc = sectorNou
@@ -1495,12 +1495,12 @@ export default function App() {
             <span>✦ Paladiu: <strong>{paladiu}</strong></span>
             <span>◇ Energie: <strong>{energieGalactica}</strong></span>
           </div>
-          {hartaActiva === "sector53" ? (
+          {hartaActiva === "sector52" ? (
             <button type="button" className="panou-paladiu-schimb" onClick={schimbaPaladiu}>
               {langaSchimb ? `Schimbă ${PALADIU_PENTRU_ENERGIE} paladiu → 1 energie` : "Mergi la schimbul de paladiu"}
             </button>
           ) : (
-            <span className="panou-paladiu-indiciu">Schimbul se află în 5-3.</span>
+            <span className="panou-paladiu-indiciu">Schimbul se află la baza piraților din 5-2.</span>
           )}
         </div>
       )}
