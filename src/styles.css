@@ -1152,126 +1152,6 @@ canvas {
   box-shadow: none;
 }
 
-.hud-grup-sus-dreapta {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  z-index: 65;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.buton-setari-joc {
-  position: static;
-  z-index: 61;
-  flex: none;
-  width: 52px;
-  height: 48px;
-  display: grid;
-  place-content: center;
-  gap: 1px;
-  border: 1px solid rgba(94, 226, 255, 0.62);
-  border-radius: 7px;
-  color: #c9f8ff;
-  background: linear-gradient(145deg, rgba(7, 31, 44, 0.95), rgba(7, 10, 24, 0.95));
-  box-shadow: 0 0 18px rgba(38, 206, 255, 0.2), inset 0 0 14px rgba(67, 221, 255, 0.08);
-  cursor: pointer;
-}
-
-.buton-setari-joc span { font-size: 19px; line-height: 18px; }
-.buton-setari-joc small { color: #65d9f2; font-size: 7px; font-weight: 900; letter-spacing: 0.08em; }
-.buton-setari-joc:hover { border-color: #d7fbff; filter: brightness(1.18); }
-
-.setari-fundal {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  display: grid;
-  place-items: center;
-  padding: 18px;
-  background: radial-gradient(circle at 50% 45%, rgba(6, 28, 40, 0.44), rgba(0, 3, 9, 0.82));
-  backdrop-filter: blur(5px);
-}
-
-.setari-panou {
-  width: min(590px, calc(100vw - 28px));
-  max-height: min(720px, calc(100vh - 28px));
-  overflow: auto;
-  border: 1px solid rgba(85, 225, 255, 0.62);
-  border-radius: 14px;
-  color: #e5fbff;
-  background:
-    linear-gradient(145deg, rgba(17, 49, 62, 0.2), transparent 38%),
-    rgba(4, 10, 20, 0.975);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.66), 0 0 32px rgba(52, 213, 255, 0.15), inset 0 0 36px rgba(63, 204, 255, 0.05);
-}
-
-.setari-antet {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 20px 14px;
-  border-bottom: 1px solid rgba(90, 214, 240, 0.18);
-}
-.setari-antet small { color: #68d8ee; font-size: 9px; font-weight: 900; letter-spacing: 0.2em; }
-.setari-antet h2 { margin: 2px 0 0; font-size: 25px; letter-spacing: 0.03em; }
-.setari-antet button {
-  width: 36px; height: 36px; border: 1px solid rgba(124, 228, 244, 0.35); border-radius: 8px;
-  color: #dffaff; background: rgba(255, 255, 255, 0.035); font-size: 23px; cursor: pointer;
-}
-
-.setari-file { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px 18px 0; }
-.setari-file button {
-  padding: 11px; border: 1px solid rgba(100, 206, 225, 0.2); border-radius: 8px 8px 3px 3px;
-  color: rgba(221, 249, 255, 0.6); background: rgba(255, 255, 255, 0.025); font-weight: 850; cursor: pointer;
-}
-.setari-file button.activ {
-  color: #eaffff; border-color: rgba(84, 229, 255, 0.7);
-  background: linear-gradient(180deg, rgba(39, 178, 207, 0.28), rgba(19, 69, 91, 0.16));
-  box-shadow: inset 0 -2px #58e3ff;
-}
-
-.setari-continut { padding: 18px 20px 22px; }
-.setari-rand-comutator { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
-.setari-rand-comutator div { display: grid; gap: 4px; }
-.setari-rand-comutator strong { font-size: 15px; }
-.setari-rand-comutator small { color: rgba(210, 241, 247, 0.56); }
-.setari-comutator {
-  display: flex; align-items: center; gap: 7px; min-width: 93px; padding: 7px 9px;
-  border: 1px solid rgba(140, 156, 170, 0.42); border-radius: 20px; color: #8e9aa6;
-  background: rgba(255, 255, 255, 0.035); font-size: 9px; font-weight: 900; cursor: pointer;
-}
-.setari-comutator span { width: 19px; height: 19px; border-radius: 50%; background: #5f6872; box-shadow: inset 0 0 7px #242a31; }
-.setari-comutator.activ { color: #adfff1; border-color: #54d9bd; background: rgba(31, 170, 143, 0.15); }
-.setari-comutator.activ span { background: #63f0cf; box-shadow: 0 0 10px rgba(79, 243, 207, 0.72); }
-
-.setari-control-volum { display: grid; gap: 9px; margin: 17px 0; }
-.setari-control-volum > span { display: flex; justify-content: space-between; font-size: 13px; }
-.setari-control-volum b { color: #65e4ff; }
-.setari-control-volum input { width: 100%; accent-color: #4eddf4; cursor: pointer; }
-.setari-control-volum.dezactivat { opacity: 0.42; }
-.setari-nota { margin: 18px 0 0; color: rgba(202, 232, 239, 0.52); font-size: 11px; line-height: 1.55; }
-
-.setari-calitati { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; }
-.setari-calitati button {
-  display: grid; gap: 4px; padding: 13px; text-align: left; border: 1px solid rgba(103, 205, 224, 0.2);
-  border-radius: 9px; color: #c7dce1; background: rgba(255, 255, 255, 0.025); cursor: pointer;
-}
-.setari-calitati button span { font-weight: 900; }
-.setari-calitati button small { color: rgba(201, 231, 237, 0.47); }
-.setari-calitati button.activ {
-  color: #eeffff; border-color: #70e9ff;
-  background: linear-gradient(145deg, rgba(39, 181, 208, 0.27), rgba(31, 63, 94, 0.21));
-  box-shadow: 0 0 16px rgba(59, 217, 246, 0.13), inset 0 0 18px rgba(77, 225, 255, 0.06);
-}
-.setari-detalii-calitate { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 15px; }
-.setari-detalii-calitate span {
-  position: relative; padding-left: 17px; color: rgba(217, 246, 251, 0.68); font-size: 11px;
-}
-.setari-detalii-calitate span::before { content: "◆"; position: absolute; left: 0; color: #52dff4; font-size: 8px; }
-
 @media (max-width: 720px) {
   .buton-muzica-martiana {
     right: 8px;
@@ -1279,13 +1159,6 @@ canvas {
     width: 46px;
     height: 40px;
   }
-  .hud-grup-sus-dreapta { top: 8px; right: 8px; gap: 6px; }
-  .buton-setari-joc { width: 46px; height: 42px; }
-  .setari-fundal { padding: 8px; }
-  .setari-panou { width: calc(100vw - 16px); max-height: calc(100vh - 16px); }
-  .setari-antet { padding: 13px 14px 10px; }
-  .setari-continut { padding: 14px; }
-  .setari-calitati { grid-template-columns: 1fr; }
 }
 
 .harta-mini {
@@ -1324,11 +1197,7 @@ canvas {
 }
 
 .harta-mini-antet span:first-child {
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  flex: none;
 }
 
 .harta-mini-ruta {
@@ -1372,9 +1241,6 @@ canvas {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  container-type: inline-size;
-  container-name: harta-mini;
-  font-size: clamp(8.5px, 3.4cqw, 13px);
 }
 
 .harta-mini-corp-ceresc {
@@ -1392,9 +1258,8 @@ canvas {
 }
 
 .buton-fullscreen {
-  position: static;
+  position: fixed;
   z-index: 60;
-  flex: none;
   width: 48px;
   height: 48px;
   display: grid;
@@ -1408,9 +1273,13 @@ canvas {
   color: #7dffef;
   font-size: 16px;
   line-height: 1;
-  cursor: pointer;
+  cursor: grab;
   user-select: none;
   pointer-events: auto;
+}
+
+.buton-fullscreen:active {
+  cursor: grabbing;
 }
 
 .buton-nava-status {
@@ -1791,8 +1660,8 @@ canvas {
 
 .harta-mini-marker {
   position: absolute;
-  width: 0.7em;
-  height: 0.7em;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
@@ -1800,31 +1669,31 @@ canvas {
 
 .harta-mini-jucator {
   background: #7dffef;
-  box-shadow: 0 0 0.8em #7dffef;
+  box-shadow: 0 0 8px #7dffef;
   z-index: 2;
 }
 
 .harta-mini-inamic {
-  width: 0.5em;
-  height: 0.5em;
+  width: 5px;
+  height: 5px;
   background: #ff4d6d;
-  box-shadow: 0 0 0.6em #ff4d6d;
+  box-shadow: 0 0 6px #ff4d6d;
 }
 
 .harta-mini-tinta {
-  width: 0.9em;
-  height: 0.9em;
+  width: 9px;
+  height: 9px;
   background: transparent;
   border: 1px solid #ffd35a;
-  box-shadow: 0 0 0.8em #ffd35a;
+  box-shadow: 0 0 8px #ffd35a;
 }
 
 .harta-mini-statie,
 .harta-mini-hangar,
 .harta-mini-portal {
-  width: 1.1em;
-  height: 1.1em;
-  border-radius: 0.3em;
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
   pointer-events: auto;
   cursor: pointer;
   z-index: 3;
@@ -1850,12 +1719,12 @@ canvas {
 }
 
 .harta-mini-portal {
-  width: 1.3em;
-  height: 1.3em;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
   background: radial-gradient(circle, #6cf3ff 0 24%, #51338e 30% 55%, #120822 60%);
   border: 1px solid #bc8cff;
-  box-shadow: 0 0 0.5em #6cf3ff, 0 0 1em #a84dff;
+  box-shadow: 0 0 5px #6cf3ff, 0 0 10px #a84dff;
 }
 
 .harta-mini-portal-secundar {
@@ -1930,25 +1799,25 @@ canvas {
 
 .harta-mini-paladiu {
   position: absolute;
-  width: 0.6em;
-  height: 0.6em;
+  width: 6px;
+  height: 6px;
   transform: translate(-50%, -50%);
   clip-path: polygon(50% 0, 63% 36%, 100% 50%, 63% 64%, 50% 100%, 37% 64%, 0 50%, 37% 36%);
   background: #a6fff1;
-  box-shadow: 0 0 0.5em #7effe3;
+  box-shadow: 0 0 5px #7effe3;
   pointer-events: none;
   z-index: 1;
 }
 
 .harta-mini-schimb-paladiu {
   position: absolute;
-  width: 1.3em;
-  height: 1.3em;
+  width: 13px;
+  height: 13px;
   transform: translate(-50%, -50%);
   border: 2px solid #c1a3f9;
   border-radius: 50%;
   background: radial-gradient(circle, #a6ffec 0 20%, #251a44 50%, #8e67cf 80%);
-  box-shadow: 0 0 0.8em #8feddc;
+  box-shadow: 0 0 8px #8feddc;
   cursor: pointer;
   z-index: 3;
 }
@@ -2778,15 +2647,10 @@ canvas {
 
   .harta-mini {
     display: flex;
-    top: 58px !important;
+    top: 8px !important;
     right: 8px !important;
-    width: min(240px, calc(100vw - 16px)) !important;
+    width: min(220px, calc(100vw - 16px)) !important;
     height: 160px !important;
-  }
-
-  .harta-mini-antet {
-    font-size: 10px;
-    padding: 5px 8px;
   }
 }
 
