@@ -58,14 +58,14 @@ function CeataPirata({ zid, culoare, index, densitate = 1 }) {
   useFrame(({ clock }) => { if (material.current) material.current.uniforms.uTimp.value = clock.elapsedTime + index * 1.9; });
   return (
     <mesh position={[zid.x, 0.8, zid.z]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={6} raycast={() => null}>
-      <planeGeometry args={[zid.w + 116, zid.h + 116]} />
+      <planeGeometry args={[zid.w + 72, zid.h + 72]} />
       <shaderMaterial ref={material} uniforms={uniforme} vertexShader={vertexCeata} fragmentShader={fragmentCeata}
         transparent depthWrite={false} side={THREE.DoubleSide} />
     </mesh>
   );
 }
 
-function PereteMineral({ zid, culoare, index }) {
+function PereteMineral({ zid, culoare, paleta, index }) {
   const rociRef = useRef();
   const piscuriRef = useRef();
   const { fragmente, contur } = useMemo(() => {
@@ -114,12 +114,13 @@ function PereteMineral({ zid, culoare, index }) {
     const baza = new THREE.Color("#20252d");
     const accent = new THREE.Color(culoare);
     fragmente.forEach((piatra, i) => {
+      const culoarePiatra = new THREE.Color(paleta[(i + index) % paleta.length]);
       obiect.position.set(piatra.x, 0.25 + (i % 4) * 0.05, piatra.z);
       obiect.rotation.set(0.14 * Math.sin(i * 4.1), piatra.unghi, 0.12 * Math.cos(i * 3.3));
       obiect.scale.set(piatra.sx, 0.75 + (i % 4) * 0.16, piatra.sz);
       obiect.updateMatrix();
       rociRef.current.setMatrixAt(i, obiect.matrix);
-      rociRef.current.setColorAt(i, baza.clone().lerp(accent, 0.16 + (i % 7) * 0.055));
+      rociRef.current.setColorAt(i, baza.clone().lerp(culoarePiatra, 0.4 + (i % 4) * 0.08));
 
       obiect.position.set(piatra.x, piatra.inaltime * 0.5, piatra.z);
       obiect.rotation.set(0, piatra.unghi, 0);
@@ -130,13 +131,13 @@ function PereteMineral({ zid, culoare, index }) {
       );
       obiect.updateMatrix();
       piscuriRef.current.setMatrixAt(i, obiect.matrix);
-      piscuriRef.current.setColorAt(i, baza.clone().lerp(accent, 0.25 + (i % 6) * 0.055));
+      piscuriRef.current.setColorAt(i, baza.clone().lerp(culoarePiatra, 0.58 + (i % 4) * 0.08).lerp(accent, 0.08));
     });
     rociRef.current.instanceMatrix.needsUpdate = true;
     if (rociRef.current.instanceColor) rociRef.current.instanceColor.needsUpdate = true;
     piscuriRef.current.instanceMatrix.needsUpdate = true;
     if (piscuriRef.current.instanceColor) piscuriRef.current.instanceColor.needsUpdate = true;
-  }, [fragmente, culoare]);
+  }, [fragmente, culoare, paleta, index]);
   return (
     <group position={[zid.x, 0, zid.z]}>
       <mesh position={[0, -0.68, 0]} rotation={[-Math.PI / 2, 0, 0]} scale={[1.11, 1.11, 1]} raycast={() => null}>
@@ -161,14 +162,14 @@ function PereteMineral({ zid, culoare, index }) {
 
 function CeataLaNava({ tema, culoare, playerRef }) {
   const grup = useRef();
-  const uniforme = useMemo(() => Array.from({ length: 5 }, (_, index) => ({
+  const uniforme = useMemo(() => Array.from({ length: 4 }, (_, index) => ({
     uTimp: { value: index * 5.7 },
     uCuloare: { value: new THREE.Color(culoare).multiplyScalar(1.12) },
     uDensitate: { value: 0 },
   })), [culoare]);
   const pozitii = useMemo(() => [
-    [-25, 0, -14, 88, 60], [26, 0.15, -5, 74, 54], [-7, 0.3, 23, 93, 64],
-    [42, 0.45, 29, 62, 48], [-44, 0.6, 25, 70, 50],
+    [-35, 0, -12, 52, 36], [36, 0.12, 5, 48, 34],
+    [-15, 0.28, 34, 56, 38], [20, 0.42, -36, 50, 34],
   ], []);
 
   useFrame(({ clock }) => {
@@ -179,10 +180,12 @@ function CeataLaNava({ tema, culoare, playerRef }) {
     grup.current.visible = densitate > 0.025;
     if (!grup.current.visible) return;
     grup.current.position.set(x, 7.4, z);
-    grup.current.rotation.y = Math.sin(clock.elapsedTime * 0.13) * 0.18;
+    grup.current.rotation.y = Math.sin(clock.elapsedTime * 0.16) * 0.24;
+    grup.current.position.x += Math.sin(clock.elapsedTime * 0.38) * 4.5;
+    grup.current.position.z += Math.cos(clock.elapsedTime * 0.31) * 3.5;
     uniforme.forEach((set, index) => {
       set.uTimp.value = clock.elapsedTime + index * 4.9;
-      set.uDensitate.value = Math.min(1.35, densitate * (1.02 + index * 0.07));
+      set.uDensitate.value = Math.min(0.78, densitate * (0.62 + index * 0.045));
     });
   });
 
@@ -266,12 +269,12 @@ export default function ZonaPirata({ tema, colectate = new Set(), onAlegeTinta, 
     <group>
       {zona.ziduri.map((zid, index) => (
         <group key={`${tema}-${index}`}>
-          <PereteMineral zid={zid} culoare={zona.culoare} index={index} />
-          <CeataPirata zid={zid} culoare={zona.ceata} index={index} />
+          <PereteMineral zid={zid} culoare={zona.culoare} paleta={zona.culoriRelief} index={index} />
+          <CeataPirata zid={zid} culoare={zona.ceata} index={index} densitate={0.48} />
         </group>
       ))}
       {zona.nori.map((nor, index) => (
-        <CeataPirata key={`nor-${tema}-${index}`} zid={nor} culoare={zona.ceata} index={zona.ziduri.length + index} densitate={1.08} />
+        <CeataPirata key={`nor-${tema}-${index}`} zid={nor} culoare={zona.ceata} index={zona.ziduri.length + index} densitate={0.72} />
       ))}
       <CeataLaNava tema={tema} culoare={zona.ceata} playerRef={playerRef} />
       <Steluțe tema={tema} colectate={colectate} onAlegeTinta={onAlegeTinta} />

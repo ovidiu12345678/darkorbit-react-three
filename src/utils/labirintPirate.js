@@ -35,19 +35,19 @@ const ZIDURI_53 = [
 
 export const LABIRINT_PIRAT = {
   sector52: {
-    ziduri: ZIDURI_52, culoare: "#6e9f9b", ceata: "#83aaa9", schimb: [0, 0, 0],
+    ziduri: ZIDURI_52, culoare: "#3f8fa3", culoriRelief: ["#3fbf67", "#378dd8", "#c94343"], ceata: "#83aaa9", schimb: [0, 0, 0],
     nori: [
       { x: -335, z: -81, w: 310, h: 350 }, { x: -45, z: -385, w: 405, h: 215 },
       { x: 330, z: -202, w: 326, h: 351 }, { x: 345, z: 298, w: 344, h: 276 },
-      { x: -260, z: 340, w: 370, h: 253 }, { x: -15, z: 16, w: 385, h: 340 },
+      { x: -260, z: 340, w: 370, h: 253 },
     ],
   },
   sector53: {
-    ziduri: ZIDURI_53, culoare: "#827c98", ceata: "#9b9aa9", schimb: null,
+    ziduri: ZIDURI_53, culoare: "#666ca0", culoriRelief: ["#42b965", "#3a7ed1", "#c3484b"], ceata: "#9b9aa9", schimb: null,
     nori: [
       { x: -329, z: -333, w: 398, h: 265 }, { x: 233, z: -269, w: 390, h: 318 },
       { x: -237, z: 86, w: 407, h: 318 }, { x: 324, z: 219, w: 364, h: 318 },
-      { x: -104, z: 350, w: 420, h: 245 }, { x: 70, z: -20, w: 335, h: 284 },
+      { x: -104, z: 350, w: 420, h: 245 },
     ],
   },
 };
