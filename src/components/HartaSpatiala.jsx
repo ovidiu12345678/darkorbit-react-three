@@ -1062,14 +1062,12 @@ const STRATURI_PROFUNZIME = {
     { y: -1.5, factor: 0.6, grila: 28, sansa: 0.09, marime: 0.04, opacitate: 0.32, apropiere: 1.0 },
     { y: 8.0, factor: 2.6, grila: 19, sansa: 0.06, marime: 0.05, opacitate: 0.27, apropiere: 2.6 },
     { y: 30.0, factor: 6.0, grila: 13, sansa: 0.032, marime: 0.066, opacitate: 0.2, apropiere: 4.6, primPlan: true },
-    { y: 58.0, factor: 13.0, grila: 9, sansa: 0.018, marime: 0.088, opacitate: 0.13, apropiere: 7.0, primPlan: true },
   ],
   ultra: [
     { y: -2.2, factor: 0.01, grila: 42, sansa: 0.12, marime: 0.03, opacitate: 0.3, apropiere: 0 },
     { y: -1.5, factor: 0.5, grila: 32, sansa: 0.095, marime: 0.038, opacitate: 0.34, apropiere: 0.85 },
     { y: 6.0, factor: 1.9, grila: 22, sansa: 0.065, marime: 0.046, opacitate: 0.29, apropiere: 2.2 },
     { y: 20.0, factor: 4.2, grila: 15, sansa: 0.04, marime: 0.058, opacitate: 0.22, apropiere: 3.8, primPlan: true },
-    { y: 42.0, factor: 8.0, grila: 10, sansa: 0.022, marime: 0.072, opacitate: 0.16, apropiere: 6.0, primPlan: true },
     { y: 64.0, factor: 15.0, grila: 7, sansa: 0.012, marime: 0.095, opacitate: 0.11, apropiere: 9.0, primPlan: true },
   ],
 };
@@ -1175,12 +1173,10 @@ const STRATURI_NEBULOASA = {
   ],
   ridicata: [
     { y: -1.95, factor: 0.1, scara: 5.0, opacitate: 0.082 },
-    { y: -0.6, factor: 0.9, scara: 6.8, opacitate: 0.058 },
     { y: 48.0, factor: 7.0, scara: 20.0, opacitate: 0.028 },
   ],
   ultra: [
     { y: -2.0, factor: 0.06, scara: 5.4, opacitate: 0.092 },
-    { y: -0.5, factor: 0.95, scara: 7.2, opacitate: 0.072 },
     { y: 9.0, factor: 2.8, scara: 9.5, opacitate: 0.038 },
     { y: 58.0, factor: 9.5, scara: 24.0, opacitate: 0.02 },
   ],
