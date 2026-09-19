@@ -345,8 +345,8 @@ function PortalAether({
   );
 
   texturaPortal.colorSpace = THREE.SRGBColorSpace;
-  texturaPortal.generateMipmaps = true;
-  texturaPortal.minFilter = THREE.LinearMipmapLinearFilter;
+  texturaPortal.generateMipmaps = false;
+  texturaPortal.minFilter = THREE.LinearFilter;
   texturaPortal.magFilter = THREE.LinearFilter;
 
   useFrame(({ camera, clock }, delta) => {
@@ -1653,8 +1653,8 @@ export default function HartaSpatiala({
     texturaCorpuri.anisotropy = anisotropie;
     texturaCorpuri.wrapS = THREE.ClampToEdgeWrapping;
     texturaCorpuri.wrapT = THREE.ClampToEdgeWrapping;
-    texturaCorpuri.generateMipmaps = folosesteMipmaps;
-    texturaCorpuri.minFilter = folosesteMipmaps ? THREE.LinearMipmapLinearFilter : THREE.LinearFilter;
+    texturaCorpuri.generateMipmaps = false;
+    texturaCorpuri.minFilter = THREE.LinearFilter;
     texturaCorpuri.magFilter = THREE.LinearFilter;
     texturaCorpuri.needsUpdate = true;
   }, [texturaCorpuri, anisotropie, folosesteMipmaps]);
