@@ -993,6 +993,134 @@ function FundalDistant({ textura }) {
   );
 }
 
+const vertexCampStelar = `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const fragmentCampStelar = `
+  uniform vec2 uDeplasare;
+  uniform vec2 uDirectie;
+  uniform vec3 uCuloare;
+  uniform float uTimp;
+  uniform float uViteza;
+  uniform float uGrila;
+  uniform float uSansa;
+  uniform float uMarime;
+  uniform float uOpacitate;
+  uniform float uApropiere;
+  varying vec2 vUv;
+
+  float hash21(vec2 p) {
+    p = fract(p * vec2(123.34, 456.21));
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+  }
+
+  void main() {
+    vec2 coord = (vUv + uDeplasare) * vec2(uGrila * 1.38, uGrila);
+    vec2 celula = floor(coord);
+    vec2 local = fract(coord) - 0.5;
+    float samanta = hash21(celula);
+    if (samanta < 1.0 - uSansa) discard;
+
+    vec2 pozitieStea = vec2(hash21(celula + 2.7), hash21(celula + 8.9)) - 0.5;
+    vec2 delta = local - pozitieStea * 0.72;
+    vec2 directie = normalize(uDirectie + vec2(0.0001, 0.0001));
+    vec2 perpendiculara = vec2(-directie.y, directie.x);
+    float longitudinal = dot(delta, directie);
+    float lateral = dot(delta, perpendiculara);
+    float alungire = 1.0 + uViteza * (3.4 + uApropiere * 9.5);
+    float distanta = length(vec2(lateral, longitudinal / alungire));
+    float raza = uMarime * (0.62 + hash21(celula + 15.1) * 0.76);
+    float stea = 1.0 - smoothstep(raza * 0.2, raza, distanta);
+    float licarire = 0.72 + 0.28 * sin(uTimp * (1.2 + samanta * 2.7) + samanta * 24.0);
+    float halou = 1.0 - smoothstep(raza * 0.45, raza * 1.85, distanta);
+    vec3 culoare = uCuloare * (0.58 + samanta * 0.62);
+    float alpha = (stea * 0.72 + halou * 0.16) * licarire * uOpacitate;
+    gl_FragColor = vec4(culoare, alpha);
+    #include <colorspace_fragment>
+  }
+`;
+
+const STRATURI_STELE = [
+  { y: -2.3, factor: 0.02, grila: 30, sansa: 0.09, marime: 0.036, opacitate: 0.28, apropiere: 0 },
+  { y: -1.6, factor: 0.5, grila: 22, sansa: 0.08, marime: 0.045, opacitate: 0.3, apropiere: 1.2 },
+  { y: 8.0, factor: 2.2, grila: 15, sansa: 0.05, marime: 0.058, opacitate: 0.24, apropiere: 3.0 },
+  { y: 24.0, factor: 5.0, grila: 11, sansa: 0.03, marime: 0.07, opacitate: 0.18, apropiere: 5.0, primPlan: true },
+];
+
+function StratStelar({ configurare, playerRef, culoare, index }) {
+  const meshRef = useRef();
+  const ultimaPozitie = useRef(null);
+  const uniforme = useMemo(() => ({
+    uDeplasare: { value: new THREE.Vector2() },
+    uDirectie: { value: new THREE.Vector2(0, 1) },
+    uCuloare: { value: new THREE.Color(culoare) },
+    uTimp: { value: index * 2.7 },
+    uViteza: { value: 0 },
+    uGrila: { value: configurare.grila },
+    uSansa: { value: configurare.sansa },
+    uMarime: { value: configurare.marime },
+    uOpacitate: { value: configurare.opacitate },
+    uApropiere: { value: configurare.apropiere },
+  }), [configurare, culoare, index]);
+  const directiePrivire = useMemo(() => new THREE.Vector3(), []);
+  const centruVizibil = useMemo(() => new THREE.Vector3(), []);
+
+  useFrame(({ camera, clock }, delta) => {
+    if (!meshRef.current || !playerRef?.current) return;
+    camera.getWorldDirection(directiePrivire);
+    const distantaFundal = (configurare.y - camera.position.y) / Math.min(-0.001, directiePrivire.y);
+    centruVizibil.copy(camera.position).addScaledVector(directiePrivire, distantaFundal);
+    meshRef.current.position.set(centruVizibil.x, configurare.y, centruVizibil.z);
+
+    const x = playerRef.current.x;
+    const z = playerRef.current.z;
+    uniforme.uDeplasare.value.set(
+      (x / 260) * configurare.factor,
+      (-z / 190) * configurare.factor,
+    );
+    if (ultimaPozitie.current) {
+      const dx = x - ultimaPozitie.current.x;
+      const dz = z - ultimaPozitie.current.z;
+      const distanta = Math.hypot(dx, dz);
+      if (distanta > 0.0001 && distanta < 80) {
+        uniforme.uDirectie.value.lerp(new THREE.Vector2(dx / distanta, -dz / distanta), 0.18);
+        const viteza = Math.min(1, distanta / Math.max(0.016, delta) / 9);
+        uniforme.uViteza.value = THREE.MathUtils.lerp(uniforme.uViteza.value, viteza, 0.12);
+      } else {
+        uniforme.uViteza.value *= 0.88;
+      }
+    }
+    ultimaPozitie.current = { x, z };
+    uniforme.uTimp.value = clock.elapsedTime + index * 2.7;
+  });
+
+  return (
+    <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]} frustumCulled={false}
+      renderOrder={configurare.primPlan ? 88 : 1 + index} raycast={() => null}>
+      <planeGeometry args={[260, 190]} />
+      <shaderMaterial uniforms={uniforme} vertexShader={vertexCampStelar} fragmentShader={fragmentCampStelar}
+        transparent depthWrite={false} depthTest={!configurare.primPlan} blending={THREE.AdditiveBlending} />
+    </mesh>
+  );
+}
+
+function CampDeStele({ playerRef, culoare = "#bdefff" }) {
+  return (
+    <>
+      {STRATURI_STELE.map((configurare, index) => (
+        <StratStelar key={`stele-${index}`} configurare={configurare}
+          playerRef={playerRef} culoare={culoare} index={index} />
+      ))}
+    </>
+  );
+}
+
 function generatorDeterminist(samanta) {
   let stare = samanta >>> 0;
   return () => {
@@ -1425,6 +1553,7 @@ export default function HartaSpatiala({
   return (
     <group>
       <FundalDistant textura={texturaHarta} />
+      <CampDeStele playerRef={playerRef} />
       <DecorSpatialUnic
         marimeHarta={marimeHarta}
         temaAether={doarPortal}
