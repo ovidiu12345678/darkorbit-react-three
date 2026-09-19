@@ -1455,7 +1455,7 @@ export default function HartaSpatiala({
         temaSectorNou={SECTOARE_NOI[temaHarta] ? temaHarta : null}
       />
       {(temaHarta === "sector52" || temaHarta === "sector53") && (
-        <ZonaPirata tema={temaHarta} colectate={paladiuColectat} onAlegeTinta={onAlegeTinta} />
+        <ZonaPirata tema={temaHarta} colectate={paladiuColectat} onAlegeTinta={onAlegeTinta} playerRef={playerRef} />
       )}
 
       <mesh

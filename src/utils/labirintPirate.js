@@ -1,18 +1,20 @@
 // Pereți de asteroizi fragmentați; culoarele, baza centrală și portalurile rămân libere.
 const ZIDURI_52 = [
-  { x: -402, z: -316, w: 42, h: 286 },
-  { x: -402, z: 111, w: 48, h: 452 },
-  { x: -256, z: -407, w: 238, h: 43 },
-  { x: -213, z: -142, w: 42, h: 310 },
-  { x: -213, z: 345, w: 46, h: 252 },
-  { x: -61, z: 392, w: 214, h: 42 },
-  { x: -35, z: -338, w: 220, h: 45 },
-  { x: 177, z: -315, w: 47, h: 354 },
-  { x: 177, z: 250, w: 43, h: 300 },
-  { x: 338, z: -418, w: 238, h: 41 },
-  { x: 398, z: -110, w: 45, h: 342 },
-  { x: 398, z: 369, w: 43, h: 181 },
-  { x: 312, z: 145, w: 191, h: 42 },
+  // Contur exterior fragmentat, cu intrări largi ca în zona piraților.
+  { x: -401, z: -300, w: 44, h: 290 }, { x: -401, z: 128, w: 46, h: 360 },
+  { x: -278, z: -420, w: 205, h: 44 }, { x: 62, z: -420, w: 242, h: 44 },
+  { x: 369, z: -349, w: 197, h: 44 }, { x: 434, z: -152, w: 44, h: 181 },
+  { x: 434, z: 201, w: 44, h: 219 }, { x: 342, z: 420, w: 230, h: 44 },
+  { x: -47, z: 420, w: 272, h: 44 }, { x: -335, z: 377, w: 142, h: 44 },
+  // Potcoava centrală: deschisă spre dreapta, cu baza piraților în interior.
+  { x: -98, z: -145, w: 90, h: 38 }, { x: -15, z: -162, w: 92, h: 38 },
+  { x: 70, z: -145, w: 80, h: 38 }, { x: -143, z: -103, w: 40, h: 78 },
+  { x: -162, z: -31, w: 40, h: 76 }, { x: -162, z: 50, w: 40, h: 76 },
+  { x: -140, z: 119, w: 40, h: 67 }, { x: -91, z: 151, w: 78, h: 38 },
+  { x: -12, z: 166, w: 88, h: 38 }, { x: 72, z: 147, w: 78, h: 38 },
+  // Două creste secundare care creează traseul de labirint.
+  { x: -281, z: -146, w: 42, h: 196 }, { x: -271, z: 218, w: 42, h: 166 },
+  { x: 276, z: -216, w: 42, h: 198 }, { x: 276, z: 143, w: 42, h: 170 },
 ];
 
 const ZIDURI_53 = [
@@ -35,20 +37,31 @@ export const LABIRINT_PIRAT = {
   sector52: {
     ziduri: ZIDURI_52, culoare: "#6e9f9b", ceata: "#83aaa9", schimb: [0, 0, 0],
     nori: [
-      { x: -320, z: -82, w: 258, h: 280 }, { x: -36, z: -395, w: 330, h: 170 },
-      { x: 334, z: -200, w: 253, h: 292 }, { x: 355, z: 305, w: 280, h: 204 },
-      { x: -267, z: 351, w: 290, h: 187 },
+      { x: -335, z: -81, w: 310, h: 350 }, { x: -45, z: -385, w: 405, h: 215 },
+      { x: 330, z: -202, w: 326, h: 351 }, { x: 345, z: 298, w: 344, h: 276 },
+      { x: -260, z: 340, w: 370, h: 253 }, { x: -15, z: 16, w: 385, h: 340 },
     ],
   },
   sector53: {
     ziduri: ZIDURI_53, culoare: "#827c98", ceata: "#9b9aa9", schimb: null,
     nori: [
-      { x: -329, z: -333, w: 331, h: 204 }, { x: 233, z: -269, w: 325, h: 251 },
-      { x: -237, z: 86, w: 337, h: 251 }, { x: 324, z: 219, w: 294, h: 253 },
-      { x: -104, z: 350, w: 350, h: 189 },
+      { x: -329, z: -333, w: 398, h: 265 }, { x: 233, z: -269, w: 390, h: 318 },
+      { x: -237, z: 86, w: 407, h: 318 }, { x: 324, z: 219, w: 364, h: 318 },
+      { x: -104, z: 350, w: 420, h: 245 }, { x: 70, z: -20, w: 335, h: 284 },
     ],
   },
 };
+
+export function densitateCeataPirata(tema, x, z) {
+  const zona = LABIRINT_PIRAT[tema];
+  if (!zona?.nori?.length) return 0;
+  let densitate = 0;
+  for (const nor of zona.nori) {
+    const distanta = Math.hypot((x - nor.x) / (nor.w * 0.5), (z - nor.z) / (nor.h * 0.5));
+    if (distanta < 1) densitate = Math.max(densitate, Math.min(1, (1 - distanta) * 2.35));
+  }
+  return densitate;
+}
 
 export function punctBlocat(x, z, ziduri, marja = 8) {
   return ziduri.some(({ x: cx, z: cz, w, h }) =>
