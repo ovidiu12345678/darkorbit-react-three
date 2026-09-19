@@ -1047,10 +1047,8 @@ const fragmentCampStelar = `
 `;
 
 const STRATURI_STELE = [
-  { y: -2.3, factor: 0.02, grila: 30, sansa: 0.09, marime: 0.036, opacitate: 0.28, apropiere: 0 },
-  { y: -1.6, factor: 0.5, grila: 22, sansa: 0.08, marime: 0.045, opacitate: 0.3, apropiere: 1.2 },
-  { y: 8.0, factor: 2.2, grila: 15, sansa: 0.05, marime: 0.058, opacitate: 0.24, apropiere: 3.0 },
-  { y: 24.0, factor: 5.0, grila: 11, sansa: 0.03, marime: 0.07, opacitate: 0.18, apropiere: 5.0, primPlan: true },
+  { y: -2.3, factor: 0.05, grila: 26, sansa: 0.08, marime: 0.04, opacitate: 0.3, apropiere: 0.6 },
+  { y: 10.0, factor: 2.6, grila: 13, sansa: 0.035, marime: 0.062, opacitate: 0.2, apropiere: 3.6, primPlan: true },
 ];
 
 function StratStelar({ configurare, playerRef, culoare, index }) {
@@ -1103,7 +1101,7 @@ function StratStelar({ configurare, playerRef, culoare, index }) {
   return (
     <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]} frustumCulled={false}
       renderOrder={configurare.primPlan ? 88 : 1 + index} raycast={() => null}>
-      <planeGeometry args={[260, 190]} />
+      <planeGeometry args={[LATIME_FUNDAL_VIZIBIL, INALTIME_FUNDAL_VIZIBIL]} />
       <shaderMaterial uniforms={uniforme} vertexShader={vertexCampStelar} fragmentShader={fragmentCampStelar}
         transparent depthWrite={false} depthTest={!configurare.primPlan} blending={THREE.AdditiveBlending} />
     </mesh>
