@@ -1,4 +1,4 @@
-import { useFrame, useLoader } from "@react-three/fiber";
+import { useFrame, useLoader, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { CORPURI_KHARON } from "../corpuriKharon.js";
@@ -931,7 +931,7 @@ const fragmentShaderFundal = `
 const LATIME_FUNDAL_VIZIBIL = 220;
 const INALTIME_FUNDAL_VIZIBIL = 160;
 
-function FundalDistant({ textura }) {
+function FundalDistant({ textura, nivelCalitate = "ridicata" }) {
   const fundalRef = useRef();
   const texturaPanorama = useMemo(() => textura.clone(), [textura]);
   const directiePrivire = useMemo(() => new THREE.Vector3(), []);
@@ -965,12 +965,13 @@ function FundalDistant({ textura }) {
     fundalRef.current.position.x = centruVizibil.x;
     fundalRef.current.position.z = centruVizibil.z;
 
+    const factorParallax = nivelCalitate === "ultra" ? 0.055 : nivelCalitate === "ridicata" ? 0.075 : nivelCalitate === "medie" ? 0.12 : 0.2;
     texturaPanorama.offset.x = THREE.MathUtils.euclideanModulo(
-      0.44 + centruVizibil.x / LATIME_FUNDAL_VIZIBIL,
+      0.44 + (centruVizibil.x / LATIME_FUNDAL_VIZIBIL) * factorParallax,
       2
     );
     texturaPanorama.offset.y = THREE.MathUtils.euclideanModulo(
-      0.04 - centruVizibil.z / INALTIME_FUNDAL_VIZIBIL,
+      0.04 - (centruVizibil.z / INALTIME_FUNDAL_VIZIBIL) * factorParallax,
       2
     );
   });
@@ -990,6 +991,246 @@ function FundalDistant({ textura }) {
         depthWrite={false}
       />
     </mesh>
+  );
+}
+
+const vertexProfunzime = `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const fragmentProfunzime = `
+  uniform vec2 uDeplasare;
+  uniform vec2 uDirectie;
+  uniform vec3 uCuloare;
+  uniform float uTimp;
+  uniform float uViteza;
+  uniform float uGrila;
+  uniform float uSansa;
+  uniform float uMarime;
+  uniform float uOpacitate;
+  uniform float uApropiere;
+  varying vec2 vUv;
+
+  float hash21(vec2 p) {
+    p = fract(p * vec2(123.34, 456.21));
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+  }
+
+  void main() {
+    vec2 coord = (vUv + uDeplasare) * vec2(uGrila * 1.38, uGrila);
+    vec2 celula = floor(coord);
+    vec2 local = fract(coord) - 0.5;
+    float samanta = hash21(celula);
+    if (samanta < 1.0 - uSansa) discard;
+
+    vec2 pozitieStea = vec2(hash21(celula + 2.7), hash21(celula + 8.9)) - 0.5;
+    vec2 delta = local - pozitieStea * 0.72;
+    vec2 directie = normalize(uDirectie + vec2(0.0001, 0.0001));
+    vec2 perpendiculara = vec2(-directie.y, directie.x);
+    float longitudinal = dot(delta, directie);
+    float lateral = dot(delta, perpendiculara);
+    float alungire = 1.0 + uViteza * (3.4 + uApropiere * 9.5);
+    float distanta = length(vec2(lateral, longitudinal / alungire));
+    float raza = uMarime * (0.62 + hash21(celula + 15.1) * 0.76);
+    float stea = 1.0 - smoothstep(raza * 0.2, raza, distanta);
+    float licarire = 0.72 + 0.28 * sin(uTimp * (1.2 + samanta * 2.7) + samanta * 24.0);
+    float halou = 1.0 - smoothstep(raza * 0.45, raza * 1.85, distanta);
+    vec3 culoare = uCuloare * (0.58 + samanta * 0.62);
+    float alpha = (stea * 0.72 + halou * 0.16) * licarire * uOpacitate;
+    gl_FragColor = vec4(culoare, alpha);
+    #include <colorspace_fragment>
+  }
+`;
+
+const STRATURI_PROFUNZIME = {
+  scazuta: [
+    { y: -2.08, factor: 0.035, grila: 24, sansa: 0.1, marime: 0.038, opacitate: 0.26, apropiere: 0 },
+  ],
+  medie: [
+    { y: -2.2, factor: 0.02, grila: 31, sansa: 0.1, marime: 0.035, opacitate: 0.28, apropiere: 0 },
+    { y: -1.5, factor: 0.55, grila: 23, sansa: 0.085, marime: 0.044, opacitate: 0.3, apropiere: 1.3 },
+    { y: 9.0, factor: 2.4, grila: 16, sansa: 0.05, marime: 0.058, opacitate: 0.24, apropiere: 3.2 },
+    { y: 26.0, factor: 5.5, grila: 12, sansa: 0.03, marime: 0.072, opacitate: 0.18, apropiere: 5.5, primPlan: true },
+  ],
+  ridicata: [
+    { y: -2.2, factor: 0.014, grila: 36, sansa: 0.11, marime: 0.032, opacitate: 0.29, apropiere: 0 },
+    { y: -1.5, factor: 0.6, grila: 28, sansa: 0.09, marime: 0.04, opacitate: 0.32, apropiere: 1.0 },
+    { y: 8.0, factor: 2.6, grila: 19, sansa: 0.06, marime: 0.05, opacitate: 0.27, apropiere: 2.6 },
+    { y: 30.0, factor: 6.0, grila: 13, sansa: 0.032, marime: 0.066, opacitate: 0.2, apropiere: 4.6, primPlan: true },
+  ],
+  ultra: [
+    { y: -2.2, factor: 0.01, grila: 42, sansa: 0.12, marime: 0.03, opacitate: 0.3, apropiere: 0 },
+    { y: -1.5, factor: 0.5, grila: 32, sansa: 0.095, marime: 0.038, opacitate: 0.34, apropiere: 0.85 },
+    { y: 6.0, factor: 1.9, grila: 22, sansa: 0.065, marime: 0.046, opacitate: 0.29, apropiere: 2.2 },
+    { y: 20.0, factor: 4.2, grila: 15, sansa: 0.04, marime: 0.058, opacitate: 0.22, apropiere: 3.8, primPlan: true },
+    { y: 64.0, factor: 15.0, grila: 7, sansa: 0.012, marime: 0.095, opacitate: 0.11, apropiere: 9.0, primPlan: true },
+  ],
+};
+
+function StratProfunzime({ configurare, playerRef, culoare, index }) {
+  const meshRef = useRef();
+  const ultimaPozitie = useRef(null);
+  const uniforme = useMemo(() => ({
+    uDeplasare: { value: new THREE.Vector2() },
+    uDirectie: { value: new THREE.Vector2(0, 1) },
+    uCuloare: { value: new THREE.Color(culoare) },
+    uTimp: { value: index * 2.7 },
+    uViteza: { value: 0 },
+    uGrila: { value: configurare.grila },
+    uSansa: { value: configurare.sansa },
+    uMarime: { value: configurare.marime },
+    uOpacitate: { value: configurare.opacitate },
+    uApropiere: { value: configurare.apropiere },
+  }), [configurare, culoare, index]);
+  const directiePrivire = useMemo(() => new THREE.Vector3(), []);
+  const centruVizibil = useMemo(() => new THREE.Vector3(), []);
+
+  useFrame(({ camera, clock }, delta) => {
+    if (!meshRef.current || !playerRef?.current) return;
+    camera.getWorldDirection(directiePrivire);
+    const distantaFundal = (configurare.y - camera.position.y) / Math.min(-0.001, directiePrivire.y);
+    centruVizibil.copy(camera.position).addScaledVector(directiePrivire, distantaFundal);
+    meshRef.current.position.set(centruVizibil.x, configurare.y, centruVizibil.z);
+
+    const x = playerRef.current.x;
+    const z = playerRef.current.z;
+    uniforme.uDeplasare.value.set(
+      (x / 260) * configurare.factor,
+      (-z / 190) * configurare.factor,
+    );
+    if (ultimaPozitie.current) {
+      const dx = x - ultimaPozitie.current.x;
+      const dz = z - ultimaPozitie.current.z;
+      const distanta = Math.hypot(dx, dz);
+      if (distanta > 0.0001 && distanta < 80) {
+        uniforme.uDirectie.value.lerp(new THREE.Vector2(dx / distanta, -dz / distanta), 0.18);
+        const viteza = Math.min(1, distanta / Math.max(0.016, delta) / 9);
+        uniforme.uViteza.value = THREE.MathUtils.lerp(uniforme.uViteza.value, viteza, 0.12);
+      } else {
+        uniforme.uViteza.value *= 0.88;
+      }
+    }
+    ultimaPozitie.current = { x, z };
+    uniforme.uTimp.value = clock.elapsedTime + index * 2.7;
+  });
+
+  return (
+    <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]} frustumCulled={false}
+      renderOrder={configurare.primPlan ? 88 : 3 + index} raycast={() => null}>
+      <planeGeometry args={[260, 190]} />
+      <shaderMaterial uniforms={uniforme} vertexShader={vertexProfunzime} fragmentShader={fragmentProfunzime}
+        transparent depthWrite={false} depthTest={!configurare.primPlan} blending={THREE.AdditiveBlending} />
+    </mesh>
+  );
+}
+
+const fragmentNebuloasaParallax = `
+  uniform vec2 uDeplasare;
+  uniform vec3 uCuloare;
+  uniform float uTimp;
+  uniform float uScara;
+  uniform float uOpacitate;
+  varying vec2 vUv;
+
+  float hashNeb(vec2 p) {
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+  }
+  float zgomotNeb(vec2 p) {
+    vec2 i = floor(p), f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hashNeb(i), hashNeb(i + vec2(1.0, 0.0)), f.x),
+      mix(hashNeb(i + vec2(0.0, 1.0)), hashNeb(i + vec2(1.0, 1.0)), f.x), f.y);
+  }
+  float fbmNeb(vec2 p) {
+    float valoare = 0.0;
+    valoare += zgomotNeb(p) * 0.55;
+    valoare += zgomotNeb(p * 2.03 + 4.7) * 0.29;
+    valoare += zgomotNeb(p * 4.11 - 8.2) * 0.16;
+    return valoare;
+  }
+  void main() {
+    vec2 p = (vUv - 0.5) * vec2(1.45, 1.0) * uScara + uDeplasare;
+    p += vec2(uTimp * 0.006, -uTimp * 0.004);
+    float nor = fbmNeb(p);
+    float goluri = fbmNeb(p * 0.61 - 12.4);
+    float forma = smoothstep(0.5, 0.82, nor) * smoothstep(0.28, 0.72, goluri);
+    vec3 culoare = uCuloare * mix(0.22, 0.72, nor);
+    gl_FragColor = vec4(culoare, forma * uOpacitate);
+    #include <colorspace_fragment>
+  }
+`;
+
+const STRATURI_NEBULOASA = {
+  scazuta: [],
+  medie: [
+    { y: -1.9, factor: 0.15, scara: 4.6, opacitate: 0.078 },
+    { y: 14.0, factor: 2.2, scara: 11.0, opacitate: 0.04 },
+  ],
+  ridicata: [
+    { y: -1.95, factor: 0.1, scara: 5.0, opacitate: 0.082 },
+    { y: 48.0, factor: 7.0, scara: 20.0, opacitate: 0.028 },
+  ],
+  ultra: [
+    { y: -2.0, factor: 0.06, scara: 5.4, opacitate: 0.092 },
+    { y: 9.0, factor: 2.8, scara: 9.5, opacitate: 0.038 },
+    { y: 58.0, factor: 9.5, scara: 24.0, opacitate: 0.02 },
+  ],
+};
+
+function StratNebuloasaParallax({ configurare, playerRef, culoare, index }) {
+  const meshRef = useRef();
+  const directiePrivire = useMemo(() => new THREE.Vector3(), []);
+  const centruVizibil = useMemo(() => new THREE.Vector3(), []);
+  const uniforme = useMemo(() => ({
+    uDeplasare: { value: new THREE.Vector2() },
+    uCuloare: { value: new THREE.Color(culoare).offsetHSL(index % 2 ? 0.045 : -0.025, -0.08, -0.05) },
+    uTimp: { value: index * 8.1 },
+    uScara: { value: configurare.scara },
+    uOpacitate: { value: configurare.opacitate },
+  }), [configurare, culoare, index]);
+
+  useFrame(({ camera, clock }) => {
+    if (!meshRef.current || !playerRef?.current) return;
+    camera.getWorldDirection(directiePrivire);
+    const distantaFundal = (configurare.y - camera.position.y) / Math.min(-0.001, directiePrivire.y);
+    centruVizibil.copy(camera.position).addScaledVector(directiePrivire, distantaFundal);
+    meshRef.current.position.set(centruVizibil.x, configurare.y, centruVizibil.z);
+    uniforme.uDeplasare.value.set(
+      (playerRef.current.x / 310) * configurare.factor,
+      (-playerRef.current.z / 230) * configurare.factor,
+    );
+    uniforme.uTimp.value = clock.elapsedTime + index * 8.1;
+  });
+
+  return (
+    <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]} frustumCulled={false}
+      renderOrder={2 + index} raycast={() => null}>
+      <planeGeometry args={[315, 235]} />
+      <shaderMaterial uniforms={uniforme} vertexShader={vertexProfunzime} fragmentShader={fragmentNebuloasaParallax}
+        transparent depthWrite={false} blending={THREE.AdditiveBlending} />
+    </mesh>
+  );
+}
+
+function ProfunzimeSpatiala({ nivelCalitate, playerRef, culoare }) {
+  const straturi = STRATURI_PROFUNZIME[nivelCalitate] ?? STRATURI_PROFUNZIME.ridicata;
+  const nebuloase = STRATURI_NEBULOASA[nivelCalitate] ?? STRATURI_NEBULOASA.ridicata;
+  return (
+    <>
+      {nebuloase.map((configurare, index) => (
+        <StratNebuloasaParallax key={`neb-${nivelCalitate}-${index}`} configurare={configurare}
+          playerRef={playerRef} culoare={culoare} index={index} />
+      ))}
+      {straturi.map((configurare, index) => (
+        <StratProfunzime key={`stele-${nivelCalitate}-${index}`} configurare={configurare}
+          playerRef={playerRef} culoare={culoare} index={index} />
+      ))}
+    </>
   );
 }
 
@@ -1316,7 +1557,7 @@ function CorpuriCerestiUnice({
           textura={textura}
           definitie={definitie}
           limitaHarta={limitaHarta}
-          alphaTransparent={Boolean(temaSectorNou) || temaKharon || temaFlota || temaVerdant || temaNeridia || temaFrontiera15 || temaFrontiera16 || temaFrontiera17 || temaFrontiera18}
+          alphaTransparent
         />
       ))}
     </group>
@@ -1346,6 +1587,7 @@ export default function HartaSpatiala({
   imaginePortalTertiar,
   temaPortalTertiar = "aether",
   temaHarta = "standard",
+  nivelCalitate = "ridicata",
   doarPortal = false,
   paladiuColectat = new Set(),
   onTransportAether,
@@ -1356,9 +1598,21 @@ export default function HartaSpatiala({
   semnalTransportSecundar = 0,
   semnalTransportTertiar = 0,
 }) {
+  const { gl } = useThree();
   const latimeHarta = marimeHarta * (16 / 9);
   const inaltimeHarta = marimeHarta;
   const factorScalare = marimeHarta / 210;
+  const culoareProfunzime = SECTOARE_NOI[temaHarta]?.culoare
+    ?? (temaHarta === "frontiera18" ? "#ffd0dc"
+      : temaHarta === "frontiera17" ? "#ffe0b4"
+        : temaHarta === "frontiera16" ? "#ffc1a2"
+          : temaHarta === "frontiera15" ? "#c5d7ff"
+            : temaHarta === "neridia" ? "#a9ffe0"
+              : temaHarta === "verdant" ? "#9bffc5"
+                : temaHarta === "flota" ? "#ff9a79"
+                  : temaHarta === "kharon" ? "#ff806d"
+                    : temaHarta === "noctis" ? "#ffd29b"
+                      : temaHarta === "aether" ? "#e4c2ff" : "#bdefff");
 
   const [texturaHarta, texturaCorpuri] = useLoader(
     THREE.TextureLoader,
@@ -1367,29 +1621,39 @@ export default function HartaSpatiala({
       `${import.meta.env.BASE_URL}${imagineCorpuri}`,
     ]
   );
+  const anisotropieMaxima = gl.capabilities.getMaxAnisotropy();
+  const anisotropie = nivelCalitate === "ultra"
+    ? anisotropieMaxima
+    : nivelCalitate === "ridicata"
+      ? Math.min(8, anisotropieMaxima)
+      : nivelCalitate === "medie"
+        ? Math.min(4, anisotropieMaxima)
+        : 1;
+  const folosesteMipmaps = nivelCalitate !== "scazuta";
 
   useEffect(() => {
     texturaHarta.colorSpace = THREE.SRGBColorSpace;
-    texturaHarta.anisotropy = 8;
+    texturaHarta.anisotropy = anisotropie;
     texturaHarta.wrapS = THREE.ClampToEdgeWrapping;
     texturaHarta.wrapT = THREE.ClampToEdgeWrapping;
     texturaHarta.repeat.set(1, 1);
     texturaHarta.offset.set(0, 0);
-    texturaHarta.generateMipmaps = true;
-    texturaHarta.minFilter = THREE.LinearMipmapLinearFilter;
+    texturaHarta.generateMipmaps = folosesteMipmaps;
+    texturaHarta.minFilter = folosesteMipmaps ? THREE.LinearMipmapLinearFilter : THREE.LinearFilter;
     texturaHarta.magFilter = THREE.LinearFilter;
     texturaHarta.needsUpdate = true;
-  }, [texturaHarta]);
+  }, [texturaHarta, anisotropie, folosesteMipmaps]);
 
   useEffect(() => {
     texturaCorpuri.colorSpace = THREE.SRGBColorSpace;
-    texturaCorpuri.anisotropy = 16;
+    texturaCorpuri.anisotropy = anisotropie;
     texturaCorpuri.wrapS = THREE.ClampToEdgeWrapping;
     texturaCorpuri.wrapT = THREE.ClampToEdgeWrapping;
-    texturaCorpuri.minFilter = THREE.LinearMipmapLinearFilter;
+    texturaCorpuri.generateMipmaps = folosesteMipmaps;
+    texturaCorpuri.minFilter = folosesteMipmaps ? THREE.LinearMipmapLinearFilter : THREE.LinearFilter;
     texturaCorpuri.magFilter = THREE.LinearFilter;
     texturaCorpuri.needsUpdate = true;
-  }, [texturaCorpuri]);
+  }, [texturaCorpuri, anisotropie, folosesteMipmaps]);
 
   const geometrie = useMemo(
     () => new THREE.PlaneGeometry(latimeHarta, inaltimeHarta),
@@ -1424,7 +1688,8 @@ export default function HartaSpatiala({
 
   return (
     <group>
-      <FundalDistant textura={texturaHarta} />
+      <FundalDistant textura={texturaHarta} nivelCalitate={nivelCalitate} />
+      <ProfunzimeSpatiala nivelCalitate={nivelCalitate} playerRef={playerRef} culoare={culoareProfunzime} />
       <DecorSpatialUnic
         marimeHarta={marimeHarta}
         temaAether={doarPortal}

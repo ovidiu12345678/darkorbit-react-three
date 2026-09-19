@@ -38,6 +38,7 @@ export default function MuzicaMartiana({
   hartaActiva = "standard",
   luptaActiva = false,
   portalActiv = false,
+  volum = 70,
 }) {
   const hartaMuzicala = ["flota", "verdant", "neridia", "frontiera15", "frontiera16", "frontiera17", "frontiera18", "sector45", "sector51", "sector52", "sector53"].includes(hartaActiva)
     ? "standard"
@@ -46,6 +47,7 @@ export default function MuzicaMartiana({
   const hartaRef = useRef(hartaMuzicala);
   const luptaRef = useRef(luptaActiva);
   const portalRef = useRef(portalActiv);
+  const volumRef = useRef(volum);
   const pornitaRef = useRef(false);
   const pornireInCursRef = useRef(false);
   const opritaRef = useRef(false);
@@ -55,12 +57,14 @@ export default function MuzicaMartiana({
   hartaRef.current = hartaMuzicala;
   luptaRef.current = luptaActiva;
   portalRef.current = portalActiv;
+  volumRef.current = volum;
 
   const volumeTinta = useCallback((esteLupta, estePortalActiv = false) => {
     const factor = estePortalActiv ? FACTOR_VOLUM_PORTAL : 1;
+    const factorVolum = Math.max(0, Math.min(1, volumRef.current / 100));
     return {
-      explorare: (esteLupta ? 0.045 : VOLUM_EXPLORARE) * factor,
-      lupta: (esteLupta ? VOLUM_LUPTA : 0) * factor,
+      explorare: (esteLupta ? 0.045 : VOLUM_EXPLORARE) * factor * factorVolum,
+      lupta: (esteLupta ? VOLUM_LUPTA : 0) * factor * factorVolum,
     };
   }, []);
 
@@ -159,7 +163,7 @@ export default function MuzicaMartiana({
 
     animatieRef.current = requestAnimationFrame(tranzitie);
     return () => cancelAnimationFrame(animatieRef.current);
-  }, [hartaMuzicala, luptaActiva, portalActiv, volumeTinta]);
+  }, [hartaMuzicala, luptaActiva, portalActiv, volum, volumeTinta]);
 
   const comutaMuzica = useCallback(async (event) => {
     event.stopPropagation();

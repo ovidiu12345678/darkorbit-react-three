@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 
-const POZITIE_INITIALA = { top: 16, right: 16 };
+const POZITIE_INITIALA = { top: 72, right: 16 };
 const DIMENSIUNE_INITIALA = { latime: 300, inaltime: 220 };
 const DIMENSIUNE_MIN = { latime: 200, inaltime: 150 };
 const DIMENSIUNE_MAX = { latime: 640, inaltime: 480 };

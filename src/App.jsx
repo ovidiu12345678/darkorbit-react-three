@@ -1,4 +1,5 @@
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
+import { Bloom, EffectComposer } from "@react-three/postprocessing";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import HartaSpatiala from "./components/HartaSpatiala.jsx";
@@ -16,6 +17,8 @@ import PanouMagazin from "./components/PanouMagazin.jsx";
 import PanouHangar from "./components/PanouHangar.jsx";
 import NotificareRecompensa from "./components/NotificareRecompensa.jsx";
 import MuzicaMartiana from "./components/MuzicaMartiana.jsx";
+import PanouSetari from "./components/PanouSetari.jsx";
+import SunetMotorNava from "./components/SunetMotorNava.jsx";
 import { CORPURI_KHARON } from "./corpuriKharon.js";
 import { CORPURI_FLOTA } from "./corpuriFlota.js";
 import { CORPURI_VERDANT } from "./corpuriVerdant.js";
@@ -107,6 +110,38 @@ const POZITIE_PORTAL_SECTOR_INAPOI = [COORDONATA_PORTAL_AETHER, 0, COORDONATA_PO
 const POZITIE_PORTAL_SECTOR_INAINTE = [-COORDONATA_PORTAL_AETHER, 0, -COORDONATA_PORTAL_AETHER];
 const RAZA_ZONA_SIGURA_PORTAL = 58;
 const PALADIU_PENTRU_ENERGIE = 15;
+const CHEIE_SETARI = "darkorbit-setari-audio-display-v1";
+const SETARI_IMPLICITE = { volumMuzica: 70, volumMotor: 68, motorActiv: true, calitate: "ridicata" };
+const PROFILURI_GRAFICE = {
+  scazuta: { dpr: [0.75, 1], antialias: false, umbre: false, hartaUmbra: 512, bloom: 0, multisampling: 0, expunere: 0.92 },
+  medie: { dpr: [1, 1.3], antialias: true, umbre: false, hartaUmbra: 512, bloom: 0, multisampling: 0, expunere: 1 },
+  ridicata: { dpr: [1, 1.75], antialias: true, umbre: true, hartaUmbra: 1024, bloom: 0.3, multisampling: 2, expunere: 1.06 },
+  ultra: { dpr: [1.5, 2.4], antialias: true, umbre: true, hartaUmbra: 2048, bloom: 0.48, multisampling: 4, expunere: 1.13 },
+};
+
+function citesteSetari() {
+  try {
+    const salvate = JSON.parse(window.localStorage.getItem(CHEIE_SETARI) || "{}");
+    const calitate = PROFILURI_GRAFICE[salvate.calitate] ? salvate.calitate : SETARI_IMPLICITE.calitate;
+    return {
+      ...SETARI_IMPLICITE,
+      ...salvate,
+      calitate,
+      volumMuzica: Math.max(0, Math.min(100, Number(salvate.volumMuzica ?? SETARI_IMPLICITE.volumMuzica))),
+      volumMotor: Math.max(0, Math.min(100, Number(salvate.volumMotor ?? SETARI_IMPLICITE.volumMotor))),
+    };
+  } catch { return SETARI_IMPLICITE; }
+}
+
+function ConfigurareRenderer({ profil }) {
+  const { gl } = useThree();
+  useEffect(() => {
+    gl.outputColorSpace = THREE.SRGBColorSpace;
+    gl.toneMapping = THREE.ACESFilmicToneMapping;
+    gl.toneMappingExposure = profil.expunere;
+  }, [gl, profil]);
+  return null;
+}
 
 function citesteResursaSalvata(cheie) {
   try { return Math.max(0, Number.parseInt(window.localStorage.getItem(cheie), 10) || 0); }
@@ -443,6 +478,7 @@ export default function App() {
   const [impulsScut, setImpulsScut] = useState(0);
   const [efecteAtmosferice, setEfecteAtmosferice] = useState({ gaz: 0, radiatie: 0 });
   const [vitezaNava, setVitezaNava] = useState(1);
+  const [setari, setSetari] = useState(citesteSetari);
   const [hartaActiva, setHartaActiva] = useState("standard");
   const [paladiu, setPaladiu] = useState(() => citesteResursaSalvata("darkorbit-paladiu-v1"));
   const [energieGalactica, setEnergieGalactica] = useState(() => citesteResursaSalvata("darkorbit-energie-galactica-v1"));
@@ -455,6 +491,12 @@ export default function App() {
   const [sunetPortalPrioritar, setSunetPortalPrioritar] = useState(false);
   const [pozitieTeleportare, setPozitieTeleportare] = useState(POZITIE_REVENIRE_STANDARD);
   const jucatorInZonaSiguraPortal = esteInZonaSiguraPortal(hartaActiva, pozitieJucator);
+  const profilGrafic = PROFILURI_GRAFICE[setari.calitate] ?? PROFILURI_GRAFICE.ridicata;
+
+  useEffect(() => {
+    try { window.localStorage.setItem(CHEIE_SETARI, JSON.stringify(setari)); }
+    catch { /* setările rămân active până la reîmprospătare */ }
+  }, [setari]);
 
   useEffect(() => {
     try {
@@ -1194,12 +1236,18 @@ export default function App() {
     <>
       <Canvas
         orthographic
-        dpr={[1, 1.5]}
+        dpr={profilGrafic.dpr}
+        shadows={profilGrafic.umbre}
+        gl={{ antialias: true, powerPreference: "high-performance", alpha: false }}
         camera={{ position: [-532.4, 68, 37.9], zoom: 18, near: 0.1, far: 600 }}
       >
+        <ConfigurareRenderer profil={profilGrafic} />
         <color attach="background" args={["#02040b"]} />
-        <ambientLight intensity={0.55} />
-        <directionalLight position={[40, 90, 20]} intensity={1.3} />
+        <ambientLight intensity={setari.calitate === "ultra" ? 0.43 : 0.55} />
+        <directionalLight position={[40, 90, 20]} intensity={setari.calitate === "ultra" ? 1.65 : 1.3}
+          castShadow={profilGrafic.umbre} shadow-mapSize-width={profilGrafic.hartaUmbra}
+          shadow-mapSize-height={profilGrafic.hartaUmbra} shadow-camera-near={1} shadow-camera-far={240}
+          shadow-camera-left={-100} shadow-camera-right={100} shadow-camera-top={100} shadow-camera-bottom={-100} />
 
         <Suspense fallback={null}>
           <HartaSpatiala
@@ -1268,6 +1316,7 @@ export default function App() {
             temaHarta={
               sectorNou ? hartaActiva : esteFrontiera18 ? "frontiera18" : esteFrontiera17 ? "frontiera17" : esteFrontiera16 ? "frontiera16" : esteFrontiera15 ? "frontiera15" : esteNeridia ? "neridia" : esteVerdant ? "verdant" : esteFlota ? "flota" : esteKharon ? "kharon" : esteNoctis ? "noctis" : esteAether ? "aether" : "standard"
             }
+            nivelCalitate={setari.calitate}
             paladiuColectat={paladiuColectat}
             doarPortal={!esteStandard}
             onTransportAether={
@@ -1361,13 +1410,24 @@ export default function App() {
               setDaunePrimiteJucator={setDaunePrimiteJucator}
           />
         </Suspense>
+        {profilGrafic.bloom > 0 && (
+          <EffectComposer multisampling={profilGrafic.multisampling}>
+            <Bloom intensity={profilGrafic.bloom} luminanceThreshold={0.72} luminanceSmoothing={0.42} mipmapBlur />
+          </EffectComposer>
+        )}
       </Canvas>
 
       <MuzicaMartiana
         hartaActiva={hartaActiva}
         luptaActiva={luptaMuzicalaActiva}
         portalActiv={sunetPortalPrioritar}
+        volum={setari.volumMuzica}
       />
+      <SunetMotorNava playerRef={playerRef} activ={setari.motorActiv} volum={setari.volumMotor} />
+      <div className="hud-grup-sus-dreapta">
+        <ButonFullscreen />
+        <PanouSetari setari={setari} onSchimba={setSetari} />
+      </div>
 
       <div className="bara-munitie" onPointerDown={(event) => event.stopPropagation()}>
         {AMMO_TYPES.map((ammo, index) => {
@@ -1504,8 +1564,6 @@ export default function App() {
           )}
         </div>
       )}
-
-      <ButonFullscreen />
 
       <PanouResurse
         credite={credite}
