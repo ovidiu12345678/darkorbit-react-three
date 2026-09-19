@@ -345,8 +345,8 @@ function PortalAether({
   );
 
   texturaPortal.colorSpace = THREE.SRGBColorSpace;
-  texturaPortal.generateMipmaps = false;
-  texturaPortal.minFilter = THREE.LinearFilter;
+  texturaPortal.generateMipmaps = true;
+  texturaPortal.minFilter = THREE.LinearMipmapLinearFilter;
   texturaPortal.magFilter = THREE.LinearFilter;
 
   useFrame(({ camera, clock }, delta) => {
@@ -1561,7 +1561,7 @@ function CorpuriCerestiUnice({
           textura={textura}
           definitie={definitie}
           limitaHarta={limitaHarta}
-          alphaTransparent={Boolean(temaSectorNou) || temaKharon || temaFlota || temaVerdant || temaNeridia || temaFrontiera15 || temaFrontiera16 || temaFrontiera17 || temaFrontiera18}
+          alphaTransparent
         />
       ))}
     </group>
@@ -1653,8 +1653,8 @@ export default function HartaSpatiala({
     texturaCorpuri.anisotropy = anisotropie;
     texturaCorpuri.wrapS = THREE.ClampToEdgeWrapping;
     texturaCorpuri.wrapT = THREE.ClampToEdgeWrapping;
-    texturaCorpuri.generateMipmaps = false;
-    texturaCorpuri.minFilter = THREE.LinearFilter;
+    texturaCorpuri.generateMipmaps = folosesteMipmaps;
+    texturaCorpuri.minFilter = folosesteMipmaps ? THREE.LinearMipmapLinearFilter : THREE.LinearFilter;
     texturaCorpuri.magFilter = THREE.LinearFilter;
     texturaCorpuri.needsUpdate = true;
   }, [texturaCorpuri, anisotropie, folosesteMipmaps]);
