@@ -13,6 +13,7 @@ const PRAG_FUGA = 0.1;
 const VITEZA_FUGA = VITEZA_INAMIC * 1.5;
 const RAZA_SOSIRE_FUGA = 6;
 const DAUNA_PROIECTIL = 27000;
+const RAZA_RENUNTARE = 48;
 
 function alegePunctFuga(marimeHarta) {
   const limitaHarta = marimeHarta / 2 - 4.5;
@@ -141,6 +142,7 @@ export default function InamicOrnament({
   onSelectare,
   onAtac,
   onPozitie,
+  onRenuntaAgresivitate,
 }) {
   const texturaOrnament = useLoader(THREE.TextureLoader, `${import.meta.env.BASE_URL}assets/inamic-ornament.webp`);
   texturaOrnament.colorSpace = THREE.SRGBColorSpace;
@@ -228,6 +230,12 @@ export default function InamicOrnament({
     stare.current.cooldown -= delta;
 
     const inPragFuga = hp <= hpMax * PRAG_FUGA && scut <= scutMax * PRAG_FUGA;
+    const distantaDeBaza = obiect.position.distanceTo(baza);
+    const depasesteRenuntarea = provocat && !inPragFuga && distantaDeBaza > RAZA_RENUNTARE;
+    if (depasesteRenuntarea) {
+      onRenuntaAgresivitate?.(id);
+    }
+    const provocatEfectiv = provocat && !depasesteRenuntarea;
 
     if (inPragFuga && provocat) {
       stare.current.modAgresiv = false;
@@ -251,7 +259,7 @@ export default function InamicOrnament({
           0.12
         );
       }
-    } else if (provocat) {
+    } else if (provocatEfectiv) {
       stare.current.modFuga = false;
       stare.current.modAgresiv = true;
       const directie = catreJucator.normalize();

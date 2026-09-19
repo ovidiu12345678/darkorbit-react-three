@@ -44,6 +44,7 @@ const CONFIGURATII = {
 const PRAG_FUGA = 0.1;
 const VITEZA_PROIECTIL = 34;
 const RAZA_IMPACT = 1.7;
+const RAZA_RENUNTARE = 48;
 
 function punctFuga(marimeHarta) {
   const margine = (marimeHarta / 2 - 4.5) * 0.91;
@@ -178,6 +179,7 @@ export default function InamicAether({
   onSelectare,
   onAtac,
   onPozitie,
+  onRenuntaAgresivitate,
 }) {
   const configuratie = CONFIGURATII[tipAether] ?? CONFIGURATII.manta;
   const textura = useLoader(
@@ -255,6 +257,12 @@ export default function InamicAether({
     );
     const distanta = catreJucator.length();
     const inPragFuga = hp <= hpMax * PRAG_FUGA && scut <= scutMax * PRAG_FUGA;
+    const distantaDeBaza = obiect.position.distanceTo(local.baza);
+    const depasesteRenuntarea = provocat && !inPragFuga && distantaDeBaza > RAZA_RENUNTARE;
+    if (depasesteRenuntarea) {
+      onRenuntaAgresivitate?.(id);
+    }
+    const provocatEfectiv = provocat && !depasesteRenuntarea;
 
     if (inPragFuga && provocat) {
       local.fuga = true;
@@ -264,7 +272,7 @@ export default function InamicAether({
       catreJucator.copy(local.tintaFuga).sub(obiect.position).setY(0).normalize();
       obiect.position.addScaledVector(catreJucator, configuratie.viteza * 1.6 * delta);
       local.unghi = Math.atan2(catreJucator.x, catreJucator.z);
-    } else if (provocat) {
+    } else if (provocatEfectiv) {
       local.fuga = false;
       catreJucator.normalize();
       const lateral = temp.lateral.set(-catreJucator.z, 0, catreJucator.x);

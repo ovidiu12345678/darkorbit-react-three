@@ -786,6 +786,12 @@ export default function App() {
     pozitiiInamici.current[id] = vector.clone();
   }, []);
 
+  const renuntaAgresivitateInamic = useCallback((id) => {
+    setInamici((lista) =>
+      lista.map((item) => (item.id === id && item.provocat ? { ...item, provocat: false } : item))
+    );
+  }, []);
+
   useEffect(() => {
     function gaseseTintaApropiata() {
       let celMaiApropiat = null;
@@ -1314,6 +1320,7 @@ export default function App() {
                 onSelectare={selecteazaInamic}
                 onAtac={atacaInamic}
                 onPozitie={raporteazaPozitieInamic}
+                onRenuntaAgresivitate={renuntaAgresivitateInamic}
               />
             );
           })}

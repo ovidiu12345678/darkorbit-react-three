@@ -54,6 +54,7 @@ const CONFIGURATII = {
 };
 
 const PRAG_FUGA = 0.1;
+const RAZA_RENUNTARE = 48;
 const VITEZA_PROIECTIL = 34;
 const RAZA_IMPACT = 1.7;
 
@@ -208,6 +209,7 @@ export default function InamicNoctis({
   onSelectare,
   onAtac,
   onPozitie,
+  onRenuntaAgresivitate,
 }) {
   const configuratie = CONFIGURATII[tipNoctis] ?? CONFIGURATII.arici;
   const textura = useLoader(
@@ -288,7 +290,13 @@ export default function InamicNoctis({
     );
     const distanta = catreJucator.length();
     const inPragFuga = hp <= hpMax * PRAG_FUGA && scut <= scutMax * PRAG_FUGA;
-    const poateUrmari = provocat || (
+    const distantaDeBaza = obiect.position.distanceTo(local.baza);
+    const depasesteRenuntarea = provocat && !inPragFuga && distantaDeBaza > RAZA_RENUNTARE;
+    if (depasesteRenuntarea) {
+      onRenuntaAgresivitate?.(id);
+    }
+    const provocatEfectiv = provocat && !depasesteRenuntarea;
+    const poateUrmari = provocatEfectiv || (
       !zonaSiguraJucator && tipNoctis === "puiStea" && distanta < configuratie.detectie
     );
 
