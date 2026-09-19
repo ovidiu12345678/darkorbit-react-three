@@ -1,7 +1,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { densitateCeataPirata, LABIRINT_PIRAT, PUNCTE_PALADIU } from "../utils/labirintPirate.js";
+import { LABIRINT_PIRAT, PUNCTE_PALADIU } from "../utils/labirintPirate.js";
 
 const formaStea = new THREE.Shape();
 for (let i = 0; i < 16; i += 1) {
@@ -35,20 +35,22 @@ const fragmentCeata = `
   }
   void main() {
     vec2 uv = vUv;
-    float margini = smoothstep(0.0, 0.24, uv.x) * smoothstep(0.0, 0.24, 1.0 - uv.x);
-    margini *= smoothstep(0.0, 0.19, uv.y) * smoothstep(0.0, 0.19, 1.0 - uv.y);
-    vec2 curgere = uv * vec2(7.0, 5.0) + vec2(uTimp * 0.035, -uTimp * 0.025);
+    vec2 centru = (uv - 0.5) * vec2(1.55, 2.0);
+    vec2 curgere = uv * vec2(6.2, 5.3) + vec2(uTimp * 0.026, -uTimp * 0.019);
     float nor = 0.57 * zgomot(curgere)
       + 0.29 * zgomot(curgere * 2.05 + 7.3)
       + 0.14 * zgomot(curgere * 4.1 - uTimp * 0.045);
-    float vapori = smoothstep(0.29, 0.68, nor);
-    vec3 culoare = mix(uCuloare * 0.52, uCuloare * 1.18, vapori);
-    gl_FragColor = vec4(culoare, margini * vapori * uDensitate * 0.62);
+    float deformare = (zgomot(uv * 3.4 + uTimp * 0.008) - 0.5) * 0.36;
+    float forma = 1.0 - smoothstep(0.48, 1.02, length(centru) + deformare);
+    float fasii = 0.78 + 0.22 * sin((uv.x + uv.y) * 16.0 + uTimp * 0.13);
+    float vapori = smoothstep(0.31, 0.72, nor) * forma * fasii;
+    vec3 culoare = mix(uCuloare * 0.43, uCuloare * 1.08, nor);
+    gl_FragColor = vec4(culoare, vapori * uDensitate * 0.5);
     #include <colorspace_fragment>
   }
 `;
 
-function CeataPirata({ zid, culoare, index, densitate = 1 }) {
+function CeataPirata({ zid, culoare, index, densitate = 1, inaltime = 0.8, decalaj = [0, 0] }) {
   const material = useRef();
   const uniforme = useMemo(() => ({
     uTimp: { value: index * 1.9 },
@@ -57,8 +59,8 @@ function CeataPirata({ zid, culoare, index, densitate = 1 }) {
   }), [culoare, densitate, index]);
   useFrame(({ clock }) => { if (material.current) material.current.uniforms.uTimp.value = clock.elapsedTime + index * 1.9; });
   return (
-    <mesh position={[zid.x, 0.8, zid.z]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={6} raycast={() => null}>
-      <planeGeometry args={[zid.w + 72, zid.h + 72]} />
+    <mesh position={[zid.x + decalaj[0], inaltime, zid.z + decalaj[1]]} rotation={[-Math.PI / 2, 0, index * 0.37]} renderOrder={inaltime > 3 ? 32 : 6} raycast={() => null}>
+      <planeGeometry args={[zid.w + 92, zid.h + 92]} />
       <shaderMaterial ref={material} uniforms={uniforme} vertexShader={vertexCeata} fragmentShader={fragmentCeata}
         transparent depthWrite={false} side={THREE.DoubleSide} />
     </mesh>
@@ -120,18 +122,22 @@ function PereteMineral({ zid, culoare, paleta, index }) {
       obiect.scale.set(piatra.sx, 0.75 + (i % 4) * 0.16, piatra.sz);
       obiect.updateMatrix();
       rociRef.current.setMatrixAt(i, obiect.matrix);
-      rociRef.current.setColorAt(i, baza.clone().lerp(culoarePiatra, 0.4 + (i % 4) * 0.08));
+      rociRef.current.setColorAt(i, baza.clone().lerp(culoarePiatra, 0.2 + (i % 4) * 0.045));
 
-      obiect.position.set(piatra.x, piatra.inaltime * 0.5, piatra.z);
-      obiect.rotation.set(0, piatra.unghi, 0);
+      obiect.position.set(piatra.x, piatra.inaltime * 0.43, piatra.z);
+      obiect.rotation.set(
+        0.18 * Math.sin(i * 2.3 + index),
+        piatra.unghi,
+        0.16 * Math.cos(i * 1.9 + index),
+      );
       obiect.scale.set(
-        Math.max(4.5, piatra.sx * 0.44),
-        piatra.inaltime,
-        Math.max(4.2, piatra.sz * 0.58),
+        Math.max(5.6, piatra.sx * 0.58),
+        piatra.inaltime * 0.58,
+        Math.max(5.2, piatra.sz * 0.7),
       );
       obiect.updateMatrix();
       piscuriRef.current.setMatrixAt(i, obiect.matrix);
-      piscuriRef.current.setColorAt(i, baza.clone().lerp(culoarePiatra, 0.58 + (i % 4) * 0.08).lerp(accent, 0.08));
+      piscuriRef.current.setColorAt(i, baza.clone().lerp(culoarePiatra, 0.3 + (i % 4) * 0.045).lerp(accent, 0.05));
     });
     rociRef.current.instanceMatrix.needsUpdate = true;
     if (rociRef.current.instanceColor) rociRef.current.instanceColor.needsUpdate = true;
@@ -153,51 +159,9 @@ function PereteMineral({ zid, culoare, paleta, index }) {
         <meshStandardMaterial color="#ffffff" metalness={0.18} roughness={0.95} flatShading />
       </instancedMesh>
       <instancedMesh ref={piscuriRef} args={[null, null, fragmente.length]} raycast={() => null} castShadow>
-        <coneGeometry args={[1, 1, 7, 1]} />
+        <dodecahedronGeometry args={[1, 0]} />
         <meshStandardMaterial color="#ffffff" metalness={0.12} roughness={0.98} flatShading />
       </instancedMesh>
-    </group>
-  );
-}
-
-function CeataLaNava({ tema, culoare, playerRef }) {
-  const grup = useRef();
-  const uniforme = useMemo(() => Array.from({ length: 4 }, (_, index) => ({
-    uTimp: { value: index * 5.7 },
-    uCuloare: { value: new THREE.Color(culoare).multiplyScalar(1.12) },
-    uDensitate: { value: 0 },
-  })), [culoare]);
-  const pozitii = useMemo(() => [
-    [-35, 0, -12, 52, 36], [36, 0.12, 5, 48, 34],
-    [-15, 0.28, 34, 56, 38], [20, 0.42, -36, 50, 34],
-  ], []);
-
-  useFrame(({ clock }) => {
-    if (!grup.current || !playerRef?.current) return;
-    const x = playerRef.current.x;
-    const z = playerRef.current.z;
-    const densitate = densitateCeataPirata(tema, x, z);
-    grup.current.visible = densitate > 0.025;
-    if (!grup.current.visible) return;
-    grup.current.position.set(x, 7.4, z);
-    grup.current.rotation.y = Math.sin(clock.elapsedTime * 0.16) * 0.24;
-    grup.current.position.x += Math.sin(clock.elapsedTime * 0.38) * 4.5;
-    grup.current.position.z += Math.cos(clock.elapsedTime * 0.31) * 3.5;
-    uniforme.forEach((set, index) => {
-      set.uTimp.value = clock.elapsedTime + index * 4.9;
-      set.uDensitate.value = Math.min(0.78, densitate * (0.62 + index * 0.045));
-    });
-  });
-
-  return (
-    <group ref={grup} visible={false} renderOrder={45}>
-      {pozitii.map(([x, y, z, w, h], index) => (
-        <mesh key={index} position={[x, y, z]} rotation={[-Math.PI / 2, 0, index * 0.71]} renderOrder={45 + index} raycast={() => null}>
-          <planeGeometry args={[w, h]} />
-          <shaderMaterial uniforms={uniforme[index]} vertexShader={vertexCeata} fragmentShader={fragmentCeata}
-            transparent depthWrite={false} depthTest={false} side={THREE.DoubleSide} />
-        </mesh>
-      ))}
     </group>
   );
 }
@@ -262,7 +226,7 @@ function RafinariaPaladiu({ onAlegeTinta }) {
   );
 }
 
-export default function ZonaPirata({ tema, colectate = new Set(), onAlegeTinta, playerRef }) {
+export default function ZonaPirata({ tema, colectate = new Set(), onAlegeTinta }) {
   const zona = LABIRINT_PIRAT[tema];
   if (!zona) return null;
   return (
@@ -270,13 +234,16 @@ export default function ZonaPirata({ tema, colectate = new Set(), onAlegeTinta, 
       {zona.ziduri.map((zid, index) => (
         <group key={`${tema}-${index}`}>
           <PereteMineral zid={zid} culoare={zona.culoare} paleta={zona.culoriRelief} index={index} />
-          <CeataPirata zid={zid} culoare={zona.ceata} index={index} densitate={0.48} />
         </group>
       ))}
       {zona.nori.map((nor, index) => (
-        <CeataPirata key={`nor-${tema}-${index}`} zid={nor} culoare={zona.ceata} index={zona.ziduri.length + index} densitate={0.72} />
+        <group key={`nor-${tema}-${index}`}>
+          <CeataPirata zid={nor} culoare={zona.ceata} index={zona.ziduri.length + index} densitate={0.72} inaltime={0.7} />
+          <CeataPirata zid={{ ...nor, w: nor.w * 0.72, h: nor.h * 0.68 }} culoare={zona.ceata}
+            index={zona.ziduri.length + zona.nori.length + index} densitate={0.43} inaltime={5.7}
+            decalaj={[index % 2 ? 24 : -22, index % 3 ? -17 : 19]} />
+        </group>
       ))}
-      <CeataLaNava tema={tema} culoare={zona.ceata} playerRef={playerRef} />
       <Steluțe tema={tema} colectate={colectate} onAlegeTinta={onAlegeTinta} />
       {zona.schimb && <RafinariaPaladiu onAlegeTinta={onAlegeTinta} />}
     </group>
