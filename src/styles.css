@@ -1152,6 +1152,116 @@ canvas {
   box-shadow: none;
 }
 
+.buton-setari-joc {
+  position: fixed;
+  top: 16px;
+  right: 282px;
+  z-index: 61;
+  width: 52px;
+  height: 48px;
+  display: grid;
+  place-content: center;
+  gap: 1px;
+  border: 1px solid rgba(94, 226, 255, 0.62);
+  border-radius: 7px;
+  color: #c9f8ff;
+  background: linear-gradient(145deg, rgba(7, 31, 44, 0.95), rgba(7, 10, 24, 0.95));
+  box-shadow: 0 0 18px rgba(38, 206, 255, 0.2), inset 0 0 14px rgba(67, 221, 255, 0.08);
+  cursor: pointer;
+}
+
+.buton-setari-joc span { font-size: 19px; line-height: 18px; }
+.buton-setari-joc small { color: #65d9f2; font-size: 7px; font-weight: 900; letter-spacing: 0.08em; }
+.buton-setari-joc:hover { border-color: #d7fbff; filter: brightness(1.18); }
+
+.setari-fundal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: radial-gradient(circle at 50% 45%, rgba(6, 28, 40, 0.44), rgba(0, 3, 9, 0.82));
+  backdrop-filter: blur(5px);
+}
+
+.setari-panou {
+  width: min(590px, calc(100vw - 28px));
+  max-height: min(720px, calc(100vh - 28px));
+  overflow: auto;
+  border: 1px solid rgba(85, 225, 255, 0.62);
+  border-radius: 14px;
+  color: #e5fbff;
+  background:
+    linear-gradient(145deg, rgba(17, 49, 62, 0.2), transparent 38%),
+    rgba(4, 10, 20, 0.975);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.66), 0 0 32px rgba(52, 213, 255, 0.15), inset 0 0 36px rgba(63, 204, 255, 0.05);
+}
+
+.setari-antet {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid rgba(90, 214, 240, 0.18);
+}
+.setari-antet small { color: #68d8ee; font-size: 9px; font-weight: 900; letter-spacing: 0.2em; }
+.setari-antet h2 { margin: 2px 0 0; font-size: 25px; letter-spacing: 0.03em; }
+.setari-antet button {
+  width: 36px; height: 36px; border: 1px solid rgba(124, 228, 244, 0.35); border-radius: 8px;
+  color: #dffaff; background: rgba(255, 255, 255, 0.035); font-size: 23px; cursor: pointer;
+}
+
+.setari-file { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px 18px 0; }
+.setari-file button {
+  padding: 11px; border: 1px solid rgba(100, 206, 225, 0.2); border-radius: 8px 8px 3px 3px;
+  color: rgba(221, 249, 255, 0.6); background: rgba(255, 255, 255, 0.025); font-weight: 850; cursor: pointer;
+}
+.setari-file button.activ {
+  color: #eaffff; border-color: rgba(84, 229, 255, 0.7);
+  background: linear-gradient(180deg, rgba(39, 178, 207, 0.28), rgba(19, 69, 91, 0.16));
+  box-shadow: inset 0 -2px #58e3ff;
+}
+
+.setari-continut { padding: 18px 20px 22px; }
+.setari-rand-comutator { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
+.setari-rand-comutator div { display: grid; gap: 4px; }
+.setari-rand-comutator strong { font-size: 15px; }
+.setari-rand-comutator small { color: rgba(210, 241, 247, 0.56); }
+.setari-comutator {
+  display: flex; align-items: center; gap: 7px; min-width: 93px; padding: 7px 9px;
+  border: 1px solid rgba(140, 156, 170, 0.42); border-radius: 20px; color: #8e9aa6;
+  background: rgba(255, 255, 255, 0.035); font-size: 9px; font-weight: 900; cursor: pointer;
+}
+.setari-comutator span { width: 19px; height: 19px; border-radius: 50%; background: #5f6872; box-shadow: inset 0 0 7px #242a31; }
+.setari-comutator.activ { color: #adfff1; border-color: #54d9bd; background: rgba(31, 170, 143, 0.15); }
+.setari-comutator.activ span { background: #63f0cf; box-shadow: 0 0 10px rgba(79, 243, 207, 0.72); }
+
+.setari-control-volum { display: grid; gap: 9px; margin: 17px 0; }
+.setari-control-volum > span { display: flex; justify-content: space-between; font-size: 13px; }
+.setari-control-volum b { color: #65e4ff; }
+.setari-control-volum input { width: 100%; accent-color: #4eddf4; cursor: pointer; }
+.setari-control-volum.dezactivat { opacity: 0.42; }
+.setari-nota { margin: 18px 0 0; color: rgba(202, 232, 239, 0.52); font-size: 11px; line-height: 1.55; }
+
+.setari-calitati { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; }
+.setari-calitati button {
+  display: grid; gap: 4px; padding: 13px; text-align: left; border: 1px solid rgba(103, 205, 224, 0.2);
+  border-radius: 9px; color: #c7dce1; background: rgba(255, 255, 255, 0.025); cursor: pointer;
+}
+.setari-calitati button span { font-weight: 900; }
+.setari-calitati button small { color: rgba(201, 231, 237, 0.47); }
+.setari-calitati button.activ {
+  color: #eeffff; border-color: #70e9ff;
+  background: linear-gradient(145deg, rgba(39, 181, 208, 0.27), rgba(31, 63, 94, 0.21));
+  box-shadow: 0 0 16px rgba(59, 217, 246, 0.13), inset 0 0 18px rgba(77, 225, 255, 0.06);
+}
+.setari-detalii-calitate { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 15px; }
+.setari-detalii-calitate span {
+  position: relative; padding-left: 17px; color: rgba(217, 246, 251, 0.68); font-size: 11px;
+}
+.setari-detalii-calitate span::before { content: "◆"; position: absolute; left: 0; color: #52dff4; font-size: 8px; }
+
 @media (max-width: 720px) {
   .buton-muzica-martiana {
     right: 8px;
@@ -1159,6 +1269,12 @@ canvas {
     width: 46px;
     height: 40px;
   }
+  .buton-setari-joc { top: 70px; right: 8px; width: 46px; height: 42px; }
+  .setari-fundal { padding: 8px; }
+  .setari-panou { width: calc(100vw - 16px); max-height: calc(100vh - 16px); }
+  .setari-antet { padding: 13px 14px 10px; }
+  .setari-continut { padding: 14px; }
+  .setari-calitati { grid-template-columns: 1fr; }
 }
 
 .harta-mini {

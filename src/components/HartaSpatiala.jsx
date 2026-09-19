@@ -1,4 +1,4 @@
-import { useFrame, useLoader } from "@react-three/fiber";
+import { useFrame, useLoader, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { CORPURI_KHARON } from "../corpuriKharon.js";
@@ -1346,6 +1346,7 @@ export default function HartaSpatiala({
   imaginePortalTertiar,
   temaPortalTertiar = "aether",
   temaHarta = "standard",
+  nivelCalitate = "ridicata",
   doarPortal = false,
   paladiuColectat = new Set(),
   onTransportAether,
@@ -1356,6 +1357,7 @@ export default function HartaSpatiala({
   semnalTransportSecundar = 0,
   semnalTransportTertiar = 0,
 }) {
+  const { gl } = useThree();
   const latimeHarta = marimeHarta * (16 / 9);
   const inaltimeHarta = marimeHarta;
   const factorScalare = marimeHarta / 210;
@@ -1367,29 +1369,39 @@ export default function HartaSpatiala({
       `${import.meta.env.BASE_URL}${imagineCorpuri}`,
     ]
   );
+  const anisotropieMaxima = gl.capabilities.getMaxAnisotropy();
+  const anisotropie = nivelCalitate === "ultra"
+    ? anisotropieMaxima
+    : nivelCalitate === "ridicata"
+      ? Math.min(8, anisotropieMaxima)
+      : nivelCalitate === "medie"
+        ? Math.min(4, anisotropieMaxima)
+        : 1;
+  const folosesteMipmaps = nivelCalitate !== "scazuta";
 
   useEffect(() => {
     texturaHarta.colorSpace = THREE.SRGBColorSpace;
-    texturaHarta.anisotropy = 8;
+    texturaHarta.anisotropy = anisotropie;
     texturaHarta.wrapS = THREE.ClampToEdgeWrapping;
     texturaHarta.wrapT = THREE.ClampToEdgeWrapping;
     texturaHarta.repeat.set(1, 1);
     texturaHarta.offset.set(0, 0);
-    texturaHarta.generateMipmaps = true;
-    texturaHarta.minFilter = THREE.LinearMipmapLinearFilter;
+    texturaHarta.generateMipmaps = folosesteMipmaps;
+    texturaHarta.minFilter = folosesteMipmaps ? THREE.LinearMipmapLinearFilter : THREE.LinearFilter;
     texturaHarta.magFilter = THREE.LinearFilter;
     texturaHarta.needsUpdate = true;
-  }, [texturaHarta]);
+  }, [texturaHarta, anisotropie, folosesteMipmaps]);
 
   useEffect(() => {
     texturaCorpuri.colorSpace = THREE.SRGBColorSpace;
-    texturaCorpuri.anisotropy = 16;
+    texturaCorpuri.anisotropy = anisotropie;
     texturaCorpuri.wrapS = THREE.ClampToEdgeWrapping;
     texturaCorpuri.wrapT = THREE.ClampToEdgeWrapping;
-    texturaCorpuri.minFilter = THREE.LinearMipmapLinearFilter;
+    texturaCorpuri.generateMipmaps = folosesteMipmaps;
+    texturaCorpuri.minFilter = folosesteMipmaps ? THREE.LinearMipmapLinearFilter : THREE.LinearFilter;
     texturaCorpuri.magFilter = THREE.LinearFilter;
     texturaCorpuri.needsUpdate = true;
-  }, [texturaCorpuri]);
+  }, [texturaCorpuri, anisotropie, folosesteMipmaps]);
 
   const geometrie = useMemo(
     () => new THREE.PlaneGeometry(latimeHarta, inaltimeHarta),
