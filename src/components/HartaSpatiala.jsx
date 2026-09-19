@@ -1034,36 +1034,40 @@ const fragmentProfunzime = `
     vec2 perpendiculara = vec2(-directie.y, directie.x);
     float longitudinal = dot(delta, directie);
     float lateral = dot(delta, perpendiculara);
-    float alungire = 1.0 + uViteza * (2.1 + uApropiere * 5.2);
+    float alungire = 1.0 + uViteza * (3.4 + uApropiere * 9.5);
     float distanta = length(vec2(lateral, longitudinal / alungire));
     float raza = uMarime * (0.62 + hash21(celula + 15.1) * 0.76);
     float stea = 1.0 - smoothstep(raza * 0.2, raza, distanta);
     float licarire = 0.72 + 0.28 * sin(uTimp * (1.2 + samanta * 2.7) + samanta * 24.0);
-    float nucleu = 1.0 - smoothstep(0.0, raza * 0.42, distanta);
-    vec3 culoare = mix(uCuloare * 0.72, vec3(1.0), nucleu * 0.72);
-    gl_FragColor = vec4(culoare, stea * licarire * uOpacitate);
+    float halou = 1.0 - smoothstep(raza * 0.45, raza * 1.85, distanta);
+    vec3 culoare = uCuloare * (0.58 + samanta * 0.62);
+    float alpha = (stea * 0.72 + halou * 0.16) * licarire * uOpacitate;
+    gl_FragColor = vec4(culoare, alpha);
     #include <colorspace_fragment>
   }
 `;
 
 const STRATURI_PROFUNZIME = {
   scazuta: [
-    { y: -2.08, factor: 0.035, grila: 24, sansa: 0.15, marime: 0.052, opacitate: 0.42, apropiere: 0 },
+    { y: -2.08, factor: 0.035, grila: 24, sansa: 0.1, marime: 0.038, opacitate: 0.26, apropiere: 0 },
   ],
   medie: [
-    { y: -2.08, factor: 0.028, grila: 28, sansa: 0.16, marime: 0.052, opacitate: 0.44, apropiere: 0 },
-    { y: -1.52, factor: 0.095, grila: 22, sansa: 0.14, marime: 0.06, opacitate: 0.48, apropiere: 0.35 },
+    { y: -2.08, factor: 0.018, grila: 31, sansa: 0.1, marime: 0.035, opacitate: 0.28, apropiere: 0 },
+    { y: -1.5, factor: 0.24, grila: 23, sansa: 0.085, marime: 0.042, opacitate: 0.3, apropiere: 0.52 },
+    { y: 1.15, factor: 0.58, grila: 16, sansa: 0.055, marime: 0.05, opacitate: 0.24, apropiere: 0.95 },
   ],
   ridicata: [
-    { y: -2.08, factor: 0.022, grila: 32, sansa: 0.17, marime: 0.05, opacitate: 0.46, apropiere: 0 },
-    { y: -1.48, factor: 0.105, grila: 25, sansa: 0.15, marime: 0.061, opacitate: 0.52, apropiere: 0.42 },
-    { y: 1.2, factor: 0.24, grila: 18, sansa: 0.12, marime: 0.068, opacitate: 0.43, apropiere: 0.78 },
+    { y: -2.08, factor: 0.012, grila: 36, sansa: 0.11, marime: 0.032, opacitate: 0.29, apropiere: 0 },
+    { y: -1.5, factor: 0.2, grila: 28, sansa: 0.09, marime: 0.039, opacitate: 0.32, apropiere: 0.45 },
+    { y: 1.18, factor: 0.56, grila: 19, sansa: 0.06, marime: 0.048, opacitate: 0.27, apropiere: 0.95 },
+    { y: 5.7, factor: 0.94, grila: 13, sansa: 0.035, marime: 0.055, opacitate: 0.2, apropiere: 1.35, primPlan: true },
   ],
   ultra: [
-    { y: -2.08, factor: 0.016, grila: 38, sansa: 0.18, marime: 0.047, opacitate: 0.48, apropiere: 0 },
-    { y: -1.42, factor: 0.09, grila: 29, sansa: 0.17, marime: 0.058, opacitate: 0.56, apropiere: 0.38 },
-    { y: 1.25, factor: 0.245, grila: 21, sansa: 0.14, marime: 0.068, opacitate: 0.48, apropiere: 0.78 },
-    { y: 6.4, factor: 0.42, grila: 15, sansa: 0.085, marime: 0.078, opacitate: 0.28, apropiere: 1.15, primPlan: true },
+    { y: -2.08, factor: 0.008, grila: 42, sansa: 0.12, marime: 0.03, opacitate: 0.3, apropiere: 0 },
+    { y: -1.5, factor: 0.17, grila: 32, sansa: 0.095, marime: 0.037, opacitate: 0.34, apropiere: 0.42 },
+    { y: 0.9, factor: 0.52, grila: 22, sansa: 0.065, marime: 0.045, opacitate: 0.29, apropiere: 0.92 },
+    { y: 4.8, factor: 0.94, grila: 15, sansa: 0.04, marime: 0.052, opacitate: 0.22, apropiere: 1.3, primPlan: true },
+    { y: 8.2, factor: 1.42, grila: 11, sansa: 0.025, marime: 0.06, opacitate: 0.16, apropiere: 1.7, primPlan: true },
   ],
 };
 
@@ -1124,12 +1128,108 @@ function StratProfunzime({ configurare, playerRef, culoare, index }) {
   );
 }
 
+const fragmentNebuloasaParallax = `
+  uniform vec2 uDeplasare;
+  uniform vec3 uCuloare;
+  uniform float uTimp;
+  uniform float uScara;
+  uniform float uOpacitate;
+  varying vec2 vUv;
+
+  float hashNeb(vec2 p) {
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+  }
+  float zgomotNeb(vec2 p) {
+    vec2 i = floor(p), f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hashNeb(i), hashNeb(i + vec2(1.0, 0.0)), f.x),
+      mix(hashNeb(i + vec2(0.0, 1.0)), hashNeb(i + vec2(1.0, 1.0)), f.x), f.y);
+  }
+  float fbmNeb(vec2 p) {
+    float valoare = 0.0;
+    valoare += zgomotNeb(p) * 0.55;
+    valoare += zgomotNeb(p * 2.03 + 4.7) * 0.29;
+    valoare += zgomotNeb(p * 4.11 - 8.2) * 0.16;
+    return valoare;
+  }
+  void main() {
+    vec2 p = (vUv - 0.5) * vec2(1.45, 1.0) * uScara + uDeplasare;
+    p += vec2(uTimp * 0.006, -uTimp * 0.004);
+    float nor = fbmNeb(p);
+    float goluri = fbmNeb(p * 0.61 - 12.4);
+    float forma = smoothstep(0.5, 0.82, nor) * smoothstep(0.28, 0.72, goluri);
+    vec3 culoare = uCuloare * mix(0.22, 0.72, nor);
+    gl_FragColor = vec4(culoare, forma * uOpacitate);
+    #include <colorspace_fragment>
+  }
+`;
+
+const STRATURI_NEBULOASA = {
+  scazuta: [],
+  medie: [
+    { y: -1.82, factor: 0.12, scara: 4.4, opacitate: 0.075 },
+  ],
+  ridicata: [
+    { y: -1.84, factor: 0.08, scara: 4.8, opacitate: 0.08 },
+    { y: -0.72, factor: 0.36, scara: 6.2, opacitate: 0.055 },
+  ],
+  ultra: [
+    { y: -1.86, factor: 0.045, scara: 5.2, opacitate: 0.09 },
+    { y: -0.58, factor: 0.42, scara: 6.8, opacitate: 0.07 },
+    { y: 2.15, factor: 0.78, scara: 8.5, opacitate: 0.038 },
+  ],
+};
+
+function StratNebuloasaParallax({ configurare, playerRef, culoare, index }) {
+  const meshRef = useRef();
+  const directiePrivire = useMemo(() => new THREE.Vector3(), []);
+  const centruVizibil = useMemo(() => new THREE.Vector3(), []);
+  const uniforme = useMemo(() => ({
+    uDeplasare: { value: new THREE.Vector2() },
+    uCuloare: { value: new THREE.Color(culoare).offsetHSL(index % 2 ? 0.045 : -0.025, -0.08, -0.05) },
+    uTimp: { value: index * 8.1 },
+    uScara: { value: configurare.scara },
+    uOpacitate: { value: configurare.opacitate },
+  }), [configurare, culoare, index]);
+
+  useFrame(({ camera, clock }) => {
+    if (!meshRef.current || !playerRef?.current) return;
+    camera.getWorldDirection(directiePrivire);
+    const distantaFundal = (configurare.y - camera.position.y) / Math.min(-0.001, directiePrivire.y);
+    centruVizibil.copy(camera.position).addScaledVector(directiePrivire, distantaFundal);
+    meshRef.current.position.set(centruVizibil.x, configurare.y, centruVizibil.z);
+    uniforme.uDeplasare.value.set(
+      (playerRef.current.x / 310) * configurare.factor,
+      (-playerRef.current.z / 230) * configurare.factor,
+    );
+    uniforme.uTimp.value = clock.elapsedTime + index * 8.1;
+  });
+
+  return (
+    <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]} frustumCulled={false}
+      renderOrder={2 + index} raycast={() => null}>
+      <planeGeometry args={[315, 235]} />
+      <shaderMaterial uniforms={uniforme} vertexShader={vertexProfunzime} fragmentShader={fragmentNebuloasaParallax}
+        transparent depthWrite={false} blending={THREE.AdditiveBlending} />
+    </mesh>
+  );
+}
+
 function ProfunzimeSpatiala({ nivelCalitate, playerRef, culoare }) {
   const straturi = STRATURI_PROFUNZIME[nivelCalitate] ?? STRATURI_PROFUNZIME.ridicata;
-  return straturi.map((configurare, index) => (
-    <StratProfunzime key={`${nivelCalitate}-${index}`} configurare={configurare}
-      playerRef={playerRef} culoare={culoare} index={index} />
-  ));
+  const nebuloase = STRATURI_NEBULOASA[nivelCalitate] ?? STRATURI_NEBULOASA.ridicata;
+  return (
+    <>
+      {nebuloase.map((configurare, index) => (
+        <StratNebuloasaParallax key={`neb-${nivelCalitate}-${index}`} configurare={configurare}
+          playerRef={playerRef} culoare={culoare} index={index} />
+      ))}
+      {straturi.map((configurare, index) => (
+        <StratProfunzime key={`stele-${nivelCalitate}-${index}`} configurare={configurare}
+          playerRef={playerRef} culoare={culoare} index={index} />
+      ))}
+    </>
+  );
 }
 
 function generatorDeterminist(samanta) {
