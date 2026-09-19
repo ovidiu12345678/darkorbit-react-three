@@ -1372,6 +1372,9 @@ canvas {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  container-type: inline-size;
+  container-name: harta-mini;
+  font-size: clamp(8.5px, 3.4cqw, 13px);
 }
 
 .harta-mini-corp-ceresc {
@@ -1788,8 +1791,8 @@ canvas {
 
 .harta-mini-marker {
   position: absolute;
-  width: 7px;
-  height: 7px;
+  width: 0.7em;
+  height: 0.7em;
   border-radius: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
@@ -1797,31 +1800,31 @@ canvas {
 
 .harta-mini-jucator {
   background: #7dffef;
-  box-shadow: 0 0 8px #7dffef;
+  box-shadow: 0 0 0.8em #7dffef;
   z-index: 2;
 }
 
 .harta-mini-inamic {
-  width: 5px;
-  height: 5px;
+  width: 0.5em;
+  height: 0.5em;
   background: #ff4d6d;
-  box-shadow: 0 0 6px #ff4d6d;
+  box-shadow: 0 0 0.6em #ff4d6d;
 }
 
 .harta-mini-tinta {
-  width: 9px;
-  height: 9px;
+  width: 0.9em;
+  height: 0.9em;
   background: transparent;
   border: 1px solid #ffd35a;
-  box-shadow: 0 0 8px #ffd35a;
+  box-shadow: 0 0 0.8em #ffd35a;
 }
 
 .harta-mini-statie,
 .harta-mini-hangar,
 .harta-mini-portal {
-  width: 11px;
-  height: 11px;
-  border-radius: 3px;
+  width: 1.1em;
+  height: 1.1em;
+  border-radius: 0.3em;
   pointer-events: auto;
   cursor: pointer;
   z-index: 3;
@@ -1847,12 +1850,12 @@ canvas {
 }
 
 .harta-mini-portal {
-  width: 13px;
-  height: 13px;
+  width: 1.3em;
+  height: 1.3em;
   border-radius: 50%;
   background: radial-gradient(circle, #6cf3ff 0 24%, #51338e 30% 55%, #120822 60%);
   border: 1px solid #bc8cff;
-  box-shadow: 0 0 5px #6cf3ff, 0 0 10px #a84dff;
+  box-shadow: 0 0 0.5em #6cf3ff, 0 0 1em #a84dff;
 }
 
 .harta-mini-portal-secundar {
@@ -1927,25 +1930,25 @@ canvas {
 
 .harta-mini-paladiu {
   position: absolute;
-  width: 6px;
-  height: 6px;
+  width: 0.6em;
+  height: 0.6em;
   transform: translate(-50%, -50%);
   clip-path: polygon(50% 0, 63% 36%, 100% 50%, 63% 64%, 50% 100%, 37% 64%, 0 50%, 37% 36%);
   background: #a6fff1;
-  box-shadow: 0 0 5px #7effe3;
+  box-shadow: 0 0 0.5em #7effe3;
   pointer-events: none;
   z-index: 1;
 }
 
 .harta-mini-schimb-paladiu {
   position: absolute;
-  width: 13px;
-  height: 13px;
+  width: 1.3em;
+  height: 1.3em;
   transform: translate(-50%, -50%);
   border: 2px solid #c1a3f9;
   border-radius: 50%;
   background: radial-gradient(circle, #a6ffec 0 20%, #251a44 50%, #8e67cf 80%);
-  box-shadow: 0 0 8px #8feddc;
+  box-shadow: 0 0 0.8em #8feddc;
   cursor: pointer;
   z-index: 3;
 }
