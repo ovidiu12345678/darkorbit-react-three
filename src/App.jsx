@@ -1424,7 +1424,10 @@ export default function App() {
         volum={setari.volumMuzica}
       />
       <SunetMotorNava playerRef={playerRef} activ={setari.motorActiv} volum={setari.volumMotor} />
-      <PanouSetari setari={setari} onSchimba={setSetari} />
+      <div className="hud-grup-sus-dreapta">
+        <ButonFullscreen />
+        <PanouSetari setari={setari} onSchimba={setSetari} />
+      </div>
 
       <div className="bara-munitie" onPointerDown={(event) => event.stopPropagation()}>
         {AMMO_TYPES.map((ammo, index) => {
@@ -1561,8 +1564,6 @@ export default function App() {
           )}
         </div>
       )}
-
-      <ButonFullscreen />
 
       <PanouResurse
         credite={credite}
